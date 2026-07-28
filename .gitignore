@@ -1,0 +1,11 @@
+.DS_Store
+
+# Kjeldemateriale (store binærfiler, held vi utanfor git)
+/bøker/*.pdf
+/bøker/*.png
+/bøker/*.doc
+/bøker/*.docx
+/bøker/ut*.txt
+
+# Tredjeparts-klon, ikkje ein del av dette prosjektet
+/tesseract-training-fraktur/
