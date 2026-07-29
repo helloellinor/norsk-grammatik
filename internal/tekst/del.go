@@ -42,7 +42,7 @@ func DelOpp(blokker []Blokk) []Del {
 
 	leggTil := func(b Blokk) {
 		if len(delar) == 0 {
-			ny(1, "Tittelblad og føreord (1997)")
+			ny(1, "Tittelblad")
 		}
 		d := &delar[len(delar)-1]
 
@@ -137,7 +137,11 @@ func utanTomme(delar []Del) []Del {
 	var ut []Del
 	for i, d := range delar {
 		harBorn := i+1 < len(delar) && delar[i+1].Nivå > d.Nivå
-		if len(d.Blokker) <= 1 && !harBorn {
+		// Tittelbladet staar sjølv om det ikkje har brødtekst: sida er
+		// sett for seg. Elles fell bolkar utan tekst og utan underbolkar
+		// bort - som den fyrste «Føreord (1997)», som berre er ei
+		// oppføring i 1997-utgåva si eiga vesle innhaldsliste framme.
+		if i > 0 && !d.HarTekst() && !harBorn {
 			continue
 		}
 		d.Id = len(ut)

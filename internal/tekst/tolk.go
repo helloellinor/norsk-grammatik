@@ -29,7 +29,7 @@ var (
 	// eiga innhaldsliste jamsides «Førſte Afdeling» - altso toppnivå.
 	// Punktumet skil overskrifta ("Fortale.") frå den same nemninga i
 	// 1997-utgåva si eiga vesle innhaldsliste framme ("Fortale").
-	reFramanfor = regexp.MustCompile(`^(Fortale|Indledning|Indholdsliſte|Indholdsliste|Forklaring af nogle Forkortninger)\.$`)
+	reFramanfor = regexp.MustCompile(`^(Fortale|Indledning|Indholdsliſte|Indholdsliste|Forklaring af nogle Forkortninger)\.$|^Føreord \(1997\)$`)
 	reSeksjon   = regexp.MustCompile(`^([IVX]+)\.\s+(.+?)\.?$`)
 	reUnderseks = regexp.MustCompile(`^([a-z])\)\s+(.+?)\.?$`)
 	reParagraf  = regexp.MustCompile(`^(\d+)\.?\s+(.+)$`)
