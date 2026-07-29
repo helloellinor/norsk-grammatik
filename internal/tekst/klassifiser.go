@@ -47,6 +47,15 @@ func Klassifiser(inn []Blokk) []Blokk {
 			harSeksjon = false
 			b.Slag, b.Tittel = Afdeling, strings.TrimSuffix(t, ".")
 
+		case reFramanfor.MatchString(t):
+			harSeksjon = false
+			b.Slag, b.Tittel = Afdeling, strings.TrimSuffix(t, ".")
+			// Same bolknamnet står stundom to gonger etter kvarandre,
+			// av di boka har det både som overskrift og som kolumnetittel.
+			if n := len(ut); n > 0 && ut[n-1].Slag == Afdeling && ut[n-1].Tittel == b.Tittel {
+				continue
+			}
+
 		case erKort(t) && reSeksjon.MatchString(t):
 			m := reSeksjon.FindStringSubmatch(t)
 			harSeksjon = true

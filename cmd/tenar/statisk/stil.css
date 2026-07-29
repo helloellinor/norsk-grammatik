@@ -107,7 +107,19 @@ body {
   background: var(--papir);
   color: var(--blekk);
   font-family: var(--fraktur);
-  font-feature-settings: "liga" 1, "hlig" 1, "rlig" 1;
+  /* liga og rlig gjev fraktursatsen sine eigne ligaturar: ch, ck, ſt,
+     ff, fi, tz og dei andre. hlig maa staa av: den «historiske»
+     funksjonen i desse skriftene byter mm og nn mot m og n med strek
+     over, ei forkorting frå handskrifter. Faksimilen syner ſammenſat
+     med to fulle m-ar, so 1864-trykket kjenner henne ikkje. */
+  font-feature-settings: "liga" 1, "rlig" 1, "hlig" 0;
+}
+/* Med alle ligaturane paa slaar hlig til: mm og nn blir m og n med
+   strek over. Det er ei forkorting frå handskrifter, ikkje 1864-sats -
+   men ho er fin aa sjaa paa. */
+:root[data-ligatur="alle"] body,
+:root[data-ligatur="alle"] .frak {
+  font-feature-settings: "liga" 1, "rlig" 1, "hlig" 1, "dlig" 1;
   line-height: 1.78;
   -webkit-font-smoothing: antialiased;
 }
@@ -170,8 +182,16 @@ body {
 }
 .register li a:hover { color: var(--blekk); background: var(--uthev); }
 .register li a:focus-visible { outline: 2px solid var(--indigo); outline-offset: -2px; }
-.register .niva-1 > a { color: var(--blekk); margin-top: 0.6rem; }
-.register .niva-2 > a { padding-left: 2.25rem; }
+/* Registeret speglar hierarkiet i storleik: Afdeling er størst,
+   so seksjon, so overskriftene inne i bolken. */
+.register .niva-1 > a {
+  color: var(--blekk);
+  margin-top: 0.9rem;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  padding-block: 0.5rem;
+}
+.register .niva-2 > a { padding-left: 2.25rem; font-size: 0.8125rem; }
 .register .aktiv > a { color: var(--indigo); border-left-color: var(--indigo); background: var(--uthev); }
 
 /* Lesefelt */
@@ -378,8 +398,8 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 /* ---- Register: undertitlar ----------------------------------------- */
 .undertitlar { list-style: none; margin: 0 0 0.4rem; padding: 0; }
 .undertitlar a {
-  padding-block: 0.25rem;
-  font-size: 0.78125rem;
+  padding-block: 0.22rem;
+  font-size: 0.75rem;
   color: color-mix(in srgb, var(--blekk-mjuk) 80%, transparent);
 }
 .undertitlar .niva-3 a { padding-left: 3rem; }

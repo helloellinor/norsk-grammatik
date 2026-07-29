@@ -11,6 +11,7 @@
     trykk: true,
     skrift: "maguntia",
     ui: "grotesk",
+    ligatur: "trykk",
     storleik: "vanleg",
     form: "fri",
     tema: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
@@ -56,11 +57,12 @@
   function settVising() {
     rot.setAttribute("data-skrift", val.skrift);
     rot.setAttribute("data-ui", val.ui);
+    rot.setAttribute("data-ligatur", val.ligatur);
     rot.setAttribute("data-storleik", val.storleik);
     rot.setAttribute("data-form", val.form);
     rot.setAttribute("data-theme", val.tema);
-    [["skrift", val.skrift], ["ui", val.ui], ["storleik", val.storleik],
-     ["form", val.form], ["tema", val.tema]]
+    [["skrift", val.skrift], ["ui", val.ui], ["ligatur", val.ligatur],
+     ["storleik", val.storleik], ["form", val.form], ["tema", val.tema]]
       .forEach(function (par) {
         var knappar = document.querySelectorAll("[data-" + par[0] + "]");
         for (var i = 0; i < knappar.length; i++) {
@@ -92,7 +94,7 @@
   stilling.addEventListener("click", function (e) {
     var k = e.target.closest("button");
     if (!k) return;
-    ["skrift", "ui", "storleik", "form", "tema"].forEach(function (felt) {
+    ["skrift", "ui", "ligatur", "storleik", "form", "tema"].forEach(function (felt) {
       var v = k.getAttribute("data-" + felt);
       if (v) { val[felt] = v; }
     });

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -39,7 +40,7 @@ type sidedata struct {
 
 func main() {
 	inn := flag.String("inn", "bøker/grammatik-sats.json", "blokker med ſ sett inn")
-	adr := flag.String("adr", "localhost:8064", "adresse å lytte på")
+	adr := flag.String("adr", ":8064", "adresse å lytte på (:8064 tek imot frå heile nettet ditt)")
 	flag.Parse()
 
 	rå, err := os.ReadFile(*inn)
@@ -98,7 +99,9 @@ func main() {
 		http.Redirect(w, r, fmt.Sprintf("/del/%d#p%s", id, nr), http.StatusSeeOther)
 	})
 
-	log.Printf("les på http://%s", *adr)
+	for _, u := range adresser(*adr) {
+		log.Printf("les på %s", u)
+	}
 	if err := http.ListenAndServe(*adr, mux); err != nil {
 		log.Fatal(err)
 	}
@@ -125,4 +128,30 @@ func høgste(indeks map[string]int) string {
 		}
 	}
 	return strconv.Itoa(beste)
+}
+
+// adresser gjev dei nettadressene tenaren kan naaast paa, so ein kan
+// opne sida paa telefonen over same nettet.
+func adresser(adr string) []string {
+	_, port, err := net.SplitHostPort(adr)
+	if err != nil {
+		return []string{"http://" + adr}
+	}
+	ut := []string{"http://localhost:" + port}
+	vert, _, _ := net.SplitHostPort(adr)
+	if vert != "" && vert != "0.0.0.0" && vert != "::" {
+		return ut
+	}
+	adrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ut
+	}
+	for _, a := range adrs {
+		ip, ok := a.(*net.IPNet)
+		if !ok || ip.IP.IsLoopback() || ip.IP.To4() == nil {
+			continue
+		}
+		ut = append(ut, "http://"+ip.IP.String()+":"+port+"  (telefon o.l. paa same nettet)")
+	}
+	return ut
 }

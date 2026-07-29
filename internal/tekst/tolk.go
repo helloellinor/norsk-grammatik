@@ -23,8 +23,13 @@ const (
 )
 
 var (
-	reAfdeling  = regexp.MustCompile(`^(Førſte|Første|Anden|Andet|Tredie|Fjerde|Femte) (Afdeling|Tillæg)\.?$`)
-	reTalseks   = regexp.MustCompile(`^(\d+)\.\s+(.+?)\.?$`)
+	reAfdeling = regexp.MustCompile(`^(Førſte|Første|Anden|Andet|Tredie|Fjerde|Femte) (Afdeling|Tillæg)\.?$`)
+	reTalseks  = regexp.MustCompile(`^(\d+)\.\s+(.+?)\.?$`)
+	// Framanfor Afdelingane står desse bolkane, og boka listar dei i si
+	// eiga innhaldsliste jamsides «Førſte Afdeling» - altso toppnivå.
+	// Punktumet skil overskrifta ("Fortale.") frå den same nemninga i
+	// 1997-utgåva si eiga vesle innhaldsliste framme ("Fortale").
+	reFramanfor = regexp.MustCompile(`^(Fortale|Indledning|Indholdsliſte|Indholdsliste|Forklaring af nogle Forkortninger)\.$`)
 	reSeksjon   = regexp.MustCompile(`^([IVX]+)\.\s+(.+?)\.?$`)
 	reUnderseks = regexp.MustCompile(`^([a-z])\)\s+(.+?)\.?$`)
 	reParagraf  = regexp.MustCompile(`^(\d+)\.?\s+(.+)$`)

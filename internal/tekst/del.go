@@ -1,6 +1,10 @@
 package tekst
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 // Peikar er ei overskrift ein kan hoppe til inne i ein del.
 type Peikar struct {
@@ -38,7 +42,7 @@ func DelOpp(blokker []Blokk) []Del {
 
 	leggTil := func(b Blokk) {
 		if len(delar) == 0 {
-			ny(1, "Framanfor")
+			ny(1, "Tittelblad og føreord (1997)")
 		}
 		d := &delar[len(delar)-1]
 
@@ -69,7 +73,10 @@ func DelOpp(blokker []Blokk) []Del {
 			// ("Førſte Afdeling." / "Lydlære."), so vi slår dei saman
 			// til éin tittel og syner namnet som undertittel i staden
 			// for som ei laus mellomoverskrift.
-			if i+1 < len(blokker) && blokker[i+1].Slag == Mellomtittel {
+			// Berre Afdeling og Tillæg har namnet sitt på linja under
+			// ("Førſte Afdeling." / "Lydlære."). Fortale, Indledning og
+			// dei andre framanfor-bolkane står med namnet sitt åleine.
+			if harNamnelinje(b.Tittel) && i+1 < len(blokker) && blokker[i+1].Slag == Mellomtittel {
 				b.Undertittel = blokker[i+1].Tittel
 				i++
 			}
@@ -87,7 +94,44 @@ func DelOpp(blokker []Blokk) []Del {
 		}
 	}
 
-	return delar
+	return utanTomme(delar)
+}
+
+// utanTomme fjernar bolkar som korkje har tekst eller underbolkar. Boka
+// si eiga innhaldsliste er ein slik: sjølve listeoppføringane er
+// Word-felt som ikkje ber tekst, og navigasjonen vaar gjer same nytta.
+// Ei Afdeling har derimot ofte berre tittelen sin, av di teksten ligg i
+// seksjonane under henne - henne skal vi halde paa.
+func utanTomme(delar []Del) []Del {
+	var ut []Del
+	for i, d := range delar {
+		harBorn := i+1 < len(delar) && delar[i+1].Nivå > d.Nivå
+		if len(d.Blokker) <= 1 && !harBorn {
+			continue
+		}
+		d.Id = len(ut)
+		for i := range d.Titlar {
+			d.Titlar[i].Ankar = fmt.Sprintf("t%d-%d", d.Id, i)
+		}
+		for i := range d.Blokker {
+			if d.Blokker[i].Ankar != "" {
+				d.Blokker[i].Ankar = fmt.Sprintf("t%d-%d", d.Id, ankarNr(d.Blokker[i].Ankar))
+			}
+		}
+		ut = append(ut, d)
+	}
+	return ut
+}
+
+// ankarNr hentar løpenummeret ut av eit ankar på forma "t<del>-<nr>".
+func ankarNr(ankar string) int {
+	if i := strings.LastIndex(ankar, "-"); i >= 0 {
+		n, err := strconv.Atoi(ankar[i+1:])
+		if err == nil {
+			return n
+		}
+	}
+	return 0
 }
 
 // ParagrafIndeks seier kva del kvart §-nummer står i, so ein kan hoppe
@@ -102,4 +146,8 @@ func ParagrafIndeks(delar []Del) map[string]int {
 		}
 	}
 	return ut
+}
+
+func harNamnelinje(tittel string) bool {
+	return reAfdeling.MatchString(tittel) || reAfdeling.MatchString(tittel+".")
 }
