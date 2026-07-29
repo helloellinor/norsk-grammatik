@@ -129,6 +129,10 @@ func reinsk(st []Stump) []Stump {
 	for _, s := range st {
 		s.Tekst = strings.ReplaceAll(s.Tekst, "\n", " ")
 		s.Tekst = strings.ReplaceAll(s.Tekst, "\r", "")
+		// Word-fila merkjer innrykk med ein tabulator i sjølve teksten.
+		// Innrykket høyrer til satsen og staar i css-en; teiknet skal
+		// ikkje bli med inn i teksten.
+		s.Tekst = strings.ReplaceAll(s.Tekst, "\t", " ")
 		for strings.Contains(s.Tekst, "  ") {
 			s.Tekst = strings.ReplaceAll(s.Tekst, "  ", " ")
 		}

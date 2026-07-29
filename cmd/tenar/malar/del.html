@@ -5,9 +5,6 @@
 {{- if and .Forrige (not .Framhald)}}
 <div class="hentar-forrige" data-del="{{.Forrige.Id}}"><span class="hand ornament" aria-hidden="true">&#9758;</span><span class="hand-tekst">les det føre</span></div>
 {{- end}}
-{{- if .Saum}}
-<div class="saum" data-del="{{.Aktiv.Id}}" aria-hidden="true"><span class="ornament">&#10087;</span></div>
-{{- end}}
 <section class="bolk{{if not .Aktiv.HarTekst}} deltittel{{end}}" data-del="{{.Aktiv.Id}}" data-tittel="{{.Aktiv.Tittel}}">
 {{- if .Tittelblad}}
 <div class="tittelark">
@@ -27,7 +24,7 @@
     {{- if .Undertittel}}<p class="afdeling-namn">{{.Undertittel}}</p>{{end}}
   </header>
   {{- else if eq .Slag "seksjon"}}
-  <h3 class="seksjon"><span class="tittel"><span class="tal">{{.Nummer}}.</span> {{.Tittel}}</span></h3>
+  <h3 class="seksjon" id="{{.Ankar}}"><span class="tittel"><span class="tal">{{.Nummer}}.</span> {{.Tittel}}</span></h3>
   {{- else if eq .Slag "underseksjon"}}
   <h4 class="underseksjon" id="{{.Ankar}}"><span class="tal">{{.Nummer}})</span> {{.Tittel}}</h4>
   {{- else if eq .Slag "mellomtittel"}}

@@ -10,12 +10,12 @@ import (
 type Peikar struct {
 	Ankar  string
 	Tittel string
-	Nivå   int // 3 = underseksjon, 4 = mellomtittel
+	Nivå   int // 2 = seksjon, 3 = underseksjon, 4 = mellomtittel
 }
 
-// Del er ein lesbar bolk av verket - ei Afdeling eller ein romartal-
-// seksjon med alt som høyrer under, fram til neste av same slag. Det er
-// denne eininga lesaren blar i, og som innhaldslista peikar på.
+// Del er ein overbolk av verket - ei Afdeling, eit Tillæg eller ein av
+// bolkane framanfor - med alt som høyrer under. Kvar del er eitt ark.
+// Seksjonane inne i han er ikkje eigne ark, men hoppmål i registeret.
 type Del struct {
 	Id      int
 	Nivå    int // 1 = Afdeling, 2 = seksjon
@@ -73,9 +73,6 @@ func DelOpp(blokker []Blokk) []Del {
 			}
 			ny(1, tittel)
 			leggTil(b)
-		case Seksjon:
-			ny(2, fmt.Sprintf("%s. %s", b.Nummer, b.Tittel))
-			leggTil(b)
 		default:
 			leggTil(b)
 		}
@@ -94,21 +91,29 @@ func DelOpp(blokker []Blokk) []Del {
 func titlarMedInnhald(d *Del) []Peikar {
 	var ut []Peikar
 	for i, b := range d.Blokker {
-		if b.Slag != Underseksjon && b.Slag != Mellomtittel {
+		nivå := 0
+		switch b.Slag {
+		case Seksjon:
+			nivå = 2
+		case Underseksjon:
+			nivå = 3
+		case Mellomtittel:
+			nivå = 4
+		default:
 			continue
 		}
-		if !harTekstUnder(d.Blokker[i+1:]) {
+		if nivå > 2 && !harTekstUnder(d.Blokker[i+1:]) {
 			continue
 		}
 		ankar := fmt.Sprintf("t%d-%d", d.Id, len(ut))
 		d.Blokker[i].Ankar = ankar
-		nivå := 4
-		if b.Slag == Underseksjon {
-			nivå = 3
-		}
 		tittel := b.Tittel
 		if b.Nummer != "" {
-			tittel = b.Nummer + ") " + b.Tittel
+			skil := ") "
+			if nivå == 2 {
+				skil = ". "
+			}
+			tittel = b.Nummer + skil + b.Tittel
 		}
 		ut = append(ut, Peikar{Ankar: ankar, Tittel: tittel, Nivå: nivå})
 	}

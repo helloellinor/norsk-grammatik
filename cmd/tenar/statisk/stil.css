@@ -114,6 +114,11 @@
 
 * { box-sizing: border-box; }
 
+/* Ingenting skal kunne gjere dokumentet breiare enn skjermen. Utan dette
+   sprengde sida seg sjølv paa smal skjerm, og teksten rann ut over
+   kanten i staden for aa brytast. */
+html, body { max-width: 100%; overflow-x: clip; }
+
 body {
   margin: 0;
   background: var(--skrivebord);
@@ -153,6 +158,8 @@ body {
 .hopp:focus { left: 0.5rem; top: 0.5rem; }
 
 .rute {
+  min-width: 0;
+  max-width: 100%;
   display: grid;
   grid-template-columns: var(--register) minmax(0, 1fr);
   min-height: 100vh;
@@ -160,6 +167,7 @@ body {
 
 /* Register */
 .register {
+  min-width: 0;
   border-right: 1px solid var(--linje);
   padding: 1.75rem 0 3rem;
   position: sticky;
@@ -228,6 +236,7 @@ body {
 }
 .styring {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
   padding: 1rem 1.5rem;
@@ -250,6 +259,8 @@ button[aria-pressed="true"] { color: var(--papir); background: var(--indigo); bo
 button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 
 .lastar {
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 0.75rem;
   color: var(--blekk-mjuk);
   opacity: 0;
@@ -260,6 +271,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 
 main {
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding: 0 0 4rem;
   display: flex;
@@ -277,6 +289,7 @@ main {
 .bolk {
   background: var(--papir);
   width: 100%;
+  min-width: 0;
   padding: 6.9em var(--sidemarg) 7.8em;
   display: flex;
   flex-direction: column;
@@ -287,7 +300,7 @@ main {
 }
 .bolk > * {
   width: 100%;
-  max-width: var(--mål);
+  max-width: min(var(--mål), 100%);
   margin-inline: auto;
 }
 /* Oppsett faar meir rom enn brødteksten, folden heile arket. */
@@ -372,6 +385,11 @@ strong { font-weight: 600; }
    med (jf. § 28), ikkje pynt. Under 1100px fell dei inn i linja att. */
 .paragraf { position: relative; }
 .paragraf .tal {
+  /* Absolutt plassering gjer talet til ein blokkboks, og daa slaar
+     avsnittet sitt text-indent inn i han og et opp breidda, so «§ 2»
+     bryt i to linjer. Berre fyrste avsnitt etter ei overskrift slapp
+     unna, av di det ikkje har innrykk. */
+  text-indent: 0;
   font-family: var(--apparat);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
@@ -396,9 +414,6 @@ strong { font-weight: 600; }
 /* Breie oppsett faar bryte ut av brødtekstmaalet, men berre naar spalta
    sikkert raadar over rommet: 1200 px minus registeret gjev 928 px, og
    satsen med utbrotet tek 720. Under det held dei seg innanfor. */
-@media (min-width: 1200px) {
-  .oppsett { width: calc(100% + 8rem); margin-inline: -4rem; }
-}
 .oppsett table {
   width: 100%;
   border-collapse: collapse;
@@ -477,7 +492,16 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 
 @media (max-width: 820px) {
-  .rute { grid-template-columns: 1fr; }
+  /* Blokkoppsett, ikkje grid: ein grid-boks kan bli breiare enn spalta
+     si naar innhaldet krev det, og daa rann heile sida ut over
+     skjermkanten. Blokker kan ikkje det. */
+  .rute { display: block; }
+  .register, .lesefelt, main, .bolk { width: 100%; max-width: 100%; }
+  /* Satsbreidda maalt i vw. Prosent løyste seg ikkje mot arket her - dei
+     vart hangande ved ei ubestemt breidd, og teksten rann ut over kanten.
+     vw er alltid kjend. */
+  :root { --sidemarg: 1.25rem; }
+  .bolk > * { max-width: calc(100vw - 2.5rem); }
   .register {
     position: static;
     max-height: none;
