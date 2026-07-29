@@ -24,12 +24,19 @@ var malar embed.FS
 //go:embed statisk
 var statisk embed.FS
 
+// Forkorting er ei oppføring frå «Forklaring af nogle Forkortninger».
+type Forkorting struct {
+	Stikkord string
+	Tyding   string
+}
+
 type Verk struct {
 	Tittel    string
 	Undertitl string
 	Delar     []tekst.Del
 	Paragraf  map[string]int // §-nummer -> del
 	SisteP    string
+	Stutt     []Forkorting // forkortingane boka forklarar
 }
 
 type sidedata struct {
@@ -64,6 +71,7 @@ func main() {
 		Delar:     delar,
 		Paragraf:  indeks,
 		SisteP:    høgste(indeks),
+		Stutt:     forkortingar(delar),
 	}
 	log.Printf("%d delar, %d paragrafar tolka frå %s", len(verk.Delar), len(indeks), *inn)
 
@@ -210,4 +218,18 @@ func (d sidedata) Vis() []tekst.Blokk {
 		hopp++
 	}
 	return b[hopp:]
+}
+
+// forkortingar plukkar ut lista boka sjølv gjev i «Forklaring af nogle
+// Forkortninger», so ho kan slaaast opp utan aa bla dit.
+func forkortingar(delar []tekst.Del) []Forkorting {
+	var ut []Forkorting
+	for _, d := range delar {
+		for _, b := range d.Blokker {
+			if b.Slag == tekst.Oppslag {
+				ut = append(ut, Forkorting{Stikkord: b.Nummer, Tyding: b.Tekst()})
+			}
+		}
+	}
+	return ut
 }

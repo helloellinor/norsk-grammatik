@@ -43,6 +43,7 @@
   --grunn: 1.3125rem;
   --register: 17rem;
   --marg: 1.5rem;
+  --sidemarg: 2.5rem;   /* skrivebordet som syner seg paa kvar side av arket */
   --toppline: 3.95rem;   /* høgda paa den faste linja */
 
   /* Satsbreidda: 90 mm = 255 pt ~ 28,3 em, maalt paa faksimilen. Rekna
@@ -108,6 +109,9 @@ body {
 .apparat { font-family: var(--apparat); }
 .frak { font-family: var(--fraktur); }
 [hidden] { display: none !important; }
+/* Lukene er unntaket: dei skal gli, ikkje forsvinne, so dei held plassen
+   sin og blir gøymde med synlegheit i staden. */
+.stilling[hidden], .luke[hidden] { display: flex !important; visibility: hidden; }
 em { font-style: italic; }
 strong { font-weight: 600; }
 p { margin: 0; }
@@ -119,7 +123,16 @@ p { margin: 0; }
 /* -- 4  BEHALDARANE ------------------------------------------------ */
 .rute { display: grid; grid-template-columns: var(--register) minmax(0, 1fr); min-height: 100vh; }
 
+/* Registeret er bokryggen: ei smal flate langs kanten, med ein fals inn
+   mot arka. */
 .register {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--skrivebord) 88%, black) 0,
+    var(--skrivebord) 0.5rem,
+    var(--skrivebord) calc(100% - 0.9rem),
+    color-mix(in srgb, var(--skrivebord) 92%, black) 100%);
+  box-shadow: inset -7px 0 9px -8px rgb(0 0 0 / 0.5);
   min-width: 0; position: sticky; top: 0; align-self: start;
   max-height: 100vh; overflow-y: auto;
   padding: 1.75rem 0 3rem;
@@ -142,18 +155,12 @@ p { margin: 0; }
   box-shadow: 0 7px 13px -7px rgb(0 0 0 / 0.26);
 }
 
-/* Papiret ligg over luka og dekkjer henne. Naar ho opnar seg, glir
-   papiret ned og avdekkjer skrivebordet under - det er sjølve rørsla.
-   Difor treng main ein eigen bakgrunn: utan han ville luka skine gjennom
-   gapa mellom arka. */
+/* Papiret ligg under luka. */
 main {
   min-width: 0; display: flex; flex-direction: column;
   padding-bottom: 4rem; font-size: var(--grunn);
   position: relative; z-index: 2;
-  background: var(--skrivebord);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-body.luke-open main { transform: translateY(var(--luke-h, 0px)); }
 
 /* Arket. Fyller leseflata; satsen ligg midt paa det. */
 .bolk {
@@ -166,7 +173,8 @@ body.luke-open main { transform: translateY(var(--luke-h, 0px)); }
   display: flex; flex-direction: column;
   gap: 1.5rem;
   padding: 6.9em var(--marg) 7.8em;
-  margin-bottom: 5.5rem;
+  margin: 0 auto 5.5rem;
+  max-width: calc(100% - 2 * var(--sidemarg));
   background: var(--papir);
   line-height: 1.52;
   box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.28);
@@ -323,8 +331,15 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   top: var(--toppline);
   left: var(--register);
   right: 0;
-  z-index: 1;
+  z-index: 9;
   max-height: calc(100vh - var(--toppline));
+  /* Ho glir ned bakom linja. Papiret kan ikkje delast midt i utan aa
+     flytte noko i dokumentet, og det var nettopp det som gjorde at ho
+     rørte paa seg - so ho legg seg over papiret i staden, der lesaren
+     er, og opnar seg nedover. */
+  transform: translateY(-100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
   overflow-y: auto;
   background: var(--skrivebord);
 }
@@ -333,6 +348,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .stilling::after, .luke::after {
   content: ""; display: block; height: 1px; background: var(--rivekant);
 }
+.stilling:not([hidden]), .luke:not([hidden]) { transform: translateY(0); }
 .stilling::before, .luke::before { box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
 .stilling::after, .luke::after { box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
 .luke { padding: 1.25rem 1.5rem 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
@@ -418,4 +434,24 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .landa { background: var(--uthev); }
+}
+
+/* Forkortingslista som oppslagsverk: to spalter, stikkordet fyrst. */
+.stuttliste { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.stuttliste th {
+  width: 7rem; text-align: right; font-weight: 400; vertical-align: baseline;
+  padding: 0.2rem 0.9rem 0.2rem 0; color: var(--blekk);
+  white-space: nowrap;
+}
+.stuttliste td { padding: 0.2rem 0; vertical-align: baseline; }
+.stuttliste tr:hover th, .stuttliste tr:hover td {
+  background: color-mix(in srgb, var(--indigo) 8%, transparent);
+}
+#stutt { padding-block: 1.1rem 1.35rem; }
+@media (min-width: 1100px) {
+  /* Lista er lang; to kolonnar gjer henne lesbar utan aa rulle. */
+  .stuttliste { column-count: 2; column-gap: 3rem; display: block; }
+  .stuttliste tbody { display: block; }
+  .stuttliste tr { display: grid; grid-template-columns: 7rem 1fr; gap: 0 0.9rem; break-inside: avoid; }
+  .stuttliste th, .stuttliste td { display: block; padding-inline: 0; }
 }

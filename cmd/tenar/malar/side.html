@@ -31,6 +31,7 @@
         <button type="submit">Hopp</button>
       </form>
       <button id="opnastilling" type="button" aria-expanded="false" aria-controls="stilling">Vis</button>
+      <button id="opnastutt" type="button" aria-expanded="false" aria-controls="stutt">Forkortingar</button>
       <button id="opnaom" type="button" aria-expanded="false" aria-controls="om">Om</button>
       <span class="skil"></span>
       <span id="lastar" class="lastar" aria-hidden="true">hentar …</span>
@@ -87,6 +88,16 @@
           <button type="button" data-tema="dark" aria-pressed="false">Mørk</button>
         </div>
       </div>
+    </div>
+
+    <div id="stutt" class="luke apparat" hidden>
+      <table class="stuttliste">
+        <tbody>
+        {{- range .Verk.Stutt}}
+          <tr><th scope="row">{{.Stikkord}}</th><td>{{.Tyding}}</td></tr>
+        {{- end}}
+        </tbody>
+      </table>
     </div>
 
     <div id="om" class="luke apparat" hidden>

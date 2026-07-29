@@ -82,6 +82,7 @@
   var stilling = document.getElementById("stilling");
   var luker = [
     { luke: stilling, knapp: document.getElementById("opnastilling") },
+    { luke: document.getElementById("stutt"), knapp: document.getElementById("opnastutt") },
     { luke: document.getElementById("om"), knapp: document.getElementById("opnaom") }
   ];
 
@@ -96,26 +97,11 @@
     par.knapp.setAttribute("aria-pressed", String(open));
   }
 
-  // Papiret glir ned like langt som luka er høg, so ho kjem heilt fram.
-  // Hoegda maa maalast: ho er ulik for Vis og Om, og skiftar med breidda.
-  function settRørsle() {
-    var open = null;
-    for (var i = 0; i < luker.length; i++) {
-      if (!luker[i].luke.hasAttribute("hidden")) { open = luker[i].luke; }
-    }
-    if (open) {
-      kropp.style.setProperty("--luke-h", open.getBoundingClientRect().height + "px");
-      kropp.classList.add("luke-open");
-    } else {
-      kropp.classList.remove("luke-open");
-    }
-  }
 
   luker.forEach(function (par) {
     par.knapp.addEventListener("click", function () {
       var open = par.luke.hasAttribute("hidden");
       luker.forEach(function (a) { visLuke(a, a === par && open); });
-      settRørsle();
     });
   });
 
