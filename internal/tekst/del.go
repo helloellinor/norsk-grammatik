@@ -157,8 +157,14 @@ func utanTomme(delar []Del) []Del {
 			continue
 		}
 		d.Id = len(ut)
+		// Berre delnummeret skal skrivast om her, ikkje løpenummeret.
+		// Med "i" - plassen i titteltavla - fekk registeret ei heilt
+		// anna nummerrekkje enn blokkene i teksten: registeret talde
+		// 0, 1, 2 ... medan overskriftene bar blokkindeksen sin, 2, 16,
+		// 49 ... So peika 52 av 60 lenkjer i innhaldslista paa eit ankar
+		// som ikkje fanst, og dei aatte som traff, traff feil overskrift.
 		for i := range d.Titlar {
-			d.Titlar[i].Ankar = fmt.Sprintf("t%d-%d", d.Id, i)
+			d.Titlar[i].Ankar = fmt.Sprintf("t%d-%d", d.Id, ankarNr(d.Titlar[i].Ankar))
 		}
 		for i := range d.Blokker {
 			if d.Blokker[i].Ankar != "" {

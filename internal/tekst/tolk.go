@@ -40,7 +40,7 @@ var (
 	// som begge har punktum. I heile boka finst mønsteret ti gonger, i to
 	// samanhengande rekkjer paa fem, kvar innleidd av ei line som endar
 	// paa kolon. Ingen einslege treff, altso ingen falske.
-	reDøme = regexp.MustCompile(`^(\d+),\s+(.+)$`)
-	reOppslag   = regexp.MustCompile(`^(\S[^—]{0,24}?)\s+—\s+(.+)$`)
-	reSøppel    = regexp.MustCompile(`GOTOBUTTON|PAGEREF|_Toc\d+|^\s*TOC\s`)
+	reDøme    = regexp.MustCompile(`^(\d+),\s+(.+)$`)
+	reOppslag = regexp.MustCompile(`^(\S[^—]{0,24}?)\s+—\s+(.+)$`)
+	reSøppel  = regexp.MustCompile(`GOTOBUTTON|PAGEREF|_Toc\d+|^\s*TOC\s`)
 )

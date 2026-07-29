@@ -72,3 +72,46 @@ func TestHeldFramFlerbyte(t *testing.T) {
 		t.Error("uavslutta setning skal halde fram")
 	}
 }
+
+// Ei blokk som held fram ei uavslutta setning er aldri ei overskrift.
+// «o. ſ. v.» - halen av setninga føre - vart teken for ei underoverskrift,
+// og teksten kom ut som «o) ſ. v»: punktumet bytt mot ein parentes og
+// siste punktum borte. Overskriftsreglane endra sjølve boka.
+func TestFramhaldBlirIkkjeOverskrift(t *testing.T) {
+	byrjing := "ved Sammenſætning med Partikler, f. Ex. tilbunden, utløyſt, tillagad"
+	for _, hale := range []string{"o. ſ. v.", "d. v. ſ. ſlikt.", "a) og fleire."} {
+		ut := Klassifiser([]Blokk{blokk(byrjing), blokk(hale)})
+		if len(ut) != 1 {
+			t.Fatalf("%q vart ei eiga blokk (%d blokker), slaget %q", hale, len(ut), ut[len(ut)-1].Slag)
+		}
+		if venta := byrjing + " " + hale; ut[0].Tekst() != venta {
+			t.Errorf("teksten er endra\n fekk  %q\n venta %q", ut[0].Tekst(), venta)
+		}
+	}
+}
+
+// Ei ekte overskrift skal framleis bli ei overskrift naar blokka føre er
+// avslutta - elles hadde prøven ovanfor kunna «rettast» ved aa slaa av
+// heile regelen.
+func TestOverskriftEtterAvsluttaSetning(t *testing.T) {
+	ut := Klassifiser([]Blokk{blokk("Dette er ei avslutta setning."), blokk("a) Subſt. af Verbum.")})
+	if len(ut) != 2 || ut[1].Slag != Underseksjon {
+		t.Fatalf("overskrifta gjekk tapt: %+v", ut)
+	}
+	if ut[1].Nummer != "a" || ut[1].Tittel != "Subſt. af Verbum" {
+		t.Errorf("fekk %q / %q", ut[1].Nummer, ut[1].Tittel)
+	}
+}
+
+// Inne i forkortingsbolken er eit oppslag eit oppslag, ògso naar det byrjar
+// med ein einskild bokstav: «v. — Verbum (S. 56)» vart underoverskrifta
+// «v) — verbum (S. 56)».
+func TestEinbokstavsOppslagIForklaringa(t *testing.T) {
+	ut := Klassifiser(iForklaringa("v. — Verbum (S. 56)."))
+	if len(ut) != 2 || ut[1].Slag != Oppslag {
+		t.Fatalf("vart ikkje eit oppslag: %+v", ut)
+	}
+	if ut[1].Nummer != "v." || ut[1].Tekst() != "Verbum (S. 56)." {
+		t.Errorf("fekk %q / %q", ut[1].Nummer, ut[1].Tekst())
+	}
+}

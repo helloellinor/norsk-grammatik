@@ -44,6 +44,14 @@ func Klassifiser(inn []Blokk) []Blokk {
 			continue
 		}
 
+		// Held blokka føre paa ei uavslutta setning, kan denne blokka
+		// ikkje vera ei overskrift, kor mykje ho enn ser ut som ei. Ein
+		// overskriftsregel som slaar til likevel endrar sjølve teksten:
+		// «o. ſ. v.» - halen av setninga føre - vart teken for ei
+		// underoverskrift, og teksten kom ut som «o) ſ. v», med
+		// punktumet bytt mot ein parentes og siste punktum borte.
+		framhald := heldFramFrå(ut)
+
 		switch {
 		case reMerknad.MatchString(t):
 			b.Slag = Merknad
@@ -66,12 +74,12 @@ func Klassifiser(inn []Blokk) []Blokk {
 				continue
 			}
 
-		case erKort(t) && reSeksjon.MatchString(t):
+		case !framhald && erKort(t) && reSeksjon.MatchString(t):
 			m := reSeksjon.FindStringSubmatch(t)
 			sisteSeksjon = romartal(m[1])
 			b.Slag, b.Nummer, b.Tittel = Seksjon, m[1], m[2]
 
-		case erKort(t) && erTalOverskrift(t):
+		case !framhald && erKort(t) && erTalOverskrift(t):
 			m := reTalseks.FindStringSubmatch(t)
 			nr, _ := strconv.Atoi(m[1])
 			if nr == sisteSeksjon+1 {
@@ -81,7 +89,15 @@ func Klassifiser(inn []Blokk) []Blokk {
 				b.Slag, b.Nummer, b.Tittel = Underseksjon, m[1], m[2]
 			}
 
-		case erKort(t) && reUnderseks.MatchString(t):
+		// Inne i forkortingsbolken er eit oppslag eit oppslag. Utan
+		// denne føre underseksjonsregelen vart «v. — Verbum (S. 56)»
+		// til underoverskrifta «v) — verbum (S. 56)».
+		case iForkortingar && erKort(t) && reOppslag.MatchString(t):
+			m := reOppslag.FindStringSubmatch(t)
+			b.Slag, b.Nummer = Oppslag, m[1]
+			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
+
+		case !framhald && erKort(t) && reUnderseks.MatchString(t):
 			m := reUnderseks.FindStringSubmatch(t)
 			b.Slag, b.Nummer, b.Tittel = Underseksjon, m[1], m[2]
 
@@ -101,16 +117,8 @@ func Klassifiser(inn []Blokk) []Blokk {
 			b.Slag, b.Nummer = Paragraf, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
-		case iForkortingar && erKort(t) && reOppslag.MatchString(t):
-			m := reOppslag.FindStringSubmatch(t)
-			b.Slag, b.Nummer = Oppslag, m[1]
-			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
-
-		// Held blokka føre paa ei uavslutta setning, er dette framhaldet
-		// hennar - same kor kort det er. Utan denne prøven vart smaabitar
-		// som «o. ſ. v.» tekne for overskrifter, av di dei er korte, og
-		// fall ut av merknaden dei høyrer til.
-		case heldFramFrå(ut):
+		// Her blir framhaldet limt inn i blokka føre.
+		case framhald:
 			b.Slag = Brødtekst
 			n := len(ut) - 1
 			ut[n].Stumpar = append(ut[n].Stumpar, Stump{Tekst: " "})
@@ -121,7 +129,7 @@ func Klassifiser(inn []Blokk) []Blokk {
 		// mellomoverskriftene kursive. Det er signalet - ikkje lengda.
 		// Utan denne prøven vart kvar kort line ei overskrift, og lister
 		// som «ei til e: Leir, heil, rein» hamna i registeret.
-		case erKort(t) && !erInnleiing(t) && heiltUtheva(b):
+		case !framhald && erKort(t) && !erInnleiing(t) && heiltUtheva(b):
 			b.Slag, b.Tittel = Mellomtittel, strings.TrimSuffix(t, ".")
 
 		default:
