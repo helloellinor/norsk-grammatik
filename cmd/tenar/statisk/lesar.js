@@ -79,25 +79,32 @@
   settSkriftform();
   settVising();
 
-  // ---- Visingsluka ----------------------------------------------------
+  // ---- Lukene under topplinja ----------------------------------------
+  // Berre éi om gongen; opnar ein den eine, lukkar den andre seg.
   var stilling = document.getElementById("stilling");
-  var opna = document.getElementById("opnastilling");
+  var luker = [
+    { luke: stilling, knapp: document.getElementById("opnastilling") },
+    { luke: document.getElementById("om"), knapp: document.getElementById("opnaom") }
+  ];
 
-  function visLuke(open) {
-    if (open) { stilling.removeAttribute("hidden"); } else { stilling.setAttribute("hidden", ""); }
-    opna.setAttribute("aria-expanded", String(open));
-    opna.setAttribute("aria-pressed", String(open));
+  function visLuke(par, open) {
+    if (open) { par.luke.removeAttribute("hidden"); } else { par.luke.setAttribute("hidden", ""); }
+    par.knapp.setAttribute("aria-expanded", String(open));
+    par.knapp.setAttribute("aria-pressed", String(open));
   }
 
-  opna.addEventListener("click", function () {
-    visLuke(stilling.hasAttribute("hidden"));
+  luker.forEach(function (par) {
+    par.knapp.addEventListener("click", function () {
+      var open = par.luke.hasAttribute("hidden");
+      luker.forEach(function (a) { visLuke(a, a === par && open); });
+    });
   });
 
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !stilling.hasAttribute("hidden")) {
-      visLuke(false);
-      opna.focus();
-    }
+    if (e.key !== "Escape") return;
+    luker.forEach(function (par) {
+      if (!par.luke.hasAttribute("hidden")) { visLuke(par, false); par.knapp.focus(); }
+    });
   });
 
   stilling.addEventListener("click", function (e) {
@@ -117,8 +124,30 @@
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var nr = document.getElementById("paragrafnr").value.trim();
-    if (nr) { window.location.href = "/paragraf/" + encodeURIComponent(nr); }
+    if (nr) {
+      window.location.href = "/paragraf/" + encodeURIComponent(nr);
+      return;
+    }
+    nesteParagraf();
   });
+
+  // Utan tal i feltet tek Hopp deg til neste paragraf nedanfor. Grensa
+  // er topplinja: ein paragraf som ligg attom henne er alt passert.
+  function nesteParagraf() {
+    var grense = document.querySelector(".topp");
+    var under = grense ? grense.getBoundingClientRect().bottom + 4 : 4;
+    var alle = document.querySelectorAll(".paragraf");
+    for (var i = 0; i < alle.length; i++) {
+      if (alle[i].getBoundingClientRect().top > under) {
+        history.replaceState(null, "", "#" + alle[i].id);
+        blink(alle[i]);
+        return;
+      }
+    }
+    // Ingen att i denne bolken: be om den neste, so lesinga held fram.
+    var sentinel = document.querySelector(".hentar-neste");
+    if (sentinel) { sentinel.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  }
 
   // ---- Landing: blink der ein hoppar --------------------------------
   function blink(el) {

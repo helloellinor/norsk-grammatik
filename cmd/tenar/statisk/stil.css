@@ -43,7 +43,7 @@
   --grunn: 1.3125rem;
   /* Høgda på den faste linja øvst. Alt ein hoppar til må halde seg
      klar av henne, elles gøymer ho fyrste linja. */
-  --toppline: 4rem;
+  --toppline: 3.9rem;
   --fraktur: "Maguntia", serif;
   --antiqua: "Garamond", ui-serif, Georgia, serif;
   --grotesk: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -211,16 +211,23 @@ body {
    ikkje med. Breie oppsett var synderen. */
 .lesefelt { display: flex; flex-direction: column; min-width: 0; overflow-x: clip; }
 
+/* Linja og lukene høyrer saman og fylgjer med nedover. Laag luka i
+   flyten under, opna ho seg der linja ein gong stod - altso langt over
+   der lesaren er naar han har rulla. No foldar ho seg ut rett under
+   linja, kvar ein enn er paa sida. */
+.topp {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--papir);
+  border-bottom: 1px solid var(--linje);
+}
 .styring {
   display: flex;
   gap: 0.5rem;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--linje);
-  position: sticky;
-  top: 0;
   background: var(--papir);
-  z-index: 5;
 }
 
 button {
@@ -408,18 +415,6 @@ main > p + p,
 main > .paragraf,
 main > .merknad { margin-top: 0.45rem; }
 
-footer {
-  max-width: var(--mål);
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
-  border-top: 1px solid var(--linje);
-  font-size: 0.8125rem;
-  line-height: 1.7;
-  color: var(--blekk-mjuk);
-}
-footer p { margin: 0 0 0.75rem; }
-footer strong { color: var(--blekk); font-weight: 600; }
 
 /* Lesetekst: same tekst, moderne skrift og rund s. */
 body.lesetekst { font-family: var(--antiqua); line-height: 1.62; }
@@ -506,14 +501,29 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
    og luka stod alltid framme. */
 [hidden] { display: none !important; }
 
+/* Lukene fyller aldri meir enn skjermen: blir det for mykje, rullar dei
+   for seg sjølve i staden for aa skuve teksten heilt ut av syne. */
+.stilling, .luke {
+  border-top: 1px solid var(--linje);
+  background: var(--uthev);
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+}
 .stilling {
-  border-bottom: 1px solid var(--linje);
   padding: 1.25rem 1.5rem 1.5rem;
   display: grid;
   gap: 1.25rem;
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  background: var(--uthev);
 }
+.luke {
+  padding: 1.25rem 1.5rem 1.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--blekk-mjuk);
+}
+.luke p { margin: 0 0 0.8rem; max-width: 46rem; }
+.luke p:last-child { margin-bottom: 0; }
+.luke strong { color: var(--blekk); font-weight: 600; }
 .stillingsrad { display: flex; flex-direction: column; gap: 0.5rem; }
 .stillingsnamn {
   font-size: 0.6875rem;
@@ -572,19 +582,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 :root[data-form="bokside"] .lesefelt { padding: 2rem 1rem 4rem; background: var(--uthev); }
 :root[data-form="bokside"] .oppsett { width: 100%; margin-inline: 0; }
-:root[data-form="bokside"] footer { max-width: var(--papirbreidd); }
-
-/* ---- Saumen mellom bolkane ---------------------------------------- */
-/* Bolkane kjem etter kvarandre i eitt renn, men overgangen skal kjennast.
-   Difor eit tydeleg skilje med luft rundt, og bolknamnet stort etter. */
-/* Saumen er sjølve sideskiftet: eit aldusblad og god luft. Namnet paa
-   bolken staar i overskrifta rett under, so det skal ikkje staa her òg. */
-.saum {
-  display: flex;
-  justify-content: center;
-  margin: 4rem 0 1rem;
-}
-.saum .ornament {
+:root[data-form="bokside"] .saum .ornament {
   font-size: 1.1rem;
   color: color-mix(in srgb, var(--blekk-mjuk) 55%, transparent);
 }

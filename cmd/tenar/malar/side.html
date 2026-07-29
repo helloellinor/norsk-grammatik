@@ -22,6 +22,7 @@
   </nav>
 
   <div class="lesefelt">
+    <div class="topp">
     <div class="styring apparat">
       <form class="hoppform" action="/paragraf/0" id="paragrafform" role="search">
         <label for="paragrafnr" class="visuelt-skjult">Hopp til paragraf</label>
@@ -30,6 +31,7 @@
         <button type="submit">Hopp</button>
       </form>
       <button id="opnastilling" type="button" aria-expanded="false" aria-controls="stilling">Vis</button>
+      <button id="opnaom" type="button" aria-expanded="false" aria-controls="om">Om</button>
       <span class="skil"></span>
       <span id="lastar" class="lastar" aria-hidden="true">hentar …</span>
     </div>
@@ -103,11 +105,7 @@
       </div>
     </div>
 
-    <main id="innhald" lang="da"{{if eq .Aktiv.Id 0}} class="tittelblad"{{end}}>
-      {{- template "del.html" .}}
-    </main>
-
-    <footer class="apparat">
+    <div id="om" class="luke apparat" hidden>
       <p><strong>Om denne utgåva.</strong> Teksten er 1864-utgåva, henta frå Det Norske
       Samlagets elektroniske transkripsjon (1997). Den lange s-en er sett attende inn etter
       korleis kvart einskilt ord faktisk står i førstetrykket, lese av ei 400 ppi-skanning
@@ -116,9 +114,19 @@
       <p>Aasen tek sjølv opp dette i § 384, og skyv det med vilje ut av grammatikken:
       skriftteikn høyrer til «det ydre eller det, som er for Øiet», og der skal ein «fylgje
       Brugen i Danſk og Tydſk». Same staden slår han fast at det er «tjenligſt at beholde
-      Frakturſkriften» — difor heiter knappen som svik han <em>Et tu, Antiqua?</em></p>
-      <p>Skriftene er UnifrakturMaguntia, UnifrakturCook og Grenze Gotisch (SIL OFL).</p>
-    </footer>
+      Frakturſkriften».</p>
+      <p>Sideforma er målt på faksimilen: tekstblokka tek 71,2 % av breidda og 77,1 % av
+      høgda på ei 5∶8-side. Setningsavstanden er òg målt — 1,75 gonger vanleg ordmellomrom,
+      men ikkje etter forkortingar.</p>
+      <p>Skriftene er UnifrakturMaguntia, UnifrakturCook, Grenze Gotisch og EB Garamond
+      (SIL OFL).</p>
+    </div>
+    </div>
+
+    <main id="innhald" lang="da"{{if eq .Aktiv.Id 0}} class="tittelblad"{{end}}>
+      {{- template "del.html" .}}
+    </main>
+
   </div>
 
 </div>
