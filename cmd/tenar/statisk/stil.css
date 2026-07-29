@@ -476,14 +476,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 .undertitlar a[aria-current="true"] { color: var(--indigo); border-left-color: var(--indigo); }
 
 /* ---- Hopp til paragraf --------------------------------------------- */
-/* Hoppluka og visingsluka fell ned under linja paa same vis. */
-.hoppluke {
-  border-bottom: 1px solid var(--linje);
-  padding: 1rem 1.5rem;
-  background: var(--uthev);
-}
-.hoppform { display: flex; gap: 0.5rem; align-items: center; }
-.hoppform label { font-size: 0.8125rem; color: var(--blekk-mjuk); }
+.hoppform { display: flex; gap: 0.4rem; align-items: center; }
 .hoppform input {
   font-family: var(--apparat);
   font-size: 0.8125rem;
@@ -496,7 +489,6 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 .hoppform input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
 .skil { flex: 1; }
-#opnahopp { font-family: "Garamond", serif; font-size: 1rem; padding-inline: 0.9rem; }
 .visuelt-skjult {
   position: absolute; width: 1px; height: 1px;
   margin: -1px; padding: 0; overflow: hidden;

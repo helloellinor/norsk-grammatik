@@ -23,20 +23,15 @@
 
   <div class="lesefelt">
     <div class="styring apparat">
-      <button id="opnahopp" type="button" aria-expanded="false" aria-controls="hoppluke"
-              title="Hopp til ein paragraf">§</button>
+      <form class="hoppform" action="/paragraf/0" id="paragrafform" role="search">
+        <label for="paragrafnr" class="visuelt-skjult">Hopp til paragraf</label>
+        <input id="paragrafnr" name="nr" type="number" min="1" max="{{.Verk.SisteP}}"
+               inputmode="numeric" placeholder="§ 1–{{.Verk.SisteP}}" autocomplete="off">
+        <button type="submit">Hopp</button>
+      </form>
       <button id="opnastilling" type="button" aria-expanded="false" aria-controls="stilling">Vis</button>
       <span class="skil"></span>
       <span id="lastar" class="lastar" aria-hidden="true">hentar …</span>
-    </div>
-
-    <div id="hoppluke" class="hoppluke apparat" hidden>
-      <form class="hoppform" action="/paragraf/0" id="paragrafform" role="search">
-        <label for="paragrafnr">Hopp til paragraf</label>
-        <input id="paragrafnr" name="nr" type="number" min="1" max="{{.Verk.SisteP}}"
-               inputmode="numeric" placeholder="1–{{.Verk.SisteP}}" autocomplete="off">
-        <button type="submit">Gaa</button>
-      </form>
     </div>
 
     <div id="stilling" class="stilling apparat" hidden>
