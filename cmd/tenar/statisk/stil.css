@@ -435,7 +435,14 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 /* Ligg rifta føre arket, staar lufta main held mot kanten imellom. Ho
    blir trekt bort, so opninga kjem like under linja her ògso. */
 .rift.over { margin-top: calc(-1 * var(--sidemarg)); }
-.rift > * { min-height: 0; overflow: hidden; }
+/* Luka fekk ei eiga rullehøgd att. Ho hadde max-height medan ho laag
+   fast; i flyten voks ho fritt, og forkortingslista med sine 45 rader
+   skauv den nedre arkhelvta fleire skjermhøgder ned - so maatte ein
+   rulle for aa lesa henne, og daa rullar sjølve opninga bort. Rulling
+   skjer inne i luka i staden. overflow-y: auto klipper like godt som
+   hidden gjorde under samanfaldinga. */
+.rift { max-height: 62vh; }
+.rift > * { min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
 @media (prefers-reduced-motion: reduce) { .rift { transition: none; } }
 
 /* Ingen ::before/::after med rivekant her lenger. Dei var teikna kantar
@@ -514,7 +521,6 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   .register { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--linje); }
   .register ol { max-height: 14rem; overflow-y: auto; }
   .bolk { padding-block: 3rem 3.5rem; margin-bottom: 3rem; }
-  .stilling, .luke { left: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }

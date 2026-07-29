@@ -117,55 +117,85 @@
   }
 
 
+  // Kvar luke hugsar kven ho stod framfor, so ho kjem attende dit.
+  luker.forEach(function (par) { par.attende = par.luke.nextSibling; });
+
+  function plassen(luke) {
+    for (var i = 0; i < luker.length; i++) {
+      if (luker[i].luke === luke) { return luker[i].attende; }
+    }
+    return document.getElementById("innhald");
+  }
+
   function riv(luke) {
     var innhald = document.getElementById("innhald");
     var ark = innhald ? innhald.querySelector(".bolk") : null;
-    rift = document.createElement("div");
-    rift.className = "rift";
-    rift.appendChild(luke);
+    var ny = document.createElement("div");
+    ny.className = "rift";
+    // Arket er dansk (lang="da"); menyane er nynorske. Utan dette arvar
+    // dei språket til teksten dei blir lagde inn i, og ein skjermlesar
+    // les heile visingsmenyen med dansk uttale.
+    ny.lang = "nn";
+    ny.appendChild(luke);
 
     var tl = toppline();
-    if (!ark) { (innhald || heim).appendChild(rift); }
+    if (!ark) { (innhald || heim).appendChild(ny); }
     else if (ark.getBoundingClientRect().top >= tl) {
       // Heile arket ligg under linja - lesaren staar over papiret. Daa
       // er det ingenting aa rive, og luka legg seg føre arket. Klassa
-      // trekkjer bort lufta main held mot kanten, so opninga kjem like
-      // under linja her ògso.
-      rift.className += " over";
-      ark.parentNode.insertBefore(rift, ark);
+      // trekkjer bort lufta main held mot kanten.
+      ny.className += " over";
+      ark.parentNode.insertBefore(ny, ark);
     } else {
       var i = delepunkt(ark, tl);
       var nedre = document.createElement("section");
       nedre.className = ark.className + " nedre";
       ark.classList.add("øvre");
       while (ark.children.length > i) { nedre.appendChild(ark.children[i]); }
-      ark.parentNode.insertBefore(rift, ark.nextSibling);
-      rift.parentNode.insertBefore(nedre, rift.nextSibling);
-      // Rifta er framleis samanfalden, so ingenting nedanfor har flytt
-      // seg enno, og snittet staar der det kjem til aa staa. Vi maaler
-      // det no - ikkje før delinga, for delinga byter flex-gapet ut med
-      // snittmarga arket har, og det flytte snittet 15 px - og dyttar
-      // sida so det legg seg akkurat paa linja. Daa opnar rifta seg same
-      // staden kvar einaste gong.
-      scrollBy(0, Math.round(rift.getBoundingClientRect().top - tl));
+      ark.parentNode.insertBefore(ny, ark.nextSibling);
+      ny.parentNode.insertBefore(nedre, ny.nextSibling);
+    }
+
+    // Éi retting for alle greinene. Rifta er framleis samanfalden, so
+    // ingenting nedanfor har flytt seg enno, og snittet staar der det
+    // kjem til aa staa; vi dyttar sida so det legg seg paa linja.
+    //
+    // Maalinga maa gjerast etter delinga, ikkje før: delinga byter
+    // flex-gapet ut med snittmarga arket har, og det flytte snittet 15 px.
+    //
+    // Ho maa ògso gjerast i «over»-greina. Der reiv marga i stilarket
+    // aaleine, og det stemmer berre naar sida staar heilt øvst - ved rull
+    // 20, 40 og 60 opna rifta seg 20, 40 og 60 px OVER linja, altso bak
+    // stonga, der toppen av menyen ikkje var til aa naa.
+    rift = ny;
+    if (ny.isConnected) {
+      scrollBy(0, Math.round(ny.getBoundingClientRect().top - tl));
     }
     // Ei bilete-ramme fram, so nettlesaren har ei høgd aa gaa ut ifrå.
-    requestAnimationFrame(function () { if (rift) { rift.classList.add("open"); } });
+    requestAnimationFrame(function () { ny.classList.add("open"); });
   }
 
+  // lim spør DOM-en i staden for aa lite paa variabelen. Er sida henta
+  // att frå htmx si historie, kan arket vera lagra i rive tilstand medan
+  // variabelen er tom - og daa vart delinga staaande for godt.
   function lim() {
-    if (!rift) return;
-    var luke = rift.firstElementChild;
-    if (luke) { heim.appendChild(luke); }
-    var nedre = rift.nextElementSibling;
-    var øvre = rift.previousElementSibling;
+    var r = document.querySelector(".rift");
+    rift = null;
+    if (!r) return;
+    var luke = r.firstElementChild;
+    // Luka skal attende paa nøyaktig sin eigen plass. Vart ho lagd bakarst
+    // i lesefeltet, hamna ho etter heile kapitlet i tabb- og leserekkja;
+    // og la vi henne berre framfor teksten, bytte dei tre menyane
+    // innbyrdes rekkjefylgje kvar gong ei av dei hadde vore open.
+    if (luke) { heim.insertBefore(luke, plassen(luke)); }
+    var nedre = r.nextElementSibling;
+    var øvre = r.previousElementSibling;
     if (nedre && nedre.classList.contains("nedre") && øvre && øvre.classList.contains("øvre")) {
       while (nedre.children.length) { øvre.appendChild(nedre.children[0]); }
       øvre.classList.remove("øvre");
-      nedre.parentNode.removeChild(nedre);
+      nedre.remove();
     }
-    rift.parentNode.removeChild(rift);
-    rift = null;
+    r.remove();
   }
 
   function visLuke(par, open) {
@@ -203,6 +233,10 @@
   // htmx byter ut heile <main>. Er arket rive naar det skjer, blir baade
   // rifta og luka kasta med. Vi limer att fyrst.
   document.body.addEventListener("htmx:beforeSwap", lukkAlle);
+
+  // Vart sida lagra i htmx si historie medan arket var rive, kjem ho att
+  // delt. lim spør DOM-en, so denne eine kallet rettar det opp.
+  lim();
 
   stilling.addEventListener("click", function (e) {
     var k = e.target.closest("button");
