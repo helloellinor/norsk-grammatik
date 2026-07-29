@@ -37,7 +37,10 @@
   --indigo: #2B3A67;
   --linje: #E4DFD6;
   --uthev: #F1ECE2;
-  --bak-papiret: #E7E1D4;
+  /* Skrivebordet er flata boka ligg paa. Apparatet vaart - topplinja,
+     registeret, lukene - høyrer til det, ikkje til arket. Riv ein arket
+     opp, er det skrivebordet ein ser ned paa. */
+  --skrivebord: #E7E1D4;
   --rivekant: #CFC7B6;
 
   --mål: 34rem;
@@ -58,28 +61,28 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bak-papiret: #100F0C;
-    --rivekant: #3E392F;
-    --papir: #191713;
+    --skrivebord: #0A0907;
+    --rivekant: #4A4438;
+    --papir: #2A261D;
     --blekk: #EDE8DE;
     --blekk-mjuk: #A29A8D;
     --indigo: #93A6DC;
-    --linje: #34302A;
-    --uthev: #23201A;
+    --linje: #3D382F;
+    --uthev: #322E24;
   }
 }
 :root[data-theme="dark"] {
-  --bak-papiret: #100F0C;
-  --rivekant: #3E392F;
-  --papir: #191713;
+  --skrivebord: #0A0907;
+  --rivekant: #4A4438;
+  --papir: #2A261D;
   --blekk: #EDE8DE;
   --blekk-mjuk: #A29A8D;
   --indigo: #93A6DC;
-  --linje: #34302A;
-  --uthev: #23201A;
+  --linje: #3D382F;
+  --uthev: #322E24;
 }
 :root[data-theme="light"] {
-  --bak-papiret: #E7E1D4;
+  --skrivebord: #E7E1D4;
   --rivekant: #CFC7B6;
   --papir: #FCFBF9;
   --blekk: #1A1714;
@@ -125,7 +128,7 @@
 
 body {
   margin: 0;
-  background: var(--papir);
+  background: var(--skrivebord);
   color: var(--blekk);
   font-family: var(--fraktur);
   /* liga og rlig gjev fraktursatsen sine eigne ligaturar: ch, ck, ſt,
@@ -229,7 +232,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--papir);
+  background: var(--skrivebord);
   border-bottom: 1px solid var(--linje);
 }
 .styring {
@@ -237,7 +240,7 @@ body {
   gap: 0.5rem;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: var(--papir);
+  background: transparent;
 }
 
 button {
@@ -262,6 +265,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   transition: opacity 0.15s;
 }
 .lastar.htmx-request { opacity: 1; }
+.register { background: transparent; }
 
 main {
   width: 100%;
@@ -276,6 +280,7 @@ main {
    staar paa sitt eige ark, so eit skifte er eit fysisk sideskifte og
    ikkje berre luft. */
 .bolk {
+  background: var(--papir);
   max-width: min(var(--mål), 100%);
   width: 100%;
   margin: 0 auto;
@@ -541,7 +546,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
    for seg sjølve i staden for aa skuve teksten heilt ut av syne. */
 .stilling, .luke {
   border-top: 1px solid var(--linje);
-  background: var(--uthev);
+  background: var(--skrivebord);
 }
 .stilling {
   padding: 1.25rem 1.5rem 1.5rem;
@@ -619,12 +624,12 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   --fold-ut: 20.22%;
   padding-block: 6.9em 7.8em;     /* 10,8 % og 12,3 % av sidehøgda */
   background: var(--papir);
-  box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.07);
+  box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.28);
   line-height: 1.52;              /* originalen er 9/10,5 pt, altfor tett
                                      for skjerm - dette er nærmaste steg */
   margin-bottom: 2.5rem;
 }
-:root[data-form="bokside"] .lesefelt { background: var(--uthev); }
+:root[data-form="bokside"] .lesefelt { background: transparent; }
 :root[data-form="bokside"] main { padding: 2.5rem 1rem 4rem; }
 :root[data-form="bokside"] .oppsett { width: 100%; margin-inline: 0; }
 :root[data-form="bokside"] .saum .ornament {
@@ -745,7 +750,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   border-block: none;
   border-radius: 0;
   margin-block: 0;
-  background: var(--bak-papiret);
+  background: var(--skrivebord);
   box-shadow:
     inset 0 9px 12px -8px rgb(0 0 0 / 0.42),
     inset 0 -9px 12px -8px rgb(0 0 0 / 0.42);
