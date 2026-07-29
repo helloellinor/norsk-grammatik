@@ -89,17 +89,23 @@ func Klassifiser(inn []Blokk) []Blokk {
 			b.Slag, b.Nummer = Oppslag, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
+		// Held blokka føre paa ei uavslutta setning, er dette framhaldet
+		// hennar - same kor kort det er. Utan denne prøven vart smaabitar
+		// som «o. ſ. v.» tekne for overskrifter, av di dei er korte, og
+		// fall ut av merknaden dei høyrer til.
+		case heldFramFrå(ut):
+			b.Slag = Brødtekst
+			n := len(ut) - 1
+			ut[n].Stumpar = append(ut[n].Stumpar, Stump{Tekst: " "})
+			ut[n].Stumpar = append(ut[n].Stumpar, b.Stumpar...)
+			continue
+
 		case erKort(t) && !erInnleiing(t):
 			b.Slag, b.Tittel = Mellomtittel, strings.TrimSuffix(t, ".")
 
 		default:
 			// Held blokka fram setninga frå blokka over, er det eit
 			// sideskift i papiret og ikkje eit nytt avsnitt.
-			if n := len(ut); n > 0 && kanHaldeFram(ut[n-1].Slag) && heldFram(ut[n-1].Tekst()) {
-				ut[n-1].Stumpar = append(ut[n-1].Stumpar, Stump{Tekst: " "})
-				ut[n-1].Stumpar = append(ut[n-1].Stumpar, b.Stumpar...)
-				continue
-			}
 			b.Slag = Brødtekst
 		}
 
@@ -107,6 +113,14 @@ func Klassifiser(inn []Blokk) []Blokk {
 	}
 
 	return ut
+}
+
+// heldFramFrå seier om siste blokka er avbroten midt i ei setning, so
+// det som kjem no er framhaldet hennar. Sideskifta i papiret deler baade
+// avsnitt og merknader i to.
+func heldFramFrå(ut []Blokk) bool {
+	n := len(ut) - 1
+	return n >= 0 && kanHaldeFram(ut[n].Slag) && heldFram(ut[n].Tekst())
 }
 
 func kanHaldeFram(s Bolkslag) bool {
