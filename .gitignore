@@ -12,6 +12,7 @@
 /bøker/grammatik.json
 /bøker/grammatik-sats.json
 /bøker/sats-rapport.txt
+# overskrifter.md er meint til handredigering - IKKJE ignorert
 
 # Tredjeparts-klon, ikkje ein del av dette prosjektet
 /tesseract-training-fraktur/
