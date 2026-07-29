@@ -111,9 +111,6 @@ body {
 .apparat { font-family: var(--apparat); }
 .frak { font-family: var(--fraktur); }
 [hidden] { display: none !important; }
-/* Lukene er unntaket: dei skal gli, ikkje forsvinne, so dei held plassen
-   sin og blir gøymde med synlegheit i staden. */
-.stilling[hidden], .luke[hidden] { display: flex !important; visibility: hidden; }
 em { font-style: italic; }
 strong { font-weight: 600; }
 p { margin: 0; }
@@ -166,7 +163,9 @@ main {
      rett inntil henne, og margen ovanfor syner seg ikkje. */
   padding-block: var(--sidemarg) 4rem;
   font-size: var(--grunn);
-  position: relative; z-index: 2;
+  /* main er skrivebordet arka ligg paa. Rifta har ingen eigen bakgrunn,
+     so det er denne flata ein ser gjennom opninga. */
+  background: var(--skrivebord);
 }
 
 /* Arket. Fyller leseflata; satsen ligg midt paa det. */
@@ -190,8 +189,21 @@ main {
 /* Blokkene i satsen. Ingen width her: dei fyller arket av seg sjølve og
    max-width kapar dei. Set ein width: 100 % attaat, blir breidda
    avhengig av at prosenten løyser seg - og det gjorde han ikkje. */
-.bolk > * { max-width: var(--mål); margin-inline: auto; }
+/* width: 100 % maa staa her. margin-inline: auto slaar av stretch paa ein
+   flex-boks, so blokkene krympa til innhaldet sitt - og daa fekk strekane
+   kvar side av overskriftene (flex: 1) null breidd og forsvann. Same
+   feilen som gjorde sjølve arket for smalt, eitt hakk ned. */
+.bolk > * { width: 100%; max-width: var(--mål); margin-inline: auto; }
 .bolk > .oppsett { max-width: calc(1.34 * var(--mål)); }
+
+/* Dei to helvtene av eit rive ark. Snittet er eit snitt, ikkje ein
+   arkkant: der skal det korkje vera margbotn eller den store luft-marga
+   arket elles har mot kanten sin. Skuggen ved snittet vender utover -
+   ned frå den øvre helvta, opp frå den nedre - av di det er kantar som
+   ligg over skrivebordet, ikkje hol i arket. */
+.bolk.øvre { margin-bottom: 0; padding-bottom: 2.2em; }
+.bolk.nedre { padding-top: 2.2em; }
+.bolk.nedre { box-shadow: 0 0 0 1px var(--linje), 0 -3px 18px rgb(0 0 0 / 0.28), 0 2px 18px rgb(0 0 0 / 0.28); }
 .deltittel, .tittelark { align-items: center; }
 
 /* Ei Afdeling har berre namnet sitt; teksten ligg i seksjonane under.
@@ -258,6 +270,37 @@ main {
 }
 .merknad + .merknad, .avsnitt + .avsnitt,
 .merknad + .avsnitt, .avsnitt + .merknad { margin-top: -0.5rem; }
+
+/* Oppstilte døme. I trykket er kvart døme ei line for seg, ikkje eit
+   avsnitt: talet heng ute i margen og teksten byrjar paa same staden i
+   alle linene. Difor korkje innrykk eller utslutting her - ei kort line
+   som blir utsluttet blir til gissen sats. */
+.døme {
+  display: grid; grid-template-columns: 2.4rem 1fr;
+  gap: 0 0.5rem;
+  text-align: left; text-indent: 0; hyphens: manual;
+  font-size: 0.97em; line-height: 1.45;
+}
+/* nowrap maa staa her: blokkene arvar overflow-wrap: break-word, og daa
+   braut «1,» midt i seg sjølv naar kolonna vart for smal - komma hamna
+   paa si eiga line under talet. */
+.døme .tal {
+  text-align: right; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--blekk-mjuk);
+}
+/* Ei rekkje døme høyrer saman og skal staa tett, ikkje med avsnittsluft. */
+.bolk > .døme + .døme { margin-top: calc(-1 * 1.5rem + 0.12rem); }
+
+/* Boka si eiga kryssvising. Ho skal kjennast som ein peikepinn i
+   margen, ikkje som ei lenkje paa ei nettside - difor ingen strek før
+   ein tek paa henne. */
+.tilvis {
+  color: inherit; text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--indigo) 32%, transparent);
+  white-space: nowrap;
+}
+.tilvis:hover, .tilvis:focus-visible { color: var(--indigo); border-bottom-color: var(--indigo); }
 
 /* Forkortingslista: stikkord og forklaring. */
 .oppslag { display: grid; grid-template-columns: minmax(4.5rem, max-content) 1fr; gap: 0 1rem; font-size: 1.0625rem; line-height: 1.5; }
@@ -329,47 +372,27 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .lastar { flex: 0 1 auto; min-width: 0; font-size: 0.75rem; color: var(--blekk-mjuk); opacity: 0; transition: opacity 0.15s; }
 .lastar.htmx-request { opacity: 1; }
 
-/* Lukene ligg i den faste blokka, so dei foldar seg ut rett under linja
-   kvar ein enn er paa sida. */
-/* Lukene ligg fast under linja og over papiret: dei er skrivebordet ein
-   ser gjennom rifta. Dei blir ikkje flytte i dokumentet - berre synte og
-   gøymde - so dei staar same staden kvar gong. */
-/* Rifta. Ho blir sett inn i papiret der lesaren er og veks til luka si
-   høgd, so arket under glir ned og opninga blir til der ein ser. Luka
-   sjølv ligg fast over rifta og rører seg ikkje. */
+/* Lukene ligg paa skrivebordet, under papiret. Naar ei av dei opnar seg,
+   blir arket rive tvers over der lesaren staar: blokkene nedanfor rifta
+   flyttar seg over i eit nytt ark, og luka kjem fram i opninga imellom.
+   Alt ligg i flyten - ingen fast plassering - so rifta rullar med
+   teksten og kan ikkje hamne ein annan stad enn der ho vart laga. */
 .rift {
-  height: 0;
-  overflow: hidden;
-  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--skrivebord);
-  margin-inline: calc(-1 * var(--marg));
-  border-block: 1px solid var(--rivekant);
-  border-block-color: transparent;
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows 0.34s cubic-bezier(0.32, 0, 0.24, 1);
+  width: 100%; max-width: calc(100% - 2 * var(--sidemarg));
+  margin: 0 auto;
 }
-.rift.open { border-block-color: var(--rivekant); }
+.rift.open { grid-template-rows: 1fr; }
+.rift > * { min-height: 0; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .rift { transition: none; } }
 
-.stilling, .luke {
-  position: fixed;
-  top: var(--toppline);
-  left: var(--register);
-  right: 0;
-  z-index: 9;
-  max-height: calc(100vh - var(--toppline));
-  /* Ho glir ned bakom linja. Papiret kan ikkje delast midt i utan aa
-     flytte noko i dokumentet, og det var nettopp det som gjorde at ho
-     rørte paa seg - so ho legg seg over papiret i staden, der lesaren
-     er, og opnar seg nedover. */
-  opacity: 0;
-  transition: opacity 0.2s ease-out;
-  overflow-y: auto;
-  background: var(--skrivebord);
-}
+.stilling, .luke { background: var(--skrivebord); }
 /* Rivekantane: papiret er opna, og kantane kastar skugge ned i opninga. */
 .stilling::before, .luke::before,
 .stilling::after, .luke::after {
   content: ""; display: block; height: 1px; background: var(--rivekant);
 }
-.stilling:not([hidden]), .luke:not([hidden]) { opacity: 1; }
 .stilling::before, .luke::before { box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
 .stilling::after, .luke::after { box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
 .luke { padding: 1.25rem 1.5rem 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }

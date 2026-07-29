@@ -19,6 +19,7 @@ const (
 	Avsnitt      Bolkslag = "avsnitt"      // innrykt framhald
 	Oppslag      Bolkslag = "oppslag"      // Ang. — Angelſachſiſk.
 	Oppsett      Bolkslag = "oppsett"      // lydtavle, bøyingsmønster
+	Døme         Bolkslag = "døme"         // 1, ſleppa ..., af ſleppa, ſlapp.
 	Brødtekst    Bolkslag = "brødtekst"
 )
 
@@ -34,6 +35,12 @@ var (
 	reUnderseks = regexp.MustCompile(`^([a-z])[.)]\s+(.+?)\.?$`) // boka brukar baade «a)» og «a.»
 	reParagraf  = regexp.MustCompile(`^(\d+)\.?\s+(.+)$`)
 	reMerknad   = regexp.MustCompile(`^\s*Anm(?:\.|ærkning\.)\s*`)
+	// Aasen nummererer oppstilte døme med komma - «1, ſleppa» - og skil
+	// dei dermed sjølv frå §-nummera og frå dei nummererte overskriftene,
+	// som begge har punktum. I heile boka finst mønsteret ti gonger, i to
+	// samanhengande rekkjer paa fem, kvar innleidd av ei line som endar
+	// paa kolon. Ingen einslege treff, altso ingen falske.
+	reDøme = regexp.MustCompile(`^(\d+),\s+(.+)$`)
 	reOppslag   = regexp.MustCompile(`^(\S[^—]{0,24}?)\s+—\s+(.+)$`)
 	reSøppel    = regexp.MustCompile(`GOTOBUTTON|PAGEREF|_Toc\d+|^\s*TOC\s`)
 )

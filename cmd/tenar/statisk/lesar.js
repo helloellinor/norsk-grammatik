@@ -86,63 +86,108 @@
     { luke: document.getElementById("om"), knapp: document.getElementById("opnaom") }
   ];
 
-  // Papiret blir rive opp der lesaren er: ei rift blir sett inn framfor
-  // den fyrste blokka under topplinja og veks til luka si høgd, so arket
-  // under glir ned. Luka sjølv blir aldri flytt - ho ligg fast over
-  // opninga. Det var flyttinga som gjorde at ho rørte paa seg før.
+  // ---- Rifta ----------------------------------------------------------
+  // Aa opne ei luke er aa rive arket tvers over der lesaren staar. Vi
+  // deler <section class="bolk"> i to: blokkene frå og med den fyrste
+  // som ligg nedanfor topplinja blir flytte over i eit nytt ark, og luka
+  // kjem inn imellom dei to helvtene. Alt ligg i flyten, so rifta rullar
+  // med teksten og treng ikkje maalast opp mot vindauget.
+  var heim = document.querySelector(".lesefelt"); // der lukene bur naar dei er att
   var rift = null;
 
-  function opnaRift(høgd) {
-    lukkRift();
-    var topp = document.querySelector(".topp");
-    var under = topp.getBoundingClientRect().bottom + 4;
-    var born = document.querySelectorAll("#innhald > section > *");
-    var mål = null;
-    for (var i = 0; i < born.length; i++) {
-      if (born[i].getBoundingClientRect().top > under) { mål = born[i]; break; }
-    }
-    if (!mål) return;
-    rift = document.createElement("div");
-    rift.className = "rift";
-    mål.parentNode.insertBefore(rift, mål);
-    // Rifta opnar seg nedanfor det lesaren ser, so sida under skal ikkje
-    // dra augo med seg: vi flyttar rullinga like mykje som ho veks.
-    requestAnimationFrame(function () {
-      rift.style.height = høgd + "px";
-      rift.classList.add("open");
-    });
+  function toppline() {
+    var t = document.querySelector(".topp");
+    return t ? t.getBoundingClientRect().bottom : 0;
   }
 
-  function lukkRift() {
+  // delepunkt er den fyrste blokka som ligg heilt nedanfor topplinja.
+  // Ligg alt over henne, er det ingenting aa dele - daa legg luka seg
+  // i staden føre eller etter heile arket.
+  function delepunkt(ark) {
+    var grense = toppline() + 2;
+    for (var i = 0; i < ark.children.length; i++) {
+      if (ark.children[i].getBoundingClientRect().top >= grense) { return i; }
+    }
+    return -1;
+  }
+
+  function riv(luke) {
+    var innhald = document.getElementById("innhald");
+    var ark = innhald ? innhald.querySelector(".bolk") : null;
+    rift = document.createElement("div");
+    rift.className = "rift";
+    rift.appendChild(luke);
+
+    if (!ark) { (innhald || heim).appendChild(rift); }
+    else {
+      var i = delepunkt(ark);
+      if (i <= 0) {
+        // Lesaren er øvst (eller nedst) i arket: ingen deling, luka
+        // legg seg heilt føre - eller heilt etter - det.
+        ark.parentNode.insertBefore(rift, i === 0 ? ark : ark.nextSibling);
+      } else {
+        var nedre = document.createElement("section");
+        nedre.className = ark.className + " nedre";
+        ark.classList.add("øvre");
+        while (ark.children.length > i) { nedre.appendChild(ark.children[i]); }
+        ark.parentNode.insertBefore(rift, ark.nextSibling);
+        rift.parentNode.insertBefore(nedre, rift.nextSibling);
+      }
+    }
+    // Ei bilete-ramme fram, so nettlesaren har ei høgd aa gaa ut ifrå.
+    requestAnimationFrame(function () { if (rift) { rift.classList.add("open"); } });
+  }
+
+  function lim() {
     if (!rift) return;
-    rift.remove();
+    var luke = rift.firstElementChild;
+    if (luke) { heim.appendChild(luke); }
+    var nedre = rift.nextElementSibling;
+    var øvre = rift.previousElementSibling;
+    if (nedre && nedre.classList.contains("nedre") && øvre && øvre.classList.contains("øvre")) {
+      while (nedre.children.length) { øvre.appendChild(nedre.children[0]); }
+      øvre.classList.remove("øvre");
+      nedre.parentNode.removeChild(nedre);
+    }
+    rift.parentNode.removeChild(rift);
     rift = null;
   }
 
   function visLuke(par, open) {
-    if (open) { par.luke.removeAttribute("hidden"); }
+    if (open) { par.luke.removeAttribute("hidden"); riv(par.luke); }
     else { par.luke.setAttribute("hidden", ""); }
     par.knapp.setAttribute("aria-expanded", String(open));
     par.knapp.setAttribute("aria-pressed", String(open));
   }
 
+  function lukkAlle() {
+    var lukka = false;
+    luker.forEach(function (par) {
+      if (!par.luke.hasAttribute("hidden")) { visLuke(par, false); lukka = true; }
+    });
+    lim();
+    return lukka;
+  }
 
   luker.forEach(function (par) {
     par.knapp.addEventListener("click", function () {
-      var open = par.luke.hasAttribute("hidden");
-      luker.forEach(function (a) { visLuke(a, a === par && open); });
-      if (open) { opnaRift(par.luke.getBoundingClientRect().height); }
-      else { lukkRift(); }
+      var skalOpne = par.luke.hasAttribute("hidden");
+      lukkAlle();
+      if (skalOpne) { visLuke(par, true); }
     });
   });
 
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
     luker.forEach(function (par) {
-      if (!par.luke.hasAttribute("hidden")) { visLuke(par, false); par.knapp.focus(); }
+      if (!par.luke.hasAttribute("hidden")) { par.knapp.focus(); }
     });
-    lukkRift();
+    lukkAlle();
   });
+
+  // htmx byter ut heile <main>. Er arket rive naar det skjer, blir baade
+  // rifta og luka kasta med. Vi limer att fyrst.
+  document.body.addEventListener("htmx:beforeSwap", lukkAlle);
 
   stilling.addEventListener("click", function (e) {
     var k = e.target.closest("button");

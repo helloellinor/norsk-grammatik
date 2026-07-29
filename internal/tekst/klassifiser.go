@@ -85,6 +85,14 @@ func Klassifiser(inn []Blokk) []Blokk {
 			m := reUnderseks.FindStringSubmatch(t)
 			b.Slag, b.Nummer, b.Tittel = Underseksjon, m[1], m[2]
 
+		// Oppstilte døme. Kvart døme staar som si eiga blokk i kjelda og
+		// er ei line for seg i trykket; utan eige slag rann dei saman til
+		// vanlege, utlikna avsnitt med innrykk.
+		case reDøme.MatchString(t):
+			m := reDøme.FindStringSubmatch(t)
+			b.Slag, b.Nummer = Døme, m[1]
+			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
+
 		// Alt anna som byrjar med eit tal er eit §-avsnitt, same kor
 		// kort det er: sideskifta i papiret deler somme paragrafar i to,
 		// so fyrste luten kan vera berre ei halv linje (t.d. § 153).

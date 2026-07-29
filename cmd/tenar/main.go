@@ -13,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -73,7 +74,7 @@ func main() {
 	log.Printf("%d delar, %d paragrafar tolka frå %s", len(verk.Delar), len(indeks), *inn)
 
 	mal := template.Must(template.New("").Funcs(template.FuncMap{
-		"rom": tekst.Setningsrom,
+		"rom": sats(indeks),
 	}).ParseFS(malar, "malar/*.html"))
 
 	mux := http.NewServeMux()
@@ -115,6 +116,44 @@ func main() {
 	}
 	if err := http.ListenAndServe(*adr, mux); err != nil {
 		log.Fatal(err)
+	}
+}
+
+// Boka kryssviser seg sjølv 556 gonger med «§ N». Det er hennar eige
+// lenkjeverk, og det er dette som gjer at ein kan lesa henne utan
+// sidetal - so vi gjer tilvisingane om til lenkjer.
+//
+// Berre den reine forma blir lenkja. Dei tjue tilfella av «§ 34, 35»
+// har eit tal til bakom kommaet, men eit lause tal er ikkje sikkert
+// nok til aa lenkje paa, so der blir berre det fyrste ei lenkje.
+// Tilvisingar til §§ som ikkje finst i teksten (169 og 196) staar att
+// som vanleg tekst i staden for aa bli daude lenkjer.
+var reTilvis = regexp.MustCompile(`§[\s\p{Zs}]*\d+`)
+
+// sats set setningsromma og lenkjer tilvisingane. Han skriv HTML og
+// lyt difor sjølv sleppe teksten gjennom escape.
+func sats(indeks map[string]int) func(string) template.HTML {
+	return func(s string) template.HTML {
+		s = tekst.Setningsrom(s)
+		treff := reTilvis.FindAllStringIndex(s, -1)
+		if treff == nil {
+			return template.HTML(template.HTMLEscapeString(s))
+		}
+		var b strings.Builder
+		slutt := 0
+		for _, t := range treff {
+			ord := s[t[0]:t[1]]
+			nr := strings.TrimLeftFunc(ord, func(r rune) bool { return r < '0' || r > '9' })
+			b.WriteString(template.HTMLEscapeString(s[slutt:t[0]]))
+			if _, finst := indeks[nr]; finst {
+				fmt.Fprintf(&b, `<a class="tilvis" href="/paragraf/%s">%s</a>`, nr, template.HTMLEscapeString(ord))
+			} else {
+				b.WriteString(template.HTMLEscapeString(ord))
+			}
+			slutt = t[1]
+		}
+		b.WriteString(template.HTMLEscapeString(s[slutt:]))
+		return template.HTML(b.String())
 	}
 }
 

@@ -42,6 +42,8 @@
   <p class="paragraf" id="p{{.Nummer}}">
     <a class="tal" href="#p{{.Nummer}}" aria-label="Paragraf {{.Nummer}}">§&nbsp;{{.Nummer}}</a>{{template "stumpar" .Stumpar}}
   </p>
+  {{- else if eq .Slag "døme"}}
+  <p class="døme"><span class="tal">{{.Nummer}},</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "oppslag"}}
   <p class="oppslag"><span class="stikkord">{{.Nummer}}</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "merknad"}}
