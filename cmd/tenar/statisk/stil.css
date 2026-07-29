@@ -500,6 +500,12 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
    som ei flytande meny, men ho er søsken til linja og ikkje barn, so
    absolutt plassering festa seg til heile sida og sende henne ut av
    skjermen. Ei skuffe i flyten treng ikkje den knuten. */
+/* display maa vinne over seg sjølv naar luka er lukka: .stilling og
+   [hidden] har same spesifisitet, og daa slaar arket vaart nettlesaren
+   sin [hidden]-regel. Utan denne linja hadde attributtet ingen verknad,
+   og luka stod alltid framme. */
+[hidden] { display: none !important; }
+
 .stilling {
   border-bottom: 1px solid var(--linje);
   padding: 1.25rem 1.5rem 1.5rem;
