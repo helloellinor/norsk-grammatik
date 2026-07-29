@@ -124,6 +124,8 @@ body {
      over, ei forkorting frå handskrifter. Faksimilen syner ſammenſat
      med to fulle m-ar, so 1864-trykket kjenner henne ikkje. */
   font-feature-settings: "liga" 1, "rlig" 1, "hlig" 0;
+  line-height: 1.78;
+  -webkit-font-smoothing: antialiased;
 }
 /* Med alle ligaturane paa slaar hlig til: mm og nn blir m og n med
    strek over. Det er ei forkorting frå handskrifter, ikkje 1864-sats -
@@ -131,8 +133,6 @@ body {
 :root[data-ligatur="alle"] body,
 :root[data-ligatur="alle"] .frak {
   font-feature-settings: "liga" 1, "rlig" 1, "hlig" 1, "dlig" 1;
-  line-height: 1.78;
-  -webkit-font-smoothing: antialiased;
 }
 
 /* Apparatet vårt skil seg med vilje frå Aasens eigen tekst: det som er
@@ -264,10 +264,18 @@ main {
 main p, main td {
   text-align: justify;
   text-justify: inter-word;
+  /* Utslutta sats utan orddeling gjev elveløp av mellomrom. Grensene er
+     lause nok til at lange samansetjingar - Landſkabsmaalene,
+     Bøiningsformerne - faktisk blir delte. */
   hyphens: auto;
   -webkit-hyphens: auto;
-  hyphenate-limit-chars: 6 3 3;
+  hyphenate-limit-chars: 5 2 2;
+  -webkit-hyphenate-limit-before: 2;
+  -webkit-hyphenate-limit-after: 2;
   hanging-punctuation: first last;
+  /* Siste utveg for ord som ikkje kan delast: bryt heller enn aa la dei
+     stikke ut av spalta. */
+  overflow-wrap: break-word;
 }
 main .oppslag, main .oppslag span { text-align: left; hyphens: manual; }
 main td { text-align: center; hyphens: manual; }
