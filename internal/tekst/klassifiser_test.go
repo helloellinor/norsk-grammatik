@@ -94,7 +94,7 @@ func TestFramhaldBlirIkkjeOverskrift(t *testing.T) {
 // avslutta - elles hadde prøven ovanfor kunna «rettast» ved aa slaa av
 // heile regelen.
 func TestOverskriftEtterAvsluttaSetning(t *testing.T) {
-	ut := Klassifiser([]Blokk{blokk("Dette er ei avslutta setning."), blokk("a) Subſt. af Verbum.")})
+	ut := Klassifiser([]Blokk{blokk("Dette er ei avslutta setning."), feit("a) Subſt. af Verbum.")})
 	if len(ut) != 2 || ut[1].Slag != Underseksjon {
 		t.Fatalf("overskrifta gjekk tapt: %+v", ut)
 	}
@@ -113,5 +113,52 @@ func TestEinbokstavsOppslagIForklaringa(t *testing.T) {
 	}
 	if ut[1].Nummer != "v." || ut[1].Tekst() != "Verbum (S. 56)." {
 		t.Errorf("fekk %q / %q", ut[1].Nummer, ut[1].Tekst())
+	}
+}
+
+// Eit listepunkt er ikkje ei overskrift, kor kort det enn er. Boka
+// uthevar overskriftene sine; listepunkta staar i vanleg skrift. Det var
+// lengdegrensa som gjorde «b) Hardangerſk ... Fl. af Fe-» til ei
+// overskrift i § 363 og reiv ordet Feminin i to.
+func TestKortListepunktErIkkjeOverskrift(t *testing.T) {
+	ut := Klassifiser([]Blokk{
+		blokk("Ei avslutta setning."),
+		blokk("b) Hardangerſk. Fleertal af Maſk. har `ar'; Fl. af Fe-"),
+		blokk("min. har `er' (irr). Dativ ſynes at mangle."),
+	})
+	if len(ut) != 2 {
+		t.Fatalf("venta to blokker, fekk %d", len(ut))
+	}
+	if ut[1].Slag != Underpunkt {
+		t.Errorf("listepunktet vart %q, ikkje eit punkt", ut[1].Slag)
+	}
+	if ut[1].Nummer != "b" {
+		t.Errorf("merket vart %q", ut[1].Nummer)
+	}
+	// Sideskiftet delte forkortinga Femin.; punktet skal vera heilt att.
+	venta := "Hardangerſk. Fleertal af Maſk. har `ar'; Fl. af Femin. har `er' (irr). Dativ ſynes at mangle."
+	if ut[1].Tekst() != venta {
+		t.Errorf("teksten er skadd:\n fekk  %q\n venta %q", ut[1].Tekst(), venta)
+	}
+}
+
+// Eit sideskift kan dele eit ord i to. Blokka føre endar paa bindestrek,
+// og daa skal streken bort og ingen mellomrom setjast inn - elles stod
+// det «om- trent» i teksten, 71 stader i verket.
+func TestOrddelingVedSideskift(t *testing.T) {
+	prov := []struct{ a, b, ut string }{
+		{"eit Tungemaal, ſom har om-", "trent den ſamme Lighed", "eit Tungemaal, ſom har omtrent den ſamme Lighed"},
+		{"og man har viſt-", "nok ogſaa ventet", "og man har viſtnok ogſaa ventet"},
+		// Utan bindestrek skal mellomrommet framleis setjast inn.
+		{"ei setning som held", "fram her", "ei setning som held fram her"},
+	}
+	for _, p := range prov {
+		ut := Klassifiser([]Blokk{blokk(p.a), blokk(p.b)})
+		if len(ut) != 1 {
+			t.Fatalf("%q + %q vart %d blokker", p.a, p.b, len(ut))
+		}
+		if ut[0].Tekst() != p.ut {
+			t.Errorf("fekk  %q\n venta %q", ut[0].Tekst(), p.ut)
+		}
 	}
 }

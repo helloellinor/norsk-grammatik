@@ -22,10 +22,12 @@
   </header>
   {{- else if eq .Slag "seksjon"}}
   <h3 class="seksjon" id="{{.Ankar}}"><span class="tittel"><span class="tal">{{.Nummer}}.</span> {{.Tittel}}</span></h3>
+  {{- else if eq .Slag "storbokstav"}}
+  <h4 class="storbokstav" id="{{.Ankar}}"><span class="tal">{{.Nummer}}.</span> {{.Tittel}}</h4>
   {{- else if eq .Slag "underseksjon"}}
-  <h4 class="underseksjon" id="{{.Ankar}}"><span class="tal">{{.Nummer}})</span> {{.Tittel}}</h4>
+  <h5 class="underseksjon" id="{{.Ankar}}"><span class="tal">{{.Nummer}})</span> {{.Tittel}}</h5>
   {{- else if eq .Slag "mellomtittel"}}
-  <h5 class="mellomtittel" id="{{.Ankar}}">{{.Tittel}}</h5>
+  <h6 class="mellomtittel" id="{{.Ankar}}">{{.Tittel}}</h6>
   {{- else if eq .Slag "oppsett"}}
   <div class="oppsett{{if .IMerknad}} i-merknad{{end}}">
     <table>
@@ -42,6 +44,10 @@
   <p class="paragraf" id="p{{.Nummer}}">
     <a class="tal" href="#p{{.Nummer}}" aria-label="Paragraf {{.Nummer}}">§&nbsp;{{.Nummer}}</a>{{template "stumpar" .Stumpar}}
   </p>
+  {{- else if eq .Slag "listepunkt"}}
+  <p class="punkt"><span class="tal">{{.Nummer}})</span><span>{{template "stumpar" .Stumpar}}</span></p>
+  {{- else if eq .Slag "underpunkt"}}
+  <p class="punkt underpunkt"><span class="tal">{{.Nummer}})</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "døme"}}
   <p class="døme"><span class="tal">{{.Nummer}},</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "oppslag"}}

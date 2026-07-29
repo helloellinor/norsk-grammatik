@@ -241,7 +241,7 @@ main {
   hyphens: auto; -webkit-hyphens: auto; hyphenate-limit-chars: 5 2 2;
   overflow-wrap: break-word;
 }
-.bolk h1, .bolk h2, .bolk h3, .bolk h4, .bolk h5 {
+.bolk h1, .bolk h2, .bolk h3, .bolk h4, .bolk h5, .bolk h6 {
   font-weight: 400; text-align: center; text-wrap: balance; hyphens: manual;
 }
 
@@ -250,11 +250,14 @@ main {
 .afdeling { display: flex; flex-direction: column; gap: 0.4rem; text-align: center; margin-block: 0 1rem; }
 .afdeling h2 { margin: 0; font-size: 1.5rem; color: var(--blekk-mjuk); }
 .afdeling-namn { margin: 0; font-size: 2.4rem; line-height: 1.2; }
-.seksjon, .underseksjon, .mellomtittel { margin-block: 1.6rem 0.7rem; }
+.seksjon, .storbokstav, .underseksjon, .mellomtittel { margin-block: 1.6rem 0.7rem; }
 .seksjon { font-size: 1.5rem; }
-.underseksjon { font-size: 1.28rem; }
+/* A. B. C. staar mellom romartalet og dei smaa bokstavane, og
+   skal difor lesast som eit hakk over dei - ikkje under. */
+.storbokstav { font-size: 1.38rem; margin-top: 2rem; }
+.underseksjon { font-size: 1.22rem; }
 .mellomtittel { font-size: 1.16rem; color: var(--blekk-mjuk); }
-.seksjon .tal, .underseksjon .tal { color: var(--indigo); }
+.seksjon .tal, .storbokstav .tal, .underseksjon .tal { color: var(--indigo); }
 
 /* Bolkoverskriftene staar mellom to linjer, som eit skilje i satsen. */
 .seksjon, .afdeling-namn { display: flex; align-items: center; justify-content: center; gap: 1.1rem; }
@@ -266,10 +269,10 @@ main {
 /* Nytt avsnitt: litt luft over, og innrykk naar det held fram inne i
    same §. Fyrste avsnittet etter ei overskrift staar flust. */
 .bolk > p + p, .bolk > .paragraf, .bolk > .merknad { margin-top: 0.45rem; }
-.bolk > .paragraf + p:not(.merknad):not(.oppslag):not(.døme),
-.bolk > p:not(.merknad):not(.oppslag) + p:not(.merknad):not(.oppslag):not(.døme),
-.bolk > .merknad + p:not(.merknad):not(.oppslag):not(.døme),
-.bolk > .oppsett + p:not(.merknad):not(.oppslag):not(.døme) { text-indent: 1.4em; }
+.bolk > .paragraf + p:not(.merknad):not(.oppslag):not(.døme):not(.punkt),
+.bolk > p:not(.merknad):not(.oppslag) + p:not(.merknad):not(.oppslag):not(.døme):not(.punkt),
+.bolk > .merknad + p:not(.merknad):not(.oppslag):not(.døme):not(.punkt),
+.bolk > .oppsett + p:not(.merknad):not(.oppslag):not(.døme):not(.punkt) { text-indent: 1.4em; }
 .merknad + .merknad { text-indent: 1.4em; }
 
 /* §-nummera heng i margen: dei er handtaka teksten siterer seg sjølv med. */
@@ -293,6 +296,28 @@ main {
 }
 .merknad + .merknad, .avsnitt + .avsnitt,
 .merknad + .avsnitt, .avsnitt + .merknad { margin-top: -0.5rem; }
+
+/* Punktlister. Boka nummererer dei med parentes og nestar dei i to
+   nivaa: «a)» og «b)» ligg under «3)» i § 363. Talet heng ute i margen
+   og teksten flankerer seg sjølv, slik at alle linene i eit punkt byrjar
+   paa same staden - det er nettopp det som gjer ei liste lesbar som
+   liste. Teksten er framleis utsluttet, av di punkta er heile avsnitt og
+   ikkje korte liner slik døma er. */
+.punkt {
+  display: grid; grid-template-columns: 1.9rem 1fr;
+  gap: 0 0.55rem;
+  text-indent: 0;
+  margin-block: 0.35rem;
+}
+.punkt .tal {
+  text-align: right; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--indigo);
+}
+.punkt > span:last-child { text-align: justify; hyphens: auto; }
+/* Underpunkta ligg eit hakk inn, so nestinga syner seg. */
+.punkt.underpunkt { margin-left: 2.45rem; }
+.bolk > .punkt + .punkt { margin-top: 0.15rem; }
 
 /* Oppstilte døme. I trykket er kvart døme ei line for seg, ikkje eit
    avsnitt: talet heng ute i margen og teksten byrjar paa same staden i
@@ -399,7 +424,8 @@ main {
 .undertitlar a { font-size: 0.75rem; padding-block: 0.22rem; }
 .undertitlar .niva-2 a { padding-left: 2.5rem; }
 .undertitlar .niva-3 a { padding-left: 3.4rem; }
-.undertitlar .niva-4 a { padding-left: 4.2rem; color: color-mix(in srgb, var(--blekk-mjuk) 75%, transparent); }
+.undertitlar .niva-4 a { padding-left: 4.2rem; }
+.undertitlar .niva-5 a { padding-left: 5rem; color: color-mix(in srgb, var(--blekk-mjuk) 75%, transparent); }
 .undertitlar a[aria-current="true"] { color: var(--indigo); border-left-color: var(--indigo); }
 
 /* -- 8  APPARATET: linja, lukene, folden --------------------------- */
@@ -432,9 +458,9 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   margin: 0 auto;
 }
 .rift.open { grid-template-rows: 1fr; }
-/* Ligg rifta føre arket, staar lufta main held mot kanten imellom. Ho
-   blir trekt bort, so opninga kjem like under linja her ògso. */
-.rift.over { margin-top: calc(-1 * var(--sidemarg)); }
+/* Ligg rifta føre arket, blir ho staaande der arket byrjar - altso under
+   lufta mellom stonga og arkkanten, ikkje inntil stonga. Luka skal koma
+   fram frå ein stad, ikkje ut av ingenting. */
 /* Luka fekk ei eiga rullehøgd att. Ho hadde max-height medan ho laag
    fast; i flyten voks ho fritt, og forkortingslista med sine 45 rader
    skauv den nedre arkhelvta fleire skjermhøgder ned - so maatte ein

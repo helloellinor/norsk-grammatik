@@ -142,10 +142,15 @@
     if (!ark) { (innhald || heim).appendChild(ny); }
     else if (ark.getBoundingClientRect().top >= tl) {
       // Heile arket ligg under linja - lesaren staar over papiret. Daa
-      // er det ingenting aa rive, og luka legg seg føre arket. Klassa
-      // trekkjer bort lufta main held mot kanten.
+      // er det ingenting aa rive, og luka legg seg føre arket: nett der
+      // arkkanten var, under lufta mot stonga. Ho blir staaande der,
+      // utan retting - blir ho dregen heilt opp til stonga i staden, ser
+      // det ut som ho kjem ut av ingenting.
       ny.className += " over";
       ark.parentNode.insertBefore(ny, ark);
+      rift = ny;
+      requestAnimationFrame(function () { ny.classList.add("open"); });
+      return;
     } else {
       var i = delepunkt(ark, tl);
       var nedre = document.createElement("section");

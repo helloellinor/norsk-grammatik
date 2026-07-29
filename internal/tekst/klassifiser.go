@@ -97,9 +97,34 @@ func Klassifiser(inn []Blokk) []Blokk {
 			b.Slag, b.Nummer = Oppslag, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
-		case !framhald && erKort(t) && reUnderseks.MatchString(t):
+		// Utheving maa krevjast her. «F. Ex. njota, Præſ. nyt; ...» er
+		// kort nok og passar mønsteret, men er brødtekst; overskriftene
+		// staar utheva, og det er det same signalet boka merkjer alle
+		// dei andre overskriftene sine med.
+		case !framhald && erKort(t) && heiltUtheva(b) && reStorbokst.MatchString(t):
+			m := reStorbokst.FindStringSubmatch(t)
+			b.Slag, b.Nummer, b.Tittel = Storbokstav, m[1], m[2]
+
+		// Utheving, ikkje lengd. Boka merkjer overskriftene sine med
+		// kursiv eller halvfeit: 24 av dei passar mønsteret og staar
+		// utheva, 5 passar utan aa vera utheva - og dei fem er
+		// listepunkt. Det var lengda som gjorde «b) Hardangerſk.
+		// Fleertal af Maſk. har `ar'; Fl. af Fe-» til ei overskrift og
+		// reiv ordet Feminin i to. Ingen ekte overskrift er lengre enn
+		// grensa, so ho tapte vi ingenting paa aa sleppe.
+		case !framhald && heiltUtheva(b) && reUnderseks.MatchString(t):
 			m := reUnderseks.FindStringSubmatch(t)
 			b.Slag, b.Nummer, b.Tittel = Underseksjon, m[1], m[2]
+
+		case !framhald && reListepunkt.MatchString(t):
+			m := reListepunkt.FindStringSubmatch(t)
+			b.Slag, b.Nummer = Listepunkt, m[1]
+			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
+
+		case !framhald && reUnderpunkt.MatchString(t):
+			m := reUnderpunkt.FindStringSubmatch(t)
+			b.Slag, b.Nummer = Underpunkt, m[1]
+			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
 		// Oppstilte døme. Kvart døme staar som si eiga blokk i kjelda og
 		// er ei line for seg i trykket; utan eige slag rann dei saman til
@@ -120,9 +145,7 @@ func Klassifiser(inn []Blokk) []Blokk {
 		// Her blir framhaldet limt inn i blokka føre.
 		case framhald:
 			b.Slag = Brødtekst
-			n := len(ut) - 1
-			ut[n].Stumpar = append(ut[n].Stumpar, Stump{Tekst: " "})
-			ut[n].Stumpar = append(ut[n].Stumpar, b.Stumpar...)
+			limInn(ut, b.Stumpar)
 			continue
 
 		// Boka uthevar overskriftene: Afdeling-namna er halvfeite,
@@ -142,6 +165,32 @@ func Klassifiser(inn []Blokk) []Blokk {
 	}
 
 	return ut
+}
+
+// limInn skøyter eit framhald paa blokka føre. Endar ho paa bindestrek,
+// er ordet delt av eit sideskift - «om-» og «trent» - og daa skal streken
+// bort og ingen mellomrom setjast inn. Utan dette stod det «om- trent» i
+// teksten, 71 stader i verket. Alle 71 er ekte orddelingar; den einaste
+// som saag ut som ein hengjande bindestrek, «der-» + «til», er ordet
+// dertil.
+func limInn(ut []Blokk, nye []Stump) {
+	n := len(ut) - 1
+	delt := false
+	for i := len(ut[n].Stumpar) - 1; i >= 0; i-- {
+		r := []rune(ut[n].Stumpar[i].Tekst)
+		if len(r) == 0 {
+			continue
+		}
+		if r[len(r)-1] == '-' {
+			ut[n].Stumpar[i].Tekst = string(r[:len(r)-1])
+			delt = true
+		}
+		break
+	}
+	if !delt {
+		ut[n].Stumpar = append(ut[n].Stumpar, Stump{Tekst: " "})
+	}
+	ut[n].Stumpar = append(ut[n].Stumpar, nye...)
 }
 
 // heiltUtheva seier om heile blokka staar utheva - kursiv eller
@@ -171,8 +220,14 @@ func heldFramFrå(ut []Blokk) bool {
 	return n >= 0 && kanHaldeFram(ut[n].Slag) && heldFram(ut[n].Tekst())
 }
 
+// Eit sideskift kan dele kva som helst av lause tekstblokker - ògso eit
+// listepunkt. «b) Hardangerſk ... Fl. af Fe-» i § 363 er nettopp det.
 func kanHaldeFram(s Bolkslag) bool {
-	return s == Brødtekst || s == Paragraf || s == Merknad
+	switch s {
+	case Brødtekst, Paragraf, Merknad, Listepunkt, Underpunkt:
+		return true
+	}
+	return false
 }
 
 // skjerFramme fjernar dei n fyrste teikna, som ved eit §-nummer vi alt

@@ -95,10 +95,12 @@ func titlarMedInnhald(d *Del) []Peikar {
 		switch b.Slag {
 		case Seksjon:
 			nivå = 2
-		case Underseksjon:
+		case Storbokstav:
 			nivå = 3
-		case Mellomtittel:
+		case Underseksjon:
 			nivå = 4
+		case Mellomtittel:
+			nivå = 5
 		default:
 			continue
 		}
@@ -111,13 +113,13 @@ func titlarMedInnhald(d *Del) []Peikar {
 		// I registeret høyrer berre dei nummererte heime - dei
 		// unummererte er overskrifter i teksten, ikkje punkt ein blar
 		// etter - og berre dei som faktisk har tekst under seg.
-		if b.Nummer == "" || (nivå > 2 && !harTekstUnder(d.Blokker[i+1:])) {
+		if b.Nummer == "" || (nivå > 2 && !harInnhald(d.Blokker[i+1:], nivå)) {
 			continue
 		}
 		tittel := b.Tittel
 		if b.Nummer != "" {
 			skil := ") "
-			if nivå == 2 {
+			if nivå == 2 || b.Slag == Storbokstav {
 				skil = ". "
 			}
 			tittel = b.Nummer + skil + b.Tittel
@@ -127,17 +129,43 @@ func titlarMedInnhald(d *Del) []Peikar {
 	return ut
 }
 
-// harTekstUnder ser om det kjem tekst før neste overskrift.
-func harTekstUnder(etter []Blokk) bool {
+// harInnhald ser om overskrifta har noko under seg før neste overskrift
+// paa same eller høgare nivaa - anten brødtekst, eller ei overskrift eit
+// hakk lenger ned. Det siste maa vera med: «A. Afledede Subſtantiver»
+// har ikkje ei einaste line tekst under seg, berre «a) Subſt. af Verbum»
+// og syskena hennar - og med ein rein tekstprøve fall difor heile det
+// mellomste nivaaet ut av registeret.
+func harInnhald(etter []Blokk, nivå int) bool {
 	for _, b := range etter {
+		if n := overskriftsnivå(b.Slag); n > 0 {
+			if n <= nivå {
+				return false
+			}
+			return true
+		}
 		switch b.Slag {
-		case Underseksjon, Mellomtittel, Seksjon, Afdeling:
-			return false
-		case Brødtekst, Paragraf, Merknad, Avsnitt, Oppsett, Oppslag, Døme:
+		case Brødtekst, Paragraf, Merknad, Avsnitt, Oppsett, Oppslag, Døme, Listepunkt, Underpunkt:
 			return true
 		}
 	}
 	return false
+}
+
+// overskriftsnivå gjev nivaaet til ei overskrift, og 0 for alt anna.
+func overskriftsnivå(s Bolkslag) int {
+	switch s {
+	case Afdeling:
+		return 1
+	case Seksjon:
+		return 2
+	case Storbokstav:
+		return 3
+	case Underseksjon:
+		return 4
+	case Mellomtittel:
+		return 5
+	}
+	return 0
 }
 
 // utanTomme fjernar bolkar som korkje har tekst eller underbolkar. Boka

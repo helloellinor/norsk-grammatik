@@ -183,11 +183,27 @@ func settInnLangS(tekst string, leks leksikon, stat *statistikk) string {
 					continue
 				}
 				stat.SIalt++
-				if j != len(ord)-1 {
-					ut[start+j] = langS
-					stat.SVartLang++
-					stat.RegelGavLangS[string(ord)]++
+				// Rund s i slutten av eit ordledd, lang ſ elles. Vi ser
+				// ikkje ordledda, men den eine staden dei alltid røper
+				// seg er dobbel s inne i ordet: han deler seg over eit
+				// stavingsskil, so den fyrste endar eit ledd og skal
+				// vera rund. Trykken er eintydig - 1002 sſ mot 9 ſſ, og
+				// alle ni er OCR som har lese frakturens «ll» som «ſſ»
+				// (Endeſſer for Endelſer).
+				//
+				// I ordslutt er det omvendt: der staar dobbel s som ſs,
+				// 131 mot 6 i trykken, og Laſs staar der sjølv. Difor
+				// held den fyrste seg lang naar den andre er siste
+				// teiknet - elles vart Vidarlaſs til Vidarlass.
+				if j == len(ord)-1 {
+					continue
 				}
+				if ord[j+1] == 's' && j+1 != len(ord)-1 {
+					continue
+				}
+				ut[start+j] = langS
+				stat.SVartLang++
+				stat.RegelGavLangS[string(ord)]++
 			}
 		}
 	}
@@ -252,7 +268,7 @@ func velVanlegaste(tal map[string]map[string]int) map[string]oppslag {
 		beste, besteTal, ialt := "", 0, 0
 		for form, n := range former {
 			ialt += n
-			if n > besteTal {
+			if n > besteTal || (n == besteTal && betre(form, beste)) {
 				beste, besteTal = form, n
 			}
 		}
@@ -264,6 +280,27 @@ func velVanlegaste(tal map[string]map[string]int) map[string]oppslag {
 		}
 	}
 	return ut
+}
+
+// betre skil to skrivemaatar som er like vanlege i trykken. Utan dette
+// avgjorde iterasjonsrekkjefylgja i ei Go-map kven som vann, og ho er
+// tilfeldig: to køyringar paa same inndata gav 11-12 ulike teikn, so ord
+// som «skule» og «ſkule» vippa mellom bygg. Teksten var ikkje den same
+// to gonger.
+//
+// Ved likt tal vel vi forma med flest lange ſ. Trykken set ſ i 74 % av
+// alle s-plassar, og OCR-en tek lettare feil av ſ som s enn omvendt -
+// den tynne tverrstreken forsvinn. Slike ord er alt merkte usikre i
+// rapporten, so eit menneske kan sjaa over dei.
+func betre(ny, gamal string) bool {
+	if gamal == "" {
+		return true
+	}
+	nyL, gamalL := strings.Count(ny, string(langS)), strings.Count(gamal, string(langS))
+	if nyL != gamalL {
+		return nyL > gamalL
+	}
+	return ny < gamal
 }
 
 // sMønster gjev ein streng like lang som ordet, med ſ eller s på kvar
