@@ -12,7 +12,7 @@
     ui: "antiqua",
     ligatur: "trykk",
     storleik: "vanleg",
-    form: "fri",
+    form: "bokside",
     tema: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
   };
   try {

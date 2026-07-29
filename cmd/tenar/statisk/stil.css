@@ -43,6 +43,7 @@
   --mål: 34rem;
   --register: 17rem;
   --grunn: 1.3125rem;
+  --sidemarg: 1.5rem;
   /* Høgda på den faste linja øvst. Alt ein hoppar til må halde seg
      klar av henne, elles gøymer ho fyrste linja. */
   --toppline: 3.9rem;
@@ -262,14 +263,25 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .lastar.htmx-request { opacity: 1; }
 
 main {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--grunn);
+}
+
+/* Bolken er arket. Kvar overbolk - Tittelblad, Føreord, ei Afdeling -
+   staar paa sitt eige ark, so eit skifte er eit fysisk sideskifte og
+   ikkje berre luft. */
+.bolk {
   max-width: var(--mål);
   width: 100%;
   margin: 0 auto;
-  padding: 3rem 1.5rem 5rem;
+  padding: 3rem var(--sidemarg) 5rem;
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
-  font-size: var(--grunn);
 }
 
 /* Utslutting som i boka. Fraktursats var alltid utslutta, og det krev
@@ -529,8 +541,6 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 .stilling, .luke {
   border-top: 1px solid var(--linje);
   background: var(--uthev);
-  max-height: calc(100vh - 8rem);
-  overflow-y: auto;
 }
 .stilling {
   padding: 1.25rem 1.5rem 1.5rem;
@@ -594,16 +604,21 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 
 /* ---- Bokside: papiret rundt satsen -------------------------------- */
-:root[data-form="bokside"] main {
+:root[data-form="bokside"] .bolk {
   max-width: var(--papirbreidd);
-  padding-inline: 14.4%;          /* snittet av 14,7 og 14,1 */
+  /* 14,4 % av papirbreidda - snittet av dei maalte 14,7 og 14,1.
+     Sett i em og ikkje i prosent, av di prosent paa folden ville løyst
+     seg mot innhaldsboksen og ikkje mot heile arket. */
+  --sidemarg: 5.724em;
   padding-block: 6.9em 7.8em;     /* 10,8 % og 12,3 % av sidehøgda */
   background: var(--papir);
-  box-shadow: 0 0 0 1px var(--linje), 0 1px 14px rgb(0 0 0 / 0.05);
+  box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.07);
   line-height: 1.52;              /* originalen er 9/10,5 pt, altfor tett
                                      for skjerm - dette er nærmaste steg */
+  margin-bottom: 2.5rem;
 }
-:root[data-form="bokside"] .lesefelt { padding: 2rem 1rem 4rem; background: var(--uthev); }
+:root[data-form="bokside"] .lesefelt { background: var(--uthev); }
+:root[data-form="bokside"] main { padding: 2.5rem 1rem 4rem; }
 :root[data-form="bokside"] .oppsett { width: 100%; margin-inline: 0; }
 :root[data-form="bokside"] .saum .ornament {
   font-size: 1.1rem;
@@ -703,7 +718,15 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
    som ei brett i papiret. Rullar ein forbi henne, fell ho att. */
 /* Folden er ikkje eit panel oppaa sida - det er laget bak henne. Papiret
    er rive opp, og kantane kastar skugge ned i opninga. */
+/* Folden river arket tvers over: ho gaar heilt ut i kanten av papiret,
+   so det ikkje blir staaande ein kvit renning paa kvar side, og ho har
+   ingen eigen rullestong - opninga er so stor som innhaldet krev. */
 .i-teksten {
+  margin-inline: calc(-1 * var(--sidemarg));
+  padding-inline: var(--sidemarg);
+  max-height: none;
+  overflow: visible;
+  border-top: none;
   border-block: none;
   border-radius: 0;
   margin-block: 0;
@@ -717,7 +740,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   content: "";
   display: block;
   height: 1px;
-  margin-inline: -1.5rem;
+  margin-inline: calc(-1 * var(--sidemarg));
   background: var(--rivekant);
 }
 .i-teksten::before { margin-bottom: 1.1rem; }
