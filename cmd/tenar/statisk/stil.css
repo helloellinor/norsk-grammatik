@@ -234,6 +234,9 @@ body {
   z-index: 10;
   background: var(--skrivebord);
   border-bottom: 1px solid var(--linje);
+  /* Arket glir inn under linja. Utan skugge saag det ut til aa bli kappa
+     der; med han les linja som eit lag over papiret. */
+  box-shadow: 0 7px 13px -7px rgb(0 0 0 / 0.26);
 }
 .styring {
   display: flex;
