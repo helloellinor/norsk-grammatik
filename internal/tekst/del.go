@@ -46,22 +46,9 @@ func DelOpp(blokker []Blokk) []Del {
 		}
 		d := &delar[len(delar)-1]
 
-		switch b.Slag {
-		case Underseksjon, Mellomtittel:
-			b.Ankar = fmt.Sprintf("t%d-%d", d.Id, len(d.Titlar))
-			nivå := 4
-			if b.Slag == Underseksjon {
-				nivå = 3
-			}
-			tittel := b.Tittel
-			if b.Nummer != "" {
-				tittel = b.Nummer + ") " + b.Tittel
-			}
-			d.Titlar = append(d.Titlar, Peikar{Ankar: b.Ankar, Tittel: tittel, Nivå: nivå})
-		case Paragraf:
+		if b.Slag == Paragraf {
 			d.Paragr = append(d.Paragr, b.Nummer)
 		}
-
 		d.Blokker = append(d.Blokker, b)
 	}
 
@@ -94,7 +81,51 @@ func DelOpp(blokker []Blokk) []Del {
 		}
 	}
 
+	for i := range delar {
+		delar[i].Titlar = titlarMedInnhald(&delar[i])
+	}
 	return utanTomme(delar)
+}
+
+// titlarMedInnhald plukkar ut dei overskriftene ein kan hoppe til: dei
+// som faktisk har tekst under seg. Linjene paa tittelbladet - forfattar,
+// verk, stad - er sette som overskrifter i Word-fila, men det staar
+// ingenting under dei, so dei høyrer ikkje heime i navigasjonen.
+func titlarMedInnhald(d *Del) []Peikar {
+	var ut []Peikar
+	for i, b := range d.Blokker {
+		if b.Slag != Underseksjon && b.Slag != Mellomtittel {
+			continue
+		}
+		if !harTekstUnder(d.Blokker[i+1:]) {
+			continue
+		}
+		ankar := fmt.Sprintf("t%d-%d", d.Id, len(ut))
+		d.Blokker[i].Ankar = ankar
+		nivå := 4
+		if b.Slag == Underseksjon {
+			nivå = 3
+		}
+		tittel := b.Tittel
+		if b.Nummer != "" {
+			tittel = b.Nummer + ") " + b.Tittel
+		}
+		ut = append(ut, Peikar{Ankar: ankar, Tittel: tittel, Nivå: nivå})
+	}
+	return ut
+}
+
+// harTekstUnder ser om det kjem tekst før neste overskrift.
+func harTekstUnder(etter []Blokk) bool {
+	for _, b := range etter {
+		switch b.Slag {
+		case Underseksjon, Mellomtittel, Seksjon, Afdeling:
+			return false
+		case Brødtekst, Paragraf, Merknad, Avsnitt, Oppsett, Oppslag:
+			return true
+		}
+	}
+	return false
 }
 
 // utanTomme fjernar bolkar som korkje har tekst eller underbolkar. Boka

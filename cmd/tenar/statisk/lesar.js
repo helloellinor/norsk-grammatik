@@ -84,11 +84,29 @@
 
   var stilling = document.getElementById("stilling");
   var opna = document.getElementById("opnastilling");
-  opna.addEventListener("click", function () {
-    var open = stilling.hasAttribute("hidden");
+
+  function visMeny(open) {
     if (open) { stilling.removeAttribute("hidden"); } else { stilling.setAttribute("hidden", ""); }
     opna.setAttribute("aria-expanded", String(open));
     opna.setAttribute("aria-pressed", String(open));
+  }
+
+  opna.addEventListener("click", function (e) {
+    e.stopPropagation();
+    visMeny(stilling.hasAttribute("hidden"));
+  });
+
+  // Ei kontekstmeny lukkar seg naar ein tek i noko anna, eller trykkjer
+  // escape. Klikk inne i menyen skal derimot ikkje lukke henne.
+  stilling.addEventListener("click", function (e) { e.stopPropagation(); });
+  document.addEventListener("click", function () {
+    if (!stilling.hasAttribute("hidden")) { visMeny(false); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !stilling.hasAttribute("hidden")) {
+      visMeny(false);
+      opna.focus();
+    }
   });
 
   stilling.addEventListener("click", function (e) {

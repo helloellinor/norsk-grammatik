@@ -204,7 +204,10 @@ body {
 .register .aktiv > a { color: var(--indigo); border-left-color: var(--indigo); background: var(--uthev); }
 
 /* Lesefelt */
-.lesefelt { display: flex; flex-direction: column; min-width: 0; }
+/* Ingenting inne i lesefeltet faar sprengje breidda: gjer det det, blir
+   sida rullande sidevegs, og topplinja - som er sticky inne her - fylgjer
+   ikkje med. Breie oppsett var synderen. */
+.lesefelt { display: flex; flex-direction: column; min-width: 0; overflow-x: clip; }
 
 .styring {
   display: flex;
@@ -277,7 +280,15 @@ strong { font-weight: 600; }
 .afdeling h2 { margin: 0; font-size: 1.5rem; font-weight: 400; color: var(--blekk-mjuk); text-wrap: balance; }
 .afdeling-namn { margin: 0; font-size: 2.4rem; line-height: 1.2; text-wrap: balance; }
 
-.seksjon, .underseksjon, .mellomtittel { margin: 1.4rem 0 0; font-weight: 400; text-wrap: balance; text-align: center; }
+/* Overskrifter treng luft under seg, ikkje berre over: elles klistrar
+   dei seg til fyrste linja i avsnittet under. */
+.seksjon, .underseksjon, .mellomtittel {
+  margin: 1.6rem 0 0.7rem;
+  font-weight: 400;
+  text-wrap: balance;
+  text-align: center;
+}
+.afdeling { margin-bottom: 1rem; }
 .seksjon { font-size: 1.5rem; }
 .underseksjon { font-size: 1.28rem; }
 .mellomtittel { font-size: 1.16rem; color: var(--blekk-mjuk); }
@@ -308,8 +319,11 @@ strong { font-weight: 600; }
 /* Breie oppsett får bryte ut av brødtekstmålet når det er rom, slik dei
    gjer i boka. Dei skal aldri gje sidescroll: kolonnane finn si eiga
    breidd og cellene brekk heller. */
-@media (min-width: 1000px) {
-  .oppsett { width: calc(100% + 9rem); margin-inline: -4.5rem; }
+/* Breie oppsett faar bryte ut av brødtekstmaalet, men berre naar spalta
+   sikkert raadar over rommet: 1200 px minus registeret gjev 928 px, og
+   satsen med utbrotet tek 720. Under det held dei seg innanfor. */
+@media (min-width: 1200px) {
+  .oppsett { width: calc(100% + 8rem); margin-inline: -4rem; }
 }
 .oppsett table {
   width: 100%;
@@ -437,13 +451,24 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 
 /* ---- Visingsval ----------------------------------------------------- */
+/* Visingsmenyen legg seg over teksten som ei kontekstmeny, i staden for
+   aa skuve han nedover. */
+.styring { position: sticky; }
 .stilling {
-  border-bottom: 1px solid var(--linje);
-  padding: 1.25rem 1.5rem 1.5rem;
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 1.5rem;
+  z-index: 20;
+  width: min(23rem, calc(100vw - 2rem));
+  max-height: min(32rem, calc(100vh - 6rem));
+  overflow-y: auto;
+  padding: 1.1rem 1.25rem 1.25rem;
   display: grid;
-  gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  background: var(--uthev);
+  gap: 1.15rem;
+  background: var(--papir);
+  border: 1px solid var(--linje);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.13), 0 1px 3px rgb(0 0 0 / 0.08);
 }
 .stillingsrad { display: flex; flex-direction: column; gap: 0.5rem; }
 .stillingsnamn {
