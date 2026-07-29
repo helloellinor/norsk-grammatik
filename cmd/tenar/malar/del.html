@@ -2,6 +2,9 @@
 
 {{define "del.html"}}
 {{if .Oob}}{{template "register.html" .}}{{end}}
+{{- if and .Forrige (not .Framhald)}}
+<div class="hentar-forrige" data-del="{{.Forrige.Id}}"><span class="hand ornament" aria-hidden="true">&#9758;</span><span class="hand-tekst">les det føre</span></div>
+{{- end}}
 {{- if .Saum}}
 <div class="saum" data-del="{{.Aktiv.Id}}" aria-hidden="true"><span class="ornament">&#10087;</span></div>
 {{- end}}
@@ -56,7 +59,7 @@
   {{- end}}
 {{- end}}
 </section>
-{{- if .Neste}}
+{{- if and .Neste (not .Oppover)}}
 <div class="hentar-neste"
      hx-get="/del/{{.Neste.Id}}?fram=1"
      hx-trigger="revealed"

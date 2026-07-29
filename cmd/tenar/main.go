@@ -37,7 +37,9 @@ type sidedata struct {
 	Aktiv    tekst.Del
 	Oob      bool       // registeret blir bytt ut for seg naar htmx hentar ein del
 	Neste    *tekst.Del // bolken som kjem etter, til samanhengande lesing
-	Framhald bool       // henta av di lesaren rulla hit, ikkje ved eit klikk
+	Forrige  *tekst.Del // bolken føre, so ein kan lesa seg oppover att
+	Framhald bool       // henta av di lesaren rulla nedover hit
+	Oppover  bool       // henta av di lesaren rulla oppover hit
 }
 
 func main() {
@@ -77,7 +79,7 @@ func main() {
 			http.NotFound(w, r)
 			return
 		}
-		vis(w, mal, verk, 0, false, false)
+		vis(w, mal, verk, 0, false, false, false)
 	})
 
 	mux.HandleFunc("GET /del/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -89,8 +91,8 @@ func main() {
 		// htmx ber om berre brotstykket; ein vanleg lenkeklikk eller eit
 		// bokmerke skal framleis gje heile sida.
 		berreDel := r.Header.Get("HX-Request") == "true"
-		framhald := r.URL.Query().Get("fram") == "1"
-		vis(w, mal, verk, id, berreDel, framhald)
+		q := r.URL.Query()
+		vis(w, mal, verk, id, berreDel, q.Get("fram") == "1", q.Get("opp") == "1")
 	})
 
 	// Hopp til ein paragraf utan å vite kva bolk han står i.
@@ -112,15 +114,19 @@ func main() {
 	}
 }
 
-func vis(w http.ResponseWriter, mal *template.Template, verk Verk, id int, berreDel, framhald bool) {
+func vis(w http.ResponseWriter, mal *template.Template, verk Verk, id int, berreDel, framhald, oppover bool) {
 	data := sidedata{
 		Verk:     verk,
 		Aktiv:    verk.Delar[id],
-		Oob:      berreDel && !framhald,
+		Oob:      berreDel && !framhald && !oppover,
 		Framhald: framhald,
+		Oppover:  oppover,
 	}
 	if id+1 < len(verk.Delar) {
 		data.Neste = &verk.Delar[id+1]
+	}
+	if id > 0 {
+		data.Forrige = &verk.Delar[id-1]
 	}
 	namn := "side.html"
 	if berreDel {

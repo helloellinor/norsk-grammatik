@@ -630,7 +630,35 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 @media (prefers-reduced-motion: reduce) {
   .landa { animation: none; background: var(--uthev); }
   .oppsett td { transition: none; }
-  .hentar-neste .hand { animation: none; }
+  .hentar-forrige {
+  min-height: 5.5rem;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--apparat);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blekk-mjuk);
+  opacity: 0.75;
+}
+.hentar-forrige .hand {
+  display: block;
+  font-size: 1.75rem;
+  line-height: 1;
+  transform: rotate(-90deg);
+  animation: vipp-opp 2.4s ease-in-out infinite;
+}
+@keyframes vipp-opp {
+  0%, 100% { transform: rotate(-90deg) translateX(0); }
+  50%      { transform: rotate(-90deg) translateX(0.28rem); }
+}
+.hentar-forrige.hentar .hand { animation: snurr 1.1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .hentar-forrige .hand { animation: none; } }
+
+.hentar-neste .hand { animation: none; }
 }
 
 /* ---- Bokside: papiret rundt satsen -------------------------------- */
@@ -682,6 +710,34 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   color: var(--blekk-mjuk);
   opacity: 0.75;
 }
+.hentar-forrige {
+  min-height: 5.5rem;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--apparat);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blekk-mjuk);
+  opacity: 0.75;
+}
+.hentar-forrige .hand {
+  display: block;
+  font-size: 1.75rem;
+  line-height: 1;
+  transform: rotate(-90deg);
+  animation: vipp-opp 2.4s ease-in-out infinite;
+}
+@keyframes vipp-opp {
+  0%, 100% { transform: rotate(-90deg) translateX(0); }
+  50%      { transform: rotate(-90deg) translateX(0.28rem); }
+}
+.hentar-forrige.hentar .hand { animation: snurr 1.1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .hentar-forrige .hand { animation: none; } }
+
 .hentar-neste .hand {
   display: block;
   font-size: 1.75rem;
