@@ -30,8 +30,6 @@
         <button type="submit">Hopp</button>
       </form>
       <span class="skil"></span>
-      <button id="skrift" type="button" aria-pressed="true"
-              title="Aasen ville halde paa frakturen (§ 384)">Et tu, Antiqua?</button>
       <button id="opnastilling" type="button" aria-expanded="false" aria-controls="stilling">Vising</button>
       <span id="lastar" class="lastar" aria-hidden="true">hentar …</span>
     </div>
@@ -49,10 +47,21 @@
       </div>
 
       <div class="stillingsrad">
+        <span class="stillingsnamn">Skriftform</span>
+        <div class="val">
+          <button id="skrift" type="button" aria-pressed="true"
+                  title="Aasen slo fast at det var tjenligſt at beholde Frakturſkriften (§ 384)">Et tu, Antiqua?</button>
+        </div>
+        <p class="stillingshjelp">Byter heile teksten til antikva med rund s. Aasen slo i
+        § 384 fast at det var «tjenligſt at beholde Frakturſkriften» — so den som trykkjer
+        her, er Brutus.</p>
+      </div>
+
+      <div class="stillingsrad">
         <span class="stillingsnamn">Grenſeſnitt</span>
         <div class="val" role="radiogroup" aria-label="Skrift i grensesnittet">
-          <button type="button" data-ui="grotesk" aria-pressed="true">Grotesk</button>
-          <button type="button" data-ui="antiqua" aria-pressed="false">Antiqua</button>
+          <button type="button" data-ui="antiqua" aria-pressed="true">Antiqua</button>
+          <button type="button" data-ui="grotesk" aria-pressed="false">Grotesk</button>
           <button type="button" data-ui="fraktur" aria-pressed="false">Fraktur</button>
         </div>
         <p class="stillingshjelp">Grotesk skil apparatet skarpast frå Aasens eigen tekst.
@@ -101,7 +110,7 @@
       </div>
     </div>
 
-    <main id="innhald" lang="da">
+    <main id="innhald" lang="da"{{if eq .Aktiv.Id 0}} class="tittelblad"{{end}}>
       {{- template "del.html" .}}
     </main>
 
