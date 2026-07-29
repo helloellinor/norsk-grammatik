@@ -707,9 +707,11 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
    Arket hennar er difor ei deltittelside, slik bøker har, og skal setjast
    som ei: namnet midt paa flata og ikkje øvst med tom side under. */
 .deltittel {
-  min-height: 38vh;
+  min-height: 46vh;
   justify-content: center;
 }
+/* Tittelbladet er ei heil side for seg. */
+:root[data-form="bokside"] .bolk:first-child:has(.tittelark) { min-height: 78vh; }
 
 /* ---- Tittelarket --------------------------------------------------- */
 /* Fyrste møtet med verket. Sett som eit titelblad, ikkje som ei rekkje
