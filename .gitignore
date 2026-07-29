@@ -1,11 +1,13 @@
 .DS_Store
 
-# Kjeldemateriale (store binærfiler, held vi utanfor git)
+# Kjeldemateriale og avleidde OCR-data (store binærfiler/genererte filer, held vi utanfor git)
 /bøker/*.pdf
 /bøker/*.png
 /bøker/*.doc
 /bøker/*.docx
 /bøker/ut*.txt
+/bøker/sider/
+/bøker/norsk_grammatik.txt
 
 # Tredjeparts-klon, ikkje ein del av dette prosjektet
 /tesseract-training-fraktur/
