@@ -288,6 +288,25 @@ strong { font-weight: 600; }
   text-wrap: balance;
   text-align: center;
 }
+
+/* Bolkoverskriftene staar mellom to linjer, som eit skilje i satsen.
+   Skrifta og storleiken er overskrifta si eiga - linjene er berre
+   ramma. */
+.seksjon, .afdeling-namn {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  justify-content: center;
+}
+.seksjon::before, .seksjon::after,
+.afdeling-namn::before, .afdeling-namn::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--linje);
+}
+.afdeling-namn { gap: 1.4rem; }
+.seksjon .tittel { flex: 0 1 auto; }
 .afdeling { margin-bottom: 1rem; }
 .seksjon { font-size: 1.5rem; }
 .underseksjon { font-size: 1.28rem; }
@@ -543,30 +562,16 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 /* ---- Saumen mellom bolkane ---------------------------------------- */
 /* Bolkane kjem etter kvarandre i eitt renn, men overgangen skal kjennast.
    Difor eit tydeleg skilje med luft rundt, og bolknamnet stort etter. */
+/* Saumen er sjølve sideskiftet: eit aldusblad og god luft. Namnet paa
+   bolken staar i overskrifta rett under, so det skal ikkje staa her òg. */
 .saum {
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  margin: 3.5rem 0 2.5rem;
-  color: var(--blekk-mjuk);
-}
-.saum::before, .saum::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--linje);
-}
-.saum span {
-  font-family: var(--apparat);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  justify-content: center;
+  margin: 4rem 0 1rem;
 }
 .saum .ornament {
-  font-size: 0.9rem;
-  letter-spacing: 0;
-  text-transform: none;
-  color: color-mix(in srgb, var(--blekk-mjuk) 70%, transparent);
+  font-size: 1.1rem;
+  color: color-mix(in srgb, var(--blekk-mjuk) 55%, transparent);
 }
 /* Ornamenta staar alltid i Garamond: det er den einaste av skriftene
    vaare som har manicule og aldusblad. Frakturskriftene har dei ikkje. */
