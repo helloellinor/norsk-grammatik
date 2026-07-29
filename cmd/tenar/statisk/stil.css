@@ -402,6 +402,11 @@ strong { font-weight: 600; }
 }
 
 p { margin: 0; }
+/* Nytt avsnitt treng litt meir luft over seg enn den jamne avstanden
+   mellom blokkene gjev. */
+main > p + p,
+main > .paragraf,
+main > .merknad { margin-top: 0.45rem; }
 
 footer {
   max-width: var(--mål);

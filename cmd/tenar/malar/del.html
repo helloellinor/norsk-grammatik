@@ -1,4 +1,4 @@
-{{define "stumpar"}}{{range .}}{{if .Kursiv}}<em>{{.Tekst}}</em>{{else if .Feit}}<strong>{{.Tekst}}</strong>{{else}}{{.Tekst}}{{end}}{{end}}{{end}}
+{{define "stumpar"}}{{range .}}{{if .Kursiv}}<em>{{rom .Tekst}}</em>{{else if .Feit}}<strong>{{rom .Tekst}}</strong>{{else}}{{rom .Tekst}}{{end}}{{end}}{{end}}
 
 {{define "del.html"}}
 {{if .Oob}}{{template "register.html" .}}{{end}}

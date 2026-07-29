@@ -65,7 +65,9 @@ func main() {
 	}
 	log.Printf("%d delar, %d paragrafar tolka frå %s", len(verk.Delar), len(indeks), *inn)
 
-	mal := template.Must(template.ParseFS(malar, "malar/*.html"))
+	mal := template.Must(template.New("").Funcs(template.FuncMap{
+		"rom": tekst.Setningsrom,
+	}).ParseFS(malar, "malar/*.html"))
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /statisk/", http.FileServer(http.FS(statisk)))
