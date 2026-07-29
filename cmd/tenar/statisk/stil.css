@@ -550,11 +550,22 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   border-top: 1px solid var(--linje);
   background: var(--skrivebord);
 }
+/* Menyen maa ikkje flytte seg naar ein endrar det han styrer. Skrift,
+   storleik og grensesnitt slaar gjennom paa alt apparatet - òg paa
+   knappane her - so ein knapp kunne skli unna under peikaren i det ein
+   trykte. Alt i menyen staar difor i faste rem og i ei fast skrift. */
 .stilling {
+  font-family: var(--grotesk);
+  font-size: 1rem;
   padding: 1.25rem 1.5rem 1.5rem;
   display: grid;
-  gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 1.25rem 2rem;
+  /* Faste spalter i rem, ikkje flytande. Storleik-valet endrar --grunn,
+     og papirbreidda staar i em av same storleik - so arket, og med det
+     panelet, skifta breidd og knappane flytta seg. Med faste spalter
+     ligg utvalet i ro same kva ein vel. */
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 15rem));
+  justify-content: center;
 }
 .luke {
   padding: 1.25rem 1.5rem 1.5rem;
@@ -566,6 +577,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 .luke p:last-child { margin-bottom: 0; }
 .luke strong { color: var(--blekk); font-weight: 600; }
 .stillingsrad { display: flex; flex-direction: column; gap: 0.5rem; }
+.stilling button { font-family: var(--grotesk); font-size: 0.8125rem; }
 .stillingsnamn {
   font-size: 0.6875rem;
   letter-spacing: 0.09em;
@@ -573,6 +585,13 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   color: var(--blekk-mjuk);
 }
 .val { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+/* Knappane syner kvar si eiga skrift, som ein prøve. Storleiken er fast
+   for kvar av dei, so utvalet ligg i ro. */
+.stilling [data-skrift="maguntia"], .stilling [data-ui="fraktur"] { font-family: "Maguntia", serif; font-size: 0.95rem; }
+.stilling [data-skrift="cook"] { font-family: "Cook", serif; font-size: 0.95rem; }
+.stilling [data-skrift="grenze"] { font-family: "Grenze", serif; font-size: 0.95rem; }
+.stilling [data-skrift="antiqua"], .stilling [data-ui="antiqua"] { font-family: "Garamond", serif; font-size: 0.875rem; }
 .meme { font-style: normal; color: var(--indigo); }
 .meme em { font-style: italic; }
 .stillingshjelp {
@@ -755,14 +774,12 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   border-radius: 0;
   margin-block: 0;
   background: var(--skrivebord);
-  /* Kantane av det oppdelte arket kastar skugge ned i opninga. */
-  box-shadow:
-    inset 0 14px 16px -12px rgb(0 0 0 / 0.55),
-    inset 0 -14px 16px -12px rgb(0 0 0 / 0.55);
   animation: fald 0.22s ease-out;
 }
-/* Sjølve snittflatene: den nedre kanten av arket over, og den øvre av
-   arket under. */
+/* Snittflatene: den nedre kanten av arket over, og den øvre av arket
+   under. Skuggen høyrer til dei - det er papirkantane som kastar han ned
+   paa skrivebordet - so han fell utover fraa kanten og ikkje innover i
+   opninga. */
 .i-teksten::before, .i-teksten::after {
   content: "";
   display: block;
@@ -770,6 +787,8 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   margin-inline: calc(-1 * var(--fold-ut) - 1px);
   background: var(--rivekant);
 }
+.i-teksten::before { box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
+.i-teksten::after { box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
 .i-teksten::before { margin-bottom: 1.1rem; }
 .i-teksten::after { margin-top: 1.1rem; }
 @keyframes fald {
