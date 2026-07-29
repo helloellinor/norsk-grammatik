@@ -38,10 +38,12 @@
   --indigo: #2B3A67;
   --linje: #E4DFD6;
   --uthev: #F1ECE2;
+  --stong: #FAF7F1;
 
   --grunn: 1.3125rem;
   --register: 17rem;
   --marg: 1.5rem;
+  --toppline: 3.95rem;   /* høgda paa den faste linja */
 
   /* Satsbreidda: 90 mm = 255 pt ~ 28,3 em, maalt paa faksimilen. Rekna
      ut frå grunnstorleiken so ho fylgjer med naar ein endrar han, og i
@@ -59,18 +61,18 @@
   :root {
     --papir: #2A261D; --skrivebord: #0A0907; --rivekant: #4A4438;
     --blekk: #EDE8DE; --blekk-mjuk: #A29A8D; --indigo: #93A6DC;
-    --linje: #3D382F; --uthev: #322E24;
+    --linje: #3D382F; --uthev: #322E24; --stong: #17150F;
   }
 }
 :root[data-theme="dark"] {
   --papir: #2A261D; --skrivebord: #0A0907; --rivekant: #4A4438;
   --blekk: #EDE8DE; --blekk-mjuk: #A29A8D; --indigo: #93A6DC;
-  --linje: #3D382F; --uthev: #322E24;
+  --linje: #3D382F; --uthev: #322E24; --stong: #17150F;
 }
 :root[data-theme="light"] {
   --papir: #FCFBF9; --skrivebord: #E7E1D4; --rivekant: #CFC7B6;
   --blekk: #1A1714; --blekk-mjuk: #57514A; --indigo: #2B3A67;
-  --linje: #E4DFD6; --uthev: #F1ECE2;
+  --linje: #E4DFD6; --uthev: #F1ECE2; --stong: #FAF7F1;
 }
 
 /* Val lesaren gjer. Berre desse rører tokena over. */
@@ -127,15 +129,31 @@ p { margin: 0; }
 
 .lesefelt { min-width: 0; display: flex; flex-direction: column; overflow-x: clip; }
 
+/* Linja er sitt eige materiale - korkje ark eller skrivebord, men
+   reiskapen ein arbeider med. Ho ligg øvst og kastar skugge ned paa
+   begge. Visingsluka høyrer derimot til skrivebordet, og kjem fram naar
+   arket blir rive opp. */
 .topp {
   position: sticky; top: 0; z-index: 10;
-  background: var(--skrivebord);
+  background: color-mix(in srgb, var(--stong) 92%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--linje);
-  /* Arket glir inn under linja; skuggen gjer henne til eit lag over. */
   box-shadow: 0 7px 13px -7px rgb(0 0 0 / 0.26);
 }
 
-main { min-width: 0; display: flex; flex-direction: column; padding-bottom: 4rem; font-size: var(--grunn); }
+/* Papiret ligg over luka og dekkjer henne. Naar ho opnar seg, glir
+   papiret ned og avdekkjer skrivebordet under - det er sjølve rørsla.
+   Difor treng main ein eigen bakgrunn: utan han ville luka skine gjennom
+   gapa mellom arka. */
+main {
+  min-width: 0; display: flex; flex-direction: column;
+  padding-bottom: 4rem; font-size: var(--grunn);
+  position: relative; z-index: 2;
+  background: var(--skrivebord);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body.luke-open main { transform: translateY(var(--luke-h, 0px)); }
 
 /* Arket. Fyller leseflata; satsen ligg midt paa det. */
 .bolk {
@@ -297,7 +315,26 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 
 /* Lukene ligg i den faste blokka, so dei foldar seg ut rett under linja
    kvar ein enn er paa sida. */
-.stilling, .luke { border-top: 1px solid var(--linje); background: var(--skrivebord); }
+/* Lukene ligg fast under linja og over papiret: dei er skrivebordet ein
+   ser gjennom rifta. Dei blir ikkje flytte i dokumentet - berre synte og
+   gøymde - so dei staar same staden kvar gong. */
+.stilling, .luke {
+  position: fixed;
+  top: var(--toppline);
+  left: var(--register);
+  right: 0;
+  z-index: 1;
+  max-height: calc(100vh - var(--toppline));
+  overflow-y: auto;
+  background: var(--skrivebord);
+}
+/* Rivekantane: papiret er opna, og kantane kastar skugge ned i opninga. */
+.stilling::before, .luke::before,
+.stilling::after, .luke::after {
+  content: ""; display: block; height: 1px; background: var(--rivekant);
+}
+.stilling::before, .luke::before { box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
+.stilling::after, .luke::after { box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
 .luke { padding: 1.25rem 1.5rem 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
 .luke p { margin: 0 0 0.8rem; max-width: 46rem; }
 .luke p:last-child { margin-bottom: 0; }
@@ -328,22 +365,29 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .stillingsrad .val { grid-column: 2; }
 .stillingsrad .stillingshjelp { grid-column: 2; }
 .stillingsnamn { justify-self: end; text-align: right; font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--blekk-mjuk); }
+/* Fraktur har ingen versaltradisjon for etikettar - store bokstavar blir
+   tunge og vanskelege aa lesa. Boka sjølv set punktum etter slike
+   nemningar, so det gjer vi òg. */
+:root[data-ui="fraktur"] .stillingsnamn,
+:root[data-ui="fraktur"] .register .undertitl,
+:root[data-ui="fraktur"] .tittelark-fot p {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.8125rem;
+}
+:root[data-ui="fraktur"] .stillingsnamn::after,
+:root[data-ui="fraktur"] .tittelark-fot p::after { content: "."; }
 .val { display: flex; gap: 0.35rem; flex-wrap: wrap; }
 .stillingshjelp { margin: 0.1rem 0 0; font-size: 0.6875rem; line-height: 1.5; color: color-mix(in srgb, var(--blekk-mjuk) 80%, transparent); }
+/* Berre Maguntia og Antiqua har historiske ligaturar. Cook har ingen
+   GSUB-tabell i det heile, og Grenze manglar hlig - valet er meiningslaust
+   for dei, so det staar ikkje der. */
+:root[data-skrift="cook"] #ligaturrad,
+:root[data-skrift="grenze"] #ligaturrad { display: none; }
+
 .meme { color: var(--indigo); }
 .meme em { font-style: italic; }
 
-/* Folden: arket er rive opp, og under ligg skrivebordet. Ho gaar eitt
-   hakk forbi papirkanten so ho dekkjer ringen arket er teikna med. */
-.i-teksten {
-  align-self: stretch; max-width: none;
-  margin-inline: calc(-1 * var(--marg) - 1px);
-  padding-inline: calc(var(--marg) + 1px);
-  margin-block: 0; border: none;
-  background: var(--skrivebord);
-}
-/* Snittflatene. Skuggen høyrer til papirkantane og fell utover. */
-.i-teksten::before, .i-teksten::after { content: ""; display: block; height: 1px; margin-inline: calc(-1 * var(--marg) - 1px); background: var(--rivekant); }
 .i-teksten::before { margin-bottom: 1.1rem; box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
 .i-teksten::after { margin-top: 1.1rem; box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
 
@@ -369,6 +413,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   .register { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--linje); }
   .register ol { max-height: 14rem; overflow-y: auto; }
   .bolk { padding-block: 3rem 3.5rem; margin-bottom: 3rem; }
+  .stilling, .luke { left: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }

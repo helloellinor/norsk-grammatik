@@ -36,6 +36,9 @@
       <span id="lastar" class="lastar" aria-hidden="true">hentar …</span>
     </div>
 
+
+    </div>
+
     <div id="stilling" class="stilling apparat" hidden>
       <div class="stillingsrad">
         <span class="stillingsnamn">Skrift</span>
@@ -68,7 +71,7 @@
         </div>
       </div>
 
-      <div class="stillingsrad">
+      <div class="stillingsrad" id="ligaturrad">
         <span class="stillingsnamn">Ligaturar</span>
         <div class="val" role="radiogroup" aria-label="Ligaturar">
           <button type="button" data-ligatur="trykk" aria-pressed="true">Som i trykket</button>
@@ -101,7 +104,6 @@
       men ikkje etter forkortingar.</p>
       <p>Skriftene er UnifrakturMaguntia, UnifrakturCook, Grenze Gotisch og EB Garamond
       (SIL OFL).</p>
-    </div>
     </div>
 
     <main id="innhald" lang="da"{{if eq .Aktiv.Id 0}} class="tittelblad"{{end}}>

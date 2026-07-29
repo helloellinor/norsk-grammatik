@@ -85,54 +85,37 @@
     { luke: document.getElementById("om"), knapp: document.getElementById("opnaom") }
   ];
 
-  var topp = document.querySelector(".topp");
-  var innhald = document.getElementById("innhald");
-
-  // Luka bryt inn i spalta der lesaren er, og skuvar linjene frå
-  // kvarandre. Rullar ein forbi henne, fell ho att.
-  function delingspunkt() {
-    var under = topp.getBoundingClientRect().bottom + 4;
-    var born = innhald.querySelectorAll(":scope > section > *");
-    for (var i = 0; i < born.length; i++) {
-      if (born[i].getBoundingClientRect().top > under) { return born[i]; }
-    }
-    return null;
-  }
-
-  var fold = null;
-  function fylgFolden(par) {
-    if (!("IntersectionObserver" in window)) return;
-    if (fold) { fold.disconnect(); }
-    var saag = false;
-    fold = new IntersectionObserver(function (rader) {
-      for (var i = 0; i < rader.length; i++) {
-        if (rader[i].isIntersecting) { saag = true; }
-        else if (saag) { visLuke(par, false); }
-      }
-    }, { threshold: 0 });
-    fold.observe(par.luke);
-  }
-
+  // Luka blir ikkje flytt i dokumentet. Ho ligg fast under linja, over
+  // papiret, og er skrivebordet ein ser gjennom rifta. Aa flytte henne
+  // for kvar opning var det som gjorde at ho rørte paa seg, og at
+  // tilstanden mellom dei to lukene kom i ulage.
   function visLuke(par, open) {
-    if (open) {
-      var mål = delingspunkt();
-      if (mål) { mål.parentNode.insertBefore(par.luke, mål); par.luke.classList.add("i-teksten"); }
-      par.luke.removeAttribute("hidden");
-      fylgFolden(par);
-    } else {
-      par.luke.setAttribute("hidden", "");
-      par.luke.classList.remove("i-teksten");
-      if (fold) { fold.disconnect(); fold = null; }
-      if (par.luke.parentNode !== topp) { topp.appendChild(par.luke); }
-    }
+    if (open) { par.luke.removeAttribute("hidden"); }
+    else { par.luke.setAttribute("hidden", ""); }
     par.knapp.setAttribute("aria-expanded", String(open));
     par.knapp.setAttribute("aria-pressed", String(open));
+  }
+
+  // Papiret glir ned like langt som luka er høg, so ho kjem heilt fram.
+  // Hoegda maa maalast: ho er ulik for Vis og Om, og skiftar med breidda.
+  function settRørsle() {
+    var open = null;
+    for (var i = 0; i < luker.length; i++) {
+      if (!luker[i].luke.hasAttribute("hidden")) { open = luker[i].luke; }
+    }
+    if (open) {
+      kropp.style.setProperty("--luke-h", open.getBoundingClientRect().height + "px");
+      kropp.classList.add("luke-open");
+    } else {
+      kropp.classList.remove("luke-open");
+    }
   }
 
   luker.forEach(function (par) {
     par.knapp.addEventListener("click", function () {
       var open = par.luke.hasAttribute("hidden");
       luker.forEach(function (a) { visLuke(a, a === par && open); });
+      settRørsle();
     });
   });
 
@@ -141,6 +124,7 @@
     luker.forEach(function (par) {
       if (!par.luke.hasAttribute("hidden")) { visLuke(par, false); par.knapp.focus(); }
     });
+    settRørsle();
   });
 
   stilling.addEventListener("click", function (e) {
