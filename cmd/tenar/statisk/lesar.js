@@ -271,58 +271,17 @@
     }
   });
 
-  // ---- Rullesporing --------------------------------------------------
-  // Bolkane kjem etter kvarandre i eitt renn, so registeret kan ikkje
-  // lita paa klikk aaleine: det maa fylgja det lesaren faktisk ser.
-  var sjaaar = null;
-  if ("IntersectionObserver" in window) {
-    sjaaar = new IntersectionObserver(function (rader) {
-      var beste = null;
-      for (var i = 0; i < rader.length; i++) {
-        if (!rader[i].isIntersecting) continue;
-        if (!beste || rader[i].boundingClientRect.top < beste.boundingClientRect.top) {
-          beste = rader[i];
-        }
-      }
-      if (beste) { merkDel(beste.target.getAttribute("data-del")); }
-    }, { rootMargin: "-25% 0px -60% 0px" });
-  }
-
-  function merkDel(id) {
-    if (id === null) return;
-    var lenke = document.querySelector('.register a[href="/del/' + id + '"]');
-    if (!lenke) return;
-    var li = lenke.closest("li");
-    var gamle = document.querySelector(".register li.aktiv");
-    if (gamle === li) return;
-    if (gamle) gamle.classList.remove("aktiv");
-    li.classList.add("aktiv");
-  }
-
-  function fylg(rot) {
-    if (!sjaaar) return;
-    var bolkar = (rot || document).querySelectorAll(".bolk");
-    for (var i = 0; i < bolkar.length; i++) { sjaaar.observe(bolkar[i]); }
-  }
-  fylg(document);
 
   // ---- Ny del henta inn ---------------------------------------------
   document.body.addEventListener("htmx:afterSwap", function (e) {
-    var mål = e.target;
-    if (!mål) return;
-    if (mål.id === "innhald") {
-      samle(mål);
-      settSkriftform();
-      fylg(mål);
-      blinkFråAdresse();
-      return;
-    }
-    // Framhald: ein ny bolk er lagd til nedanfor.
-    if (mål.closest && mål.closest("#innhald")) {
-      samle(mål.parentNode);
-      settSkriftform();
-      fylg(mål.parentNode);
-    }
+    if (!e.target || e.target.id !== "innhald") return;
+    samle(e.target);
+    settSkriftform();
+    // Ein ny bolk er henta, og han skal byrje paa toppen. Utan dette
+    // vart rullinga staaande der ho var, og eit ankar frå den førre
+    // bolken kunne dra oss ned att.
+    history.replaceState(null, "", location.pathname);
+    scrollTo({ top: 0, behavior: "auto" });
   });
 
   document.body.addEventListener("htmx:afterOnLoad", function (e) {

@@ -102,6 +102,12 @@ func titlarMedInnhald(d *Del) []Peikar {
 		default:
 			continue
 		}
+		// Berre nummererte overskrifter høyrer heime i registeret. Dei
+		// unummererte er overskrifter i teksten, men ikkje punkt ein blar
+		// etter - og dei fyller lista med smaating.
+		if b.Nummer == "" {
+			continue
+		}
 		if nivå > 2 && !harTekstUnder(d.Blokker[i+1:]) {
 			continue
 		}
