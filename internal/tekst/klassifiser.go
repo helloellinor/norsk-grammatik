@@ -11,12 +11,13 @@ import (
 func Klassifiser(inn []Blokk) []Blokk {
 	var ut []Blokk
 
-	// Boka nummererer seksjonane med romartal, men på eitt punkt brukar
-	// ho arabartal der «I.» skulle ha stått: «1. Subſtantivernes Bøining»
-	// står i hennar eiga innhaldsliste jamsides «II. Adjektivernes
-	// Bøining». Difor reknar vi ei kort, arabisk nummerert overskrift som
-	// ein seksjon når Afdelinga enno ikkje har fått nokon.
-	harSeksjon := false
+	// Boka blandar talsystem i seksjonsnummereringa, men rekkjefylgja
+	// held fram tvers gjennom. Fyrste Tillæg har «I. Den nordenfjeldſke
+	// Række», so «2. Den veſtenfjeldſke» og «3. Den søndenfjeldſke» - og
+	// alle tre staar jamsides i hennar eiga innhaldsliste. Difor er ei
+	// kort, arabisk nummerert overskrift ein seksjon nettopp naar talet
+	// held fram rekkja, og elles ei underoverskrift.
+	sisteSeksjon := 0
 
 	for _, b := range inn {
 		if b.Tabell != nil {
@@ -44,11 +45,11 @@ func Klassifiser(inn []Blokk) []Blokk {
 			b.Slag = Merknad
 
 		case reAfdeling.MatchString(t):
-			harSeksjon = false
+			sisteSeksjon = 0
 			b.Slag, b.Tittel = Afdeling, strings.TrimSuffix(t, ".")
 
 		case reFramanfor.MatchString(t):
-			harSeksjon = false
+			sisteSeksjon = 0
 			b.Slag, b.Tittel = Afdeling, strings.TrimSuffix(t, ".")
 			// Same bolknamnet står stundom to gonger etter kvarandre,
 			// av di boka har det både som overskrift og som kolumnetittel.
@@ -58,13 +59,14 @@ func Klassifiser(inn []Blokk) []Blokk {
 
 		case erKort(t) && reSeksjon.MatchString(t):
 			m := reSeksjon.FindStringSubmatch(t)
-			harSeksjon = true
+			sisteSeksjon = romartal(m[1])
 			b.Slag, b.Nummer, b.Tittel = Seksjon, m[1], m[2]
 
 		case erKort(t) && erTalOverskrift(t):
 			m := reTalseks.FindStringSubmatch(t)
-			if !harSeksjon {
-				harSeksjon = true
+			nr, _ := strconv.Atoi(m[1])
+			if nr == sisteSeksjon+1 {
+				sisteSeksjon = nr
 				b.Slag, b.Nummer, b.Tittel = Seksjon, m[1], m[2]
 			} else {
 				b.Slag, b.Nummer, b.Tittel = Underseksjon, m[1], m[2]
@@ -134,6 +136,22 @@ func skjerFramme(st []Stump, n int) []Stump {
 }
 
 func erKort(s string) bool { return tal(s) < 60 }
+
+// romartal gjer eit seksjonsnummer om til eit tal, so rekkja kan fylgjast
+// tvers gjennom talsystema.
+func romartal(s string) int {
+	verd := map[byte]int{'I': 1, 'V': 5, 'X': 10}
+	sum := 0
+	for i := 0; i < len(s); i++ {
+		v := verd[s[i]]
+		if i+1 < len(s) && v < verd[s[i+1]] {
+			sum -= v
+		} else {
+			sum += v
+		}
+	}
+	return sum
+}
 
 // erInnleiing skil ei kort innleiingssetning frå ei overskrift. Framfor
 // oppsetta staar det ofte ei line som «De Former ſom forefindes i
