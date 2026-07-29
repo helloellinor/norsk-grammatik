@@ -14,10 +14,12 @@
 <div class="rute">
 
   <nav class="register apparat" aria-label="Innhald">
-    <div class="register-topp">
-      <p class="verk">{{.Verk.Tittel}}</p>
-      <p class="undertitl">{{.Verk.Undertitl}}</p>
-    </div>
+    <a class="register-topp{{if eq .Aktiv.Id 0}} aktiv{{end}}" href="/del/0"
+       hx-get="/del/0" hx-target="#innhald" hx-swap="innerHTML scroll:top"
+       hx-push-url="true" hx-indicator="#lastar">
+      <span class="verk">{{.Verk.Tittel}}</span>
+      <span class="undertitl">{{.Verk.Undertitl}}</span>
+    </a>
     {{template "register.html" .}}
   </nav>
 

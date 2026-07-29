@@ -32,13 +32,44 @@ type Forkorting struct {
 	Tyding   string
 }
 
+// Bolk er eit av dei tre laga verket ligg i. Boka deler seg sjølv slik:
+// framstykket ber ingen §§, verket ber §§ 1-399 i ei samanhengande
+// rekkje - Indledning med §§ 1-6 og dei to Tillæga med §§ 351-399 er
+// altso med i det - og bakstykket ber ingen att.
+type Bolk struct {
+	Delar []tekst.Del
+}
+
 type Verk struct {
 	Tittel    string
 	Undertitl string
 	Delar     []tekst.Del
+	Bolkar    []Bolk         // dei same delane, lagde i tre
 	Paragraf  map[string]int // §-nummer -> del
 	SisteP    string
 	Stutt     []Forkorting // forkortingane boka forklarar
+}
+
+// bolkar deler delane i framstykke, verk og bakstykke etter om dei ber
+// §§. Tittelbladet høyrer ikkje heime i registeret - ein kjem dit ved
+// aa klikke tittelen øvst paa ryggen - so det blir haldt utanfor.
+func bolkar(delar []tekst.Del) []Bolk {
+	ut := make([]Bolk, 3)
+	sett := false // har vi passert fyrste delen med §§?
+	for _, d := range delar {
+		if d.Id == 0 {
+			continue
+		}
+		i := 0
+		switch {
+		case len(d.Paragr) > 0:
+			i, sett = 1, true
+		case sett:
+			i = 2
+		}
+		ut[i].Delar = append(ut[i].Delar, d)
+	}
+	return ut
 }
 
 type sidedata struct {
@@ -67,6 +98,7 @@ func main() {
 		Tittel:    "Norſk Grammatik",
 		Undertitl: "Ivar Aasen · Chriſtiania 1864",
 		Delar:     delar,
+		Bolkar:    bolkar(delar),
 		Paragraf:  indeks,
 		SisteP:    høgste(indeks),
 		Stutt:     forkortingar(delar),

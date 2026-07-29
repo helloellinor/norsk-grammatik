@@ -1,6 +1,9 @@
 {{define "register.html"}}
 <ol id="registerliste"{{if .Oob}} hx-swap-oob="true"{{end}}>
-  {{- range .Verk.Delar}}
+  {{- range $b, $bolk := .Verk.Bolkar}}
+  {{- if $bolk.Delar}}
+  {{- if $b}}<li class="bolkskil" role="separator"></li>{{end}}
+  {{- range $bolk.Delar}}
   <li class="niva-{{.Nivå}}{{if eq .Id $.Aktiv.Id}} aktiv{{end}}">
     <a href="/del/{{.Id}}"
        hx-get="/del/{{.Id}}"
@@ -16,6 +19,8 @@
     </ul>
     {{- end}}
   </li>
+  {{- end}}
+  {{- end}}
   {{- end}}
 </ol>
 {{end}}

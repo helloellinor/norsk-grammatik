@@ -343,6 +343,11 @@
     // bolken kunne dra oss ned att.
     history.replaceState(null, "", location.pathname);
     scrollTo({ top: 0, behavior: "auto" });
+    // Ryggskiltet staar utanfor #registerliste, som er det htmx byter ut,
+    // so det maa merkjast her. Elles vart det staaande som aktivt etter
+    // at ein hadde forlate tittelbladet.
+    var skilt = document.querySelector(".register-topp");
+    if (skilt) { skilt.classList.toggle("aktiv", location.pathname === "/del/0"); }
   });
 
   document.body.addEventListener("htmx:afterOnLoad", function (e) {
