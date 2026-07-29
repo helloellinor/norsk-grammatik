@@ -100,16 +100,22 @@
     return t ? t.getBoundingClientRect().bottom : 0;
   }
 
-  // delepunkt er den fyrste blokka som ligg heilt nedanfor topplinja.
-  // Ligg alt over henne, er det ingenting aa dele - daa legg luka seg
-  // i staden føre eller etter heile arket.
-  function delepunkt(ark) {
-    var grense = toppline() + 2;
-    for (var i = 0; i < ark.children.length; i++) {
-      if (ark.children[i].getBoundingClientRect().top >= grense) { return i; }
+  // delepunkt er det snittet mellom to blokker som ligg nærast topplinja
+  // - ovanfor eller nedanfor, det som er kortast unna. Tok vi i staden
+  // fyrste blokka heilt nedanfor linja, hamna rifta langt nede kvar gong
+  // ei høg blokk laag tvers over henne: maalt 400 px ned ved rull 9000.
+  // Talet n er lovleg og tyder eit snitt etter siste blokka.
+  function delepunkt(ark, tl) {
+    var best = 0, kortast = Infinity;
+    for (var i = 0; i <= ark.children.length; i++) {
+      var r = i < ark.children.length
+        ? ark.children[i].getBoundingClientRect().top
+        : ark.getBoundingClientRect().bottom;
+      if (Math.abs(r - tl) < kortast) { kortast = Math.abs(r - tl); best = i; }
     }
-    return -1;
+    return best;
   }
+
 
   function riv(luke) {
     var innhald = document.getElementById("innhald");
@@ -118,21 +124,30 @@
     rift.className = "rift";
     rift.appendChild(luke);
 
+    var tl = toppline();
     if (!ark) { (innhald || heim).appendChild(rift); }
-    else {
-      var i = delepunkt(ark);
-      if (i <= 0) {
-        // Lesaren er øvst (eller nedst) i arket: ingen deling, luka
-        // legg seg heilt føre - eller heilt etter - det.
-        ark.parentNode.insertBefore(rift, i === 0 ? ark : ark.nextSibling);
-      } else {
-        var nedre = document.createElement("section");
-        nedre.className = ark.className + " nedre";
-        ark.classList.add("øvre");
-        while (ark.children.length > i) { nedre.appendChild(ark.children[i]); }
-        ark.parentNode.insertBefore(rift, ark.nextSibling);
-        rift.parentNode.insertBefore(nedre, rift.nextSibling);
-      }
+    else if (ark.getBoundingClientRect().top >= tl) {
+      // Heile arket ligg under linja - lesaren staar over papiret. Daa
+      // er det ingenting aa rive, og luka legg seg føre arket. Klassa
+      // trekkjer bort lufta main held mot kanten, so opninga kjem like
+      // under linja her ògso.
+      rift.className += " over";
+      ark.parentNode.insertBefore(rift, ark);
+    } else {
+      var i = delepunkt(ark, tl);
+      var nedre = document.createElement("section");
+      nedre.className = ark.className + " nedre";
+      ark.classList.add("øvre");
+      while (ark.children.length > i) { nedre.appendChild(ark.children[i]); }
+      ark.parentNode.insertBefore(rift, ark.nextSibling);
+      rift.parentNode.insertBefore(nedre, rift.nextSibling);
+      // Rifta er framleis samanfalden, so ingenting nedanfor har flytt
+      // seg enno, og snittet staar der det kjem til aa staa. Vi maaler
+      // det no - ikkje før delinga, for delinga byter flex-gapet ut med
+      // snittmarga arket har, og det flytte snittet 15 px - og dyttar
+      // sida so det legg seg akkurat paa linja. Daa opnar rifta seg same
+      // staden kvar einaste gong.
+      scrollBy(0, Math.round(rift.getBoundingClientRect().top - tl));
     }
     // Ei bilete-ramme fram, so nettlesaren har ei høgd aa gaa ut ifrå.
     requestAnimationFrame(function () { if (rift) { rift.classList.add("open"); } });

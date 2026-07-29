@@ -166,6 +166,9 @@ main {
   /* main er skrivebordet arka ligg paa. Rifta har ingen eigen bakgrunn,
      so det er denne flata ein ser gjennom opninga. */
   background: var(--skrivebord);
+  /* Rifta dyttar sida sjølv, so snittet hamnar paa linja. Nettlesaren
+     sitt eige rulleanker ville dra imot og gjere plasseringa tilfeldig. */
+  overflow-anchor: none;
 }
 
 /* Arket. Fyller leseflata; satsen ligg midt paa det. */
@@ -201,9 +204,19 @@ main {
    arket elles har mot kanten sin. Skuggen ved snittet vender utover -
    ned frå den øvre helvta, opp frå den nedre - av di det er kantar som
    ligg over skrivebordet, ikkje hol i arket. */
-.bolk.øvre { margin-bottom: 0; padding-bottom: 2.2em; }
-.bolk.nedre { padding-top: 2.2em; }
-.bolk.nedre { box-shadow: 0 0 0 1px var(--linje), 0 -3px 18px rgb(0 0 0 / 0.28), 0 2px 18px rgb(0 0 0 / 0.28); }
+/* z-index maa staa her. Skuggen frå den øvre helvta fell ned i opninga,
+   men baade rifta og den nedre helvta kjem etter henne i treet, og
+   bakgrunnane deira mala han over. Med eit eige stablingslag legg
+   kantane seg over luka - som dei skal, av di dei ligg paa henne. */
+.bolk.øvre, .bolk.nedre { position: relative; z-index: 1; }
+.bolk.øvre {
+  margin-bottom: 0; padding-bottom: 2.2em;
+  box-shadow: 0 0 0 1px var(--linje), 0 9px 16px -4px rgb(0 0 0 / 0.34);
+}
+.bolk.nedre {
+  padding-top: 2.2em;
+  box-shadow: 0 0 0 1px var(--linje), 0 -9px 16px -4px rgb(0 0 0 / 0.34), 0 2px 18px rgb(0 0 0 / 0.28);
+}
 .deltittel, .tittelark { align-items: center; }
 
 /* Ei Afdeling har berre namnet sitt; teksten ligg i seksjonane under.
@@ -384,17 +397,16 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   margin: 0 auto;
 }
 .rift.open { grid-template-rows: 1fr; }
+/* Ligg rifta føre arket, staar lufta main held mot kanten imellom. Ho
+   blir trekt bort, so opninga kjem like under linja her ògso. */
+.rift.over { margin-top: calc(-1 * var(--sidemarg)); }
 .rift > * { min-height: 0; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .rift { transition: none; } }
 
+/* Ingen ::before/::after med rivekant her lenger. Dei var teikna kantar
+   frå den tida luka laag over papiret; no er kantane ekte arkkantar med
+   sin eigen skugge, og dei to sette skugge paa skugge. */
 .stilling, .luke { background: var(--skrivebord); }
-/* Rivekantane: papiret er opna, og kantane kastar skugge ned i opninga. */
-.stilling::before, .luke::before,
-.stilling::after, .luke::after {
-  content: ""; display: block; height: 1px; background: var(--rivekant);
-}
-.stilling::before, .luke::before { box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
-.stilling::after, .luke::after { box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
 .luke { padding: 1.25rem 1.5rem 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
 .luke p { margin: 0 0 0.8rem; max-width: 46rem; }
 .luke p:last-child { margin-bottom: 0; }
