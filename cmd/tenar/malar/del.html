@@ -2,9 +2,6 @@
 
 {{define "del.html"}}
 {{if .Oob}}{{template "register.html" .}}{{end}}
-{{- if and .Forrige (not .Framhald)}}
-<div class="hentar-forrige" data-del="{{.Forrige.Id}}"><span class="hand ornament" aria-hidden="true">&#9758;</span><span class="hand-tekst">les det føre</span></div>
-{{- end}}
 <section class="bolk{{if not .Aktiv.HarTekst}} deltittel{{end}}" data-del="{{.Aktiv.Id}}" data-tittel="{{.Aktiv.Tittel}}">
 {{- if .Tittelblad}}
 <div class="tittelark">
@@ -56,11 +53,4 @@
   {{- end}}
 {{- end}}
 </section>
-{{- if and .Neste (not .Oppover)}}
-<div class="hentar-neste"
-     hx-get="/del/{{.Neste.Id}}?fram=1"
-     hx-trigger="revealed"
-     hx-swap="outerHTML"
-     hx-target="this"><span class="hand ornament" aria-hidden="true">&#9758;</span><span class="hand-tekst">les vidare</span></div>
-{{- end}}
 {{end}}

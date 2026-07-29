@@ -349,24 +349,9 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 /* Manicula er trykkjaren sitt teikn for «sjaa hit». Ho staar alltid i
    Garamond - den einaste av skriftene vaare som har henne. */
 .ornament { font-family: "Garamond", serif; }
-.hentar-neste, .hentar-forrige {
   min-height: 5.5rem; display: flex; justify-content: center; align-items: center; gap: 0.35rem;
   font-family: var(--apparat); font-size: 0.75rem; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--blekk-mjuk); opacity: 0.75;
-}
-.hentar-neste { flex-direction: column; }
-/* Handa oppover er stum til ho verkar: ho hentar fyrst naar lesaren har
-   rulla, so det er misvisande aa la henne rope frå toppen med ein gong. */
-.hentar-forrige { flex-direction: column-reverse; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-body.har-rulla .hentar-forrige { opacity: 0.75; pointer-events: auto; }
-.hentar-neste .hand, .hentar-forrige .hand { display: block; font-size: 1.75rem; line-height: 1; }
-.hentar-neste .hand { transform: rotate(90deg); animation: vipp 2.4s ease-in-out infinite; }
-.hentar-forrige .hand { transform: rotate(-90deg); animation: vipp-opp 2.4s ease-in-out infinite; }
-.hentar-neste.htmx-request .hand, .hentar-forrige.hentar .hand { animation: snurr 1.1s linear infinite; }
-.hentar-neste.htmx-request .hand-tekst::after { content: " …"; }
-@keyframes vipp { 0%, 100% { transform: rotate(90deg) translateX(0); } 50% { transform: rotate(90deg) translateX(0.28rem); } }
-@keyframes vipp-opp { 0%, 100% { transform: rotate(-90deg) translateX(0); } 50% { transform: rotate(-90deg) translateX(0.28rem); } }
-@keyframes snurr { from { transform: rotate(90deg); } to { transform: rotate(450deg); } }
 
 /* -- 10  SMAL SKJERM ----------------------------------------------- */
 @media (max-width: 1100px) {

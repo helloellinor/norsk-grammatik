@@ -180,17 +180,7 @@
         return;
       }
     }
-    // Ingen att i denne bolken: hent den neste og hald fram der.
-    var sentinel = document.querySelector(".hentar-neste");
-    if (!sentinel) return;
-    ventarPaaNeste = true;
-    sentinel.scrollIntoView({ behavior: "smooth", block: "center" });
   }
-
-  // Sett naar Hopp gjekk tom for paragrafar og bad om ein ny bolk. Naar
-  // han er inne, hoppar vi vidare av oss sjølve, so ein kan halde fram
-  // med aa trykkje utan aa venta paa noko.
-  var ventarPaaNeste = false;
 
   // ---- Landing: blink der ein hoppar --------------------------------
   function blink(el) {
@@ -316,57 +306,6 @@
   }
   fylg(document);
 
-  // ---- Lesa seg oppover att -----------------------------------------
-  // Klikkar ein seg til ein bolk fraa registeret, byrjar teksten der.
-  // Utan dette var det ingen veg tilbake oppover. Naar vi legg noko inn
-  // over det ein ser, maa rullinga flyttast like mykje, elles blir
-  // lesaren kasta nedover i det innhaldet veks over hovudet paa han.
-  var lastarOpp = false;
-
-  function hentForrige(el) {
-    if (lastarOpp || !el || !el.parentNode) return;
-    lastarOpp = true;
-    el.classList.add("hentar");
-    var før = document.documentElement.scrollHeight;
-    var ferdig = function () {
-      window.scrollBy(0, document.documentElement.scrollHeight - før);
-      lastarOpp = false;
-    };
-    var p = htmx.ajax("GET", "/del/" + el.getAttribute("data-del") + "?opp=1",
-      { target: el, swap: "outerHTML" });
-    if (p && p.then) { p.then(ferdig, function () { lastarOpp = false; }); }
-    else { setTimeout(ferdig, 60); }
-  }
-
-  var harRulla = false;
-  addEventListener("scroll", function () {
-    harRulla = true;
-    kropp.classList.add("har-rulla");
-  }, { passive: true });
-
-  var oppSjaaar = null;
-  if ("IntersectionObserver" in window) {
-    oppSjaaar = new IntersectionObserver(function (rader) {
-      if (!harRulla) return;
-      for (var i = 0; i < rader.length; i++) {
-        if (rader[i].isIntersecting) { hentForrige(rader[i].target); }
-      }
-    }, { rootMargin: "300px 0px 0px 0px" });
-  }
-
-  function fylgOpp(rot) {
-    if (!oppSjaaar) return;
-    var alle = (rot || document).querySelectorAll(".hentar-forrige");
-    for (var i = 0; i < alle.length; i++) { oppSjaaar.observe(alle[i]); }
-  }
-  fylgOpp(document);
-
-  // Staar ein alt heilt øvst, kjem det ingen rullehending aa venta paa.
-  // Eit hjulsveip oppover seier like klart at ein vil vidare bakover.
-  addEventListener("wheel", function (e) {
-    if (e.deltaY < 0 && scrollY < 60) { hentForrige(document.querySelector(".hentar-forrige")); }
-  }, { passive: true });
-
   // ---- Ny del henta inn ---------------------------------------------
   document.body.addEventListener("htmx:afterSwap", function (e) {
     var mål = e.target;
@@ -375,7 +314,6 @@
       samle(mål);
       settSkriftform();
       fylg(mål);
-      fylgOpp(mål);
       blinkFråAdresse();
       return;
     }
@@ -384,8 +322,6 @@
       samle(mål.parentNode);
       settSkriftform();
       fylg(mål.parentNode);
-      fylgOpp(mål.parentNode);
-      if (ventarPaaNeste) { ventarPaaNeste = false; nesteParagraf(); }
     }
   });
 
