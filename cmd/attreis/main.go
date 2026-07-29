@@ -6,6 +6,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -14,6 +15,8 @@ import (
 	"sort"
 	"strings"
 	"unicode"
+
+	"aasen/internal/tekst"
 )
 
 const langS = 'ſ' // U+017F LATIN SMALL LETTER LONG S
@@ -49,8 +52,8 @@ func (l leksikon) slåOpp(ord []rune) (oppslag, bool) {
 
 func main() {
 	sidemappe := flag.String("sider", "bøker/sider", "mappe med OCR-tekst frå trykken")
-	tekstfil := flag.String("tekst", "bøker/norsk_grammatik.txt", "rein doc-tekst")
-	utfil := flag.String("ut", "bøker/norsk_grammatik_sats.txt", "utfil med ſ sett inn")
+	tekstfil := flag.String("tekst", "bøker/grammatik.json", "blokker frå Word-fila")
+	utfil := flag.String("ut", "bøker/grammatik-sats.json", "blokker med ſ sett inn")
 	rapportfil := flag.String("rapport", "bøker/sats-rapport.txt", "liste over ord som treng ettersyn")
 	flag.Parse()
 
@@ -62,18 +65,47 @@ func main() {
 	fmt.Printf("leksikon frå trykken: %d ordformer (%d med folda vokalar)\n",
 		len(leks.Eksakt), len(leks.Folda))
 
-	tekst, err := os.ReadFile(*tekstfil)
+	rå, err := os.ReadFile(*tekstfil)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	ut, stat := settInnLangS(string(tekst), leks)
-
-	if err := os.WriteFile(*utfil, []byte(ut), 0o644); err != nil {
+	var blokker []tekst.Blokk
+	if err := json.Unmarshal(rå, &blokker); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
+	stat := nyStatistikk()
+	for i := range blokker {
+		for j := range blokker[i].Stumpar {
+			blokker[i].Stumpar[j].Tekst = settInnLangS(blokker[i].Stumpar[j].Tekst, leks, stat)
+		}
+		if blokker[i].Tabell == nil {
+			continue
+		}
+		for r := range blokker[i].Tabell.Rader {
+			for c := range blokker[i].Tabell.Rader[r].Celler {
+				celle := blokker[i].Tabell.Rader[r].Celler[c]
+				for k := range celle {
+					celle[k].Tekst = settInnLangS(celle[k].Tekst, leks, stat)
+				}
+			}
+		}
+	}
+
+	utfila, err := os.Create(*utfil)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	enc := json.NewEncoder(utfila)
+	enc.SetIndent("", " ")
+	if err := enc.Encode(blokker); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	utfila.Close()
 
 	skrivRapport(*rapportfil, stat)
 	stat.skriv(*utfil, *rapportfil)
@@ -101,8 +133,7 @@ func nyStatistikk() *statistikk {
 // settInnLangS går gjennom teksten teikn for teikn og byter berre ut
 // små s-ar. Alt anna - teiknsetjing, linjeskift, store bokstavar - står
 // urørt, slik at teksten elles er nøyaktig den same.
-func settInnLangS(tekst string, leks leksikon) (string, *statistikk) {
-	stat := nyStatistikk()
+func settInnLangS(tekst string, leks leksikon, stat *statistikk) string {
 	runar := []rune(tekst)
 	ut := make([]rune, len(runar))
 	copy(ut, runar)
@@ -161,7 +192,7 @@ func settInnLangS(tekst string, leks leksikon) (string, *statistikk) {
 		}
 	}
 
-	return string(ut), stat
+	return string(ut)
 }
 
 // byggLeksikon les alle OCR-sidene og finn den vanlegaste skrivemåten

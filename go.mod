@@ -1,3 +1,5 @@
 module aasen
 
-go 1.24.1
+go 1.25.0
+
+require golang.org/x/net v0.57.0 // indirect

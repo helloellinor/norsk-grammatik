@@ -166,8 +166,28 @@ main {
   flex-direction: column;
   gap: 1.6rem;
   font-size: 1.1875rem;
-  hyphens: auto;
 }
+
+/* Utslutting som i boka. Fraktursats var alltid utslutta, og det krev
+   orddeling - utan henne blir det elveløp av mellomrom i spalta. Sida er
+   nynorsk, men sjølve teksten er dansk-norsk frå 1864, so han får
+   lang="da" og dermed danske delingsmønster. */
+main p, main td {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 6 3 3;
+  hanging-punctuation: first last;
+}
+main .oppslag, main .oppslag span { text-align: left; hyphens: manual; }
+main td { text-align: center; hyphens: manual; }
+
+/* Overskrifter skal aldri sluttast ut - dei er nemningar, ikkje spalte. */
+main h2, main h3, main h4, main h5, .afdeling-namn { text-align: center; hyphens: manual; }
+
+em { font-style: italic; }
+strong { font-weight: 600; }
 
 .afdeling { text-align: center; display: flex; flex-direction: column; gap: 0.4rem; }
 .afdeling h2 { margin: 0; font-size: 1.5rem; font-weight: 400; color: var(--blekk-mjuk); text-wrap: balance; }
@@ -196,6 +216,36 @@ main {
 }
 .paragraf .tal:hover { text-decoration: underline; }
 .paragraf:target { background: var(--uthev); }
+
+/* Oppsett (lydtavler, bøyingsmønster). Dei skal aldri gje sidescroll:
+   spalta krympar heller skrifta og let cellene brekke. Ingen rammer -
+   boka skil kolonnane med luft, ikkje med strek. */
+.oppsett { width: 100%; }
+/* Breie oppsett får bryte ut av brødtekstmålet når det er rom, slik dei
+   gjer i boka. Dei skal aldri gje sidescroll: kolonnane finn si eiga
+   breidd og cellene brekk heller. */
+@media (min-width: 1000px) {
+  .oppsett { width: calc(100% + 9rem); margin-inline: -4.5rem; }
+}
+.oppsett table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.oppsett td {
+  padding: 0.3rem 0.35rem;
+  vertical-align: baseline;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+/* Fyrste kolonne er radnamnet: venstrestilt, som i boka. */
+.oppsett td:first-child { text-align: left; color: var(--blekk-mjuk); }
+/* Originalen skil kolonnane med loddrett strek og set ein strek under
+   talrekkja øvst. Vi gjer det same. */
+.oppsett td + td { border-left: 1px solid var(--linje); }
+.oppsett tr:first-child td { color: var(--blekk-mjuk); border-bottom: 1px solid var(--linje); }
 
 .oppslag {
   display: grid;

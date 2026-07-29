@@ -9,7 +9,14 @@
 /bøker/sider/
 /bøker/norsk_grammatik.txt
 /bøker/norsk_grammatik_sats.txt
+/bøker/grammatik.json
+/bøker/grammatik-sats.json
 /bøker/sats-rapport.txt
 
 # Tredjeparts-klon, ikkje ein del av dette prosjektet
 /tesseract-training-fraktur/
+
+# Byggjeartefaktar
+/attreis
+/hent
+/tenar

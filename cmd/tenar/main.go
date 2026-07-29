@@ -5,6 +5,7 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"flag"
 	"html/template"
 	"log"
@@ -33,7 +34,7 @@ type sidedata struct {
 }
 
 func main() {
-	inn := flag.String("inn", "bøker/norsk_grammatik_sats.txt", "tekst med ſ sett inn")
+	inn := flag.String("inn", "bøker/grammatik-sats.json", "blokker med ſ sett inn")
 	adr := flag.String("adr", "localhost:8064", "adresse å lytte på")
 	flag.Parse()
 
@@ -41,11 +42,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("kunne ikkje lese teksten: %v", err)
 	}
+	var blokker []tekst.Blokk
+	if err := json.Unmarshal(rå, &blokker); err != nil {
+		log.Fatalf("kunne ikkje tolke %s: %v", *inn, err)
+	}
 
 	verk := Verk{
 		Tittel:    "Norſk Grammatik",
 		Undertitl: "Ivar Aasen · Chriſtiania 1864",
-		Delar:     tekst.DelOpp(tekst.Tolk(string(rå))),
+		Delar:     tekst.DelOpp(tekst.Klassifiser(blokker)),
 	}
 	log.Printf("%d delar tolka frå %s", len(verk.Delar), *inn)
 

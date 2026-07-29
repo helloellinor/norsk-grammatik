@@ -1,6 +1,8 @@
+{{define "stumpar"}}{{range .}}{{if .Kursiv}}<em>{{.Tekst}}</em>{{else if .Feit}}<strong>{{.Tekst}}</strong>{{else}}{{.Tekst}}{{end}}{{end}}{{end}}
+
 {{define "del.html"}}
 {{- with .Aktiv}}
-{{- range .Bolkar}}
+{{- range .Blokker}}
   {{- if eq .Slag "afdeling"}}
   <header class="afdeling">
     <h2>{{.Tittel}}</h2>
@@ -12,18 +14,30 @@
   <h4 class="underseksjon"><span class="tal">{{.Nummer}})</span> {{.Tittel}}</h4>
   {{- else if eq .Slag "mellomtittel"}}
   <h5 class="mellomtittel">{{.Tittel}}</h5>
+  {{- else if eq .Slag "oppsett"}}
+  <div class="oppsett">
+    <table>
+      {{- range .Tabell.Rader}}
+      <tr>
+        {{- range .Celler}}
+        <td>{{template "stumpar" .}}</td>
+        {{- end}}
+      </tr>
+      {{- end}}
+    </table>
+  </div>
   {{- else if eq .Slag "paragraf"}}
   <p class="paragraf" id="p{{.Nummer}}">
-    <a class="tal" href="#p{{.Nummer}}" aria-label="Paragraf {{.Nummer}}">§&nbsp;{{.Nummer}}</a>{{.Tekst}}
+    <a class="tal" href="#p{{.Nummer}}" aria-label="Paragraf {{.Nummer}}">§&nbsp;{{.Nummer}}</a>{{template "stumpar" .Stumpar}}
   </p>
   {{- else if eq .Slag "oppslag"}}
-  <p class="oppslag"><span class="stikkord">{{.Nummer}}</span><span>{{.Tekst}}</span></p>
+  <p class="oppslag"><span class="stikkord">{{.Nummer}}</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "merknad"}}
-  <p class="merknad">{{.Tekst}}</p>
+  <p class="merknad">{{template "stumpar" .Stumpar}}</p>
   {{- else if eq .Slag "avsnitt"}}
-  <p class="avsnitt">{{.Tekst}}</p>
+  <p class="avsnitt">{{template "stumpar" .Stumpar}}</p>
   {{- else}}
-  <p>{{.Tekst}}</p>
+  <p>{{template "stumpar" .Stumpar}}</p>
   {{- end}}
 {{- end}}
 {{- end}}
