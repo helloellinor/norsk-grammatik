@@ -43,11 +43,12 @@
   --skrivebord: #E7E1D4;
   --rivekant: #CFC7B6;
 
-  --mål: 34rem;
+  /* Satsbreidda, maalt paa faksimilen: 90 mm = 255 pt ~ 28,3 em. */
+  --mål: 28.3em;
   --register: 17rem;
   --grunn: 1.3125rem;
-  --sidemarg: 1.5rem;
-  --fold-ut: 1.5rem;
+  --sidemarg: 2rem;
+  --fold-ut: calc(var(--sidemarg) + 1px);
   /* Høgda på den faste linja øvst. Alt ein hoppar til må halde seg
      klar av henne, elles gøymer ho fyrste linja. */
   --toppline: 3.9rem;
@@ -102,19 +103,6 @@
 :root[data-storleik="liten"] { --grunn: 1.1875rem; }
 :root[data-storleik="stor"] { --grunn: 1.5rem; }
 
-/* Bokside 5∶8, maalt paa faksimilen. Tekstblokka er 1416x2454 px paa
-   14 sider i snitt; skanninga er 1840x3182 og altso skoren i breidda.
-   Er papiret 5∶8 og høgda heil, blir papiret 1989 px breitt - og daa
-   kjem høgremargen ut paa 281 px, mot 292 til venstre. Tekstblokka staar
-   altso midt paa sida. Utrekna tap i kanten (147 px) møter det maalte
-   underskotet (149 px), so reknestykket lukkar seg.
-     tekstblokk  71,2 % av breidda, 77,1 % av høgda
-     margar      v 14,7 %  h 14,1 %  o 10,8 %  n 12,3 %
-     satsbreidd  90 mm = 255 pt ~ 28,3 em ved 9 pt skrift */
-:root[data-form="bokside"] {
-  --mål: 28.3em;
-  --papirbreidd: 39.75em;   /* 28,3 / 0,712 */
-}
 
 /* Grensesnittet kan setjast i tre skrifter. Fraktur gjev ei heilstøypt
    side, men er tyngre aa lesa i smaatt, so han faar litt meir kropp.
@@ -222,7 +210,7 @@ body {
 /* Ingenting inne i lesefeltet faar sprengje breidda: gjer det det, blir
    sida rullande sidevegs, og topplinja - som er sticky inne her - fylgjer
    ikkje med. Breie oppsett var synderen. */
-.lesefelt { display: flex; flex-direction: column; min-width: 0; overflow-x: clip; }
+.lesefelt { display: flex; flex-direction: column; min-width: 0; overflow-x: clip; background: var(--skrivebord); }
 
 /* Linja og lukene høyrer saman og fylgjer med nedover. Laag luka i
    flyten under, opna ho seg der linja ein gong stod - altso langt over
@@ -273,7 +261,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 main {
   width: 100%;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 0 4rem;
   display: flex;
   flex-direction: column;
   font-size: var(--grunn);
@@ -282,16 +270,29 @@ main {
 /* Bolken er arket. Kvar overbolk - Tittelblad, Føreord, ei Afdeling -
    staar paa sitt eige ark, so eit skifte er eit fysisk sideskifte og
    ikkje berre luft. */
+/* Arket fyller heile leseflata. Skrivebordet under syner seg berre der
+   arket er flytt til side: i gapet mellom sidene, og i folden. Satsen
+   ligg midt paa arket i den maalte breidda - det er han som er 28,3em,
+   ikkje papiret. */
 .bolk {
   background: var(--papir);
-  max-width: min(var(--mål), 100%);
   width: 100%;
-  margin: 0 auto;
-  padding: 3rem var(--sidemarg) 5rem;
+  padding: 6.9em var(--sidemarg) 7.8em;
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
+  line-height: 1.52;
+  box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.28);
+  margin-bottom: 5.5rem;
 }
+.bolk > * {
+  width: 100%;
+  max-width: var(--mål);
+  margin-inline: auto;
+}
+/* Oppsett faar meir rom enn brødteksten, folden heile arket. */
+.bolk > .oppsett { max-width: min(38em, 100%); }
+.bolk > .i-teksten { max-width: none; }
 
 /* Utslutting som i boka. Fraktursats var alltid utslutta, og det krev
    orddeling - utan henne blir det elveløp av mellomrom i spalta. Sida er
@@ -335,7 +336,9 @@ strong { font-weight: 600; }
 /* Overskrifter treng luft under seg, ikkje berre over: elles klistrar
    dei seg til fyrste linja i avsnittet under. */
 .seksjon, .underseksjon, .mellomtittel {
-  margin: 1.6rem 0 0.7rem;
+  /* margin-block, ikkje margin: kortforma nullstiller sidemargane, og
+     dei er det som held overskrifta midt paa satsen. */
+  margin-block: 1.6rem 0.7rem;
   font-weight: 400;
   text-wrap: balance;
   text-align: center;
@@ -630,7 +633,12 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 @media (prefers-reduced-motion: reduce) {
   .landa { animation: none; background: var(--uthev); }
   .oppsett td { transition: none; }
-  .hentar-forrige {
+  /* Handa oppover er stum til ho verkar: ho hentar fyrst naar lesaren har
+   rulla, so det er misvisande aa la henne rope frå toppen med ein gong.
+   Ho held plassen sin, so ingenting hoppar naar ho vaknar. */
+.hentar-forrige { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+body.har-rulla .hentar-forrige { opacity: 0.75; pointer-events: auto; }
+.hentar-forrige {
   min-height: 5.5rem;
   display: flex;
   flex-direction: column-reverse;
@@ -662,32 +670,6 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 
 /* ---- Bokside: papiret rundt satsen -------------------------------- */
-:root[data-form="bokside"] .bolk {
-  /* Arket maa krympe med spalta. Var det laast til 39,75em, sprengde det
-     spalta paa smale vindauge, og clip skar av det som stakk ut - difor
-     vart teksten kappa og saumen stod ikkje under arket. */
-  max-width: min(var(--papirbreidd), 100%);
-  /* Margen er 14,4 % av arket - snittet av dei maalte 14,7 og 14,1 - og
-     staar i prosent so han fylgjer arket naar det krympar. */
-  --sidemarg: 14.4%;
-  /* Folden skal ut til kanten av arket. Prosent paa henne løyser seg mot
-     satsbreidda, ikkje mot arket, so 14,4 % av arket er 20,22 % av
-     satsen. */
-  --fold-ut: 20.22%;
-  padding-block: 6.9em 7.8em;     /* 10,8 % og 12,3 % av sidehøgda */
-  background: var(--papir);
-  box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.28);
-  line-height: 1.52;              /* originalen er 9/10,5 pt, altfor tett
-                                     for skjerm - dette er nærmaste steg */
-  margin-bottom: 2.5rem;
-}
-:root[data-form="bokside"] .lesefelt { background: transparent; }
-:root[data-form="bokside"] main { padding: 2.5rem 1rem 4rem; }
-:root[data-form="bokside"] .oppsett { width: 100%; margin-inline: 0; }
-:root[data-form="bokside"] .saum .ornament {
-  font-size: 1.1rem;
-  color: color-mix(in srgb, var(--blekk-mjuk) 55%, transparent);
-}
 /* Ornamenta staar alltid i Garamond: det er den einaste av skriftene
    vaare som har manicule og aldusblad. Frakturskriftene har dei ikkje. */
 .ornament { font-family: "Garamond", serif; }
@@ -710,6 +692,11 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   color: var(--blekk-mjuk);
   opacity: 0.75;
 }
+/* Handa oppover er stum til ho verkar: ho hentar fyrst naar lesaren har
+   rulla, so det er misvisande aa la henne rope frå toppen med ein gong.
+   Ho held plassen sin, so ingenting hoppar naar ho vaknar. */
+.hentar-forrige { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+body.har-rulla .hentar-forrige { opacity: 0.75; pointer-events: auto; }
 .hentar-forrige {
   min-height: 5.5rem;
   display: flex;
@@ -767,7 +754,6 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   justify-content: center;
 }
 /* Tittelbladet er ei heil side for seg. */
-:root[data-form="bokside"] .bolk:first-child:has(.tittelark) { min-height: 78vh; }
 
 /* ---- Tittelarket --------------------------------------------------- */
 /* Fyrste møtet med verket. Sett som eit titelblad, ikkje som ei rekkje
@@ -827,8 +813,8 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   /* Éin piksel forbi kanten, so folden dekkjer ringen arket er teikna
      med. Utan det ligg ho innanfor ramma og les som ei stripe i arket i
      staden for eit gap mellom to ark. */
-  margin-inline: calc(-1 * var(--fold-ut) - 1px);
-  padding-inline: calc(var(--fold-ut) + 1px);
+  margin-inline: calc(-1 * var(--fold-ut));
+  padding-inline: var(--fold-ut);
   max-height: none;
   overflow: visible;
   border: none;
@@ -845,7 +831,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   content: "";
   display: block;
   height: 1px;
-  margin-inline: calc(-1 * var(--fold-ut) - 1px);
+  margin-inline: calc(-1 * var(--fold-ut));
   background: var(--rivekant);
 }
 .i-teksten::before { box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }

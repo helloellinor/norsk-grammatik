@@ -12,7 +12,6 @@
     ui: "antiqua",
     ligatur: "trykk",
     storleik: "vanleg",
-    form: "bokside",
     tema: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
   };
   try {
@@ -62,10 +61,9 @@
     rot.setAttribute("data-ui", val.ui);
     rot.setAttribute("data-ligatur", val.ligatur);
     rot.setAttribute("data-storleik", val.storleik);
-    rot.setAttribute("data-form", val.form);
     rot.setAttribute("data-theme", val.tema);
     [["skrift", val.skrift], ["ui", val.ui], ["ligatur", val.ligatur],
-     ["storleik", val.storleik], ["form", val.form], ["tema", val.tema]]
+     ["storleik", val.storleik], ["tema", val.tema]]
       .forEach(function (par) {
         var knappar = document.querySelectorAll("[data-" + par[0] + "]");
         for (var i = 0; i < knappar.length; i++) {
@@ -148,7 +146,7 @@
   stilling.addEventListener("click", function (e) {
     var k = e.target.closest("button");
     if (!k) return;
-    ["skrift", "ui", "ligatur", "storleik", "form", "tema"].forEach(function (felt) {
+    ["skrift", "ui", "ligatur", "storleik", "tema"].forEach(function (felt) {
       var v = k.getAttribute("data-" + felt);
       if (v) { val[felt] = v; }
     });
@@ -341,7 +339,10 @@
   }
 
   var harRulla = false;
-  addEventListener("scroll", function () { harRulla = true; }, { passive: true });
+  addEventListener("scroll", function () {
+    harRulla = true;
+    kropp.classList.add("har-rulla");
+  }, { passive: true });
 
   var oppSjaaar = null;
   if ("IntersectionObserver" in window) {

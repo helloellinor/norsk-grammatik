@@ -87,7 +87,7 @@ func Klassifiser(inn []Blokk) []Blokk {
 			b.Slag, b.Nummer = Oppslag, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
-		case erKort(t):
+		case erKort(t) && !erInnleiing(t):
 			b.Slag, b.Tittel = Mellomtittel, strings.TrimSuffix(t, ".")
 
 		default:
@@ -134,6 +134,15 @@ func skjerFramme(st []Stump, n int) []Stump {
 }
 
 func erKort(s string) bool { return tal(s) < 60 }
+
+// erInnleiing skil ei kort innleiingssetning frå ei overskrift. Framfor
+// oppsetta staar det ofte ei line som «De Former ſom forefindes i
+// Bygdemaalene, ere:» - ho er kort nok til aa sjaa ut som ei overskrift,
+// men ei overskrift er ei nemning og endar ikkje med kolon eller komma.
+func erInnleiing(s string) bool {
+	t := strings.TrimSpace(s)
+	return strings.HasSuffix(t, ":") || strings.HasSuffix(t, ",") || strings.HasSuffix(t, ";")
+}
 
 // tal er talet paa teikn, ikkje byte. skjerFramme tel teikn, so gjev ein
 // han eit bytetal i staden, skjer han for mykje: tankestreken er eitt
