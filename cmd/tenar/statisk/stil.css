@@ -442,7 +442,14 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 .undertitlar a[aria-current="true"] { color: var(--indigo); border-left-color: var(--indigo); }
 
 /* ---- Hopp til paragraf --------------------------------------------- */
-.hoppform { display: flex; gap: 0.35rem; align-items: center; }
+/* Hoppluka og visingsluka fell ned under linja paa same vis. */
+.hoppluke {
+  border-bottom: 1px solid var(--linje);
+  padding: 1rem 1.5rem;
+  background: var(--uthev);
+}
+.hoppform { display: flex; gap: 0.5rem; align-items: center; }
+.hoppform label { font-size: 0.8125rem; color: var(--blekk-mjuk); }
 .hoppform input {
   font-family: var(--apparat);
   font-size: 0.8125rem;
@@ -455,6 +462,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 .hoppform input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
 .skil { flex: 1; }
+#opnahopp { font-family: "Garamond", serif; font-size: 1rem; padding-inline: 0.9rem; }
 .visuelt-skjult {
   position: absolute; width: 1px; height: 1px;
   margin: -1px; padding: 0; overflow: hidden;
@@ -515,6 +523,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 @media (prefers-reduced-motion: reduce) {
   .landa { animation: none; background: var(--uthev); }
   .oppsett td { transition: none; }
+  .hentar-neste .hand { animation: none; }
 }
 
 /* ---- Bokside: papiret rundt satsen -------------------------------- */
@@ -553,14 +562,52 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+.saum .ornament {
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: color-mix(in srgb, var(--blekk-mjuk) 70%, transparent);
+}
+/* Ornamenta staar alltid i Garamond: det er den einaste av skriftene
+   vaare som har manicule og aldusblad. Frakturskriftene har dei ikkje. */
+.ornament { font-family: "Garamond", serif; }
+
+/* Handa som peikar vidare. Manicula er trykkjaren sitt eige teikn for
+   «sjaa hit», og her peikar ho nedover mot neste bolk. Ho vippar seg
+   sakte medan du nærmar deg, og snurrar rundt medan bolken blir henta -
+   som eit varsel om at noko er paa veg, ikkje som pynt. */
 .hentar-neste {
-  min-height: 2rem;
+  min-height: 5.5rem;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 0.35rem;
   font-family: var(--apparat);
   font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--blekk-mjuk);
+  opacity: 0.75;
+}
+.hentar-neste .hand {
+  display: block;
+  font-size: 1.75rem;
+  line-height: 1;
+  transform: rotate(90deg);
+  animation: vipp 2.4s ease-in-out infinite;
+}
+@keyframes vipp {
+  0%, 100% { transform: rotate(90deg) translateX(0); }
+  50%      { transform: rotate(90deg) translateX(0.28rem); }
+}
+.hentar-neste.htmx-request .hand {
+  animation: snurr 1.1s linear infinite;
+}
+.hentar-neste.htmx-request .hand-tekst::after { content: " …"; }
+@keyframes snurr {
+  from { transform: rotate(90deg); }
+  to   { transform: rotate(450deg); }
 }
 
 /* ---- Tittelbladet -------------------------------------------------- */

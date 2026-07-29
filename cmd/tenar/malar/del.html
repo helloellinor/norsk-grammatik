@@ -3,7 +3,7 @@
 {{define "del.html"}}
 {{if .Oob}}{{template "register.html" .}}{{end}}
 {{- if .Framhald}}
-<div class="saum" data-del="{{.Aktiv.Id}}" aria-hidden="true"><span>{{.Aktiv.Tittel}}</span></div>
+<div class="saum" data-del="{{.Aktiv.Id}}" aria-hidden="true"><span class="ornament">&#10087;</span><span>{{.Aktiv.Tittel}}</span><span class="ornament">&#10087;</span></div>
 {{- end}}
 <section class="bolk" data-del="{{.Aktiv.Id}}" data-tittel="{{.Aktiv.Tittel}}">
 {{- with .Aktiv}}
@@ -52,6 +52,6 @@
      hx-get="/del/{{.Neste.Id}}?fram=1"
      hx-trigger="revealed"
      hx-swap="outerHTML"
-     hx-target="this">les vidare …</div>
+     hx-target="this"><span class="hand ornament" aria-hidden="true">&#9758;</span><span class="hand-tekst">les vidare</span></div>
 {{- end}}
 {{end}}

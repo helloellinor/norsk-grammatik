@@ -82,27 +82,37 @@
     lagre();
   });
 
-  var stilling = document.getElementById("stilling");
-  var opna = document.getElementById("opnastilling");
+  // ---- Lukene under topplinja ----------------------------------------
+  // Berre éi luke om gongen; den andre lukkar seg.
+  var luker = [
+    { luke: document.getElementById("stilling"), knapp: document.getElementById("opnastilling") },
+    { luke: document.getElementById("hoppluke"), knapp: document.getElementById("opnahopp") }
+  ];
 
-  function visMeny(open) {
-    if (open) { stilling.removeAttribute("hidden"); } else { stilling.setAttribute("hidden", ""); }
-    opna.setAttribute("aria-expanded", String(open));
-    opna.setAttribute("aria-pressed", String(open));
+  function visLuke(par, open) {
+    if (open) { par.luke.removeAttribute("hidden"); } else { par.luke.setAttribute("hidden", ""); }
+    par.knapp.setAttribute("aria-expanded", String(open));
+    par.knapp.setAttribute("aria-pressed", String(open));
   }
 
-  opna.addEventListener("click", function () {
-    visMeny(stilling.hasAttribute("hidden"));
+  luker.forEach(function (par) {
+    par.knapp.addEventListener("click", function () {
+      var open = par.luke.hasAttribute("hidden");
+      luker.forEach(function (a) { visLuke(a, a === par && open); });
+      if (open && par.luke.id === "hoppluke") {
+        document.getElementById("paragrafnr").focus();
+      }
+    });
   });
 
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !stilling.hasAttribute("hidden")) {
-      visMeny(false);
-      opna.focus();
-    }
+    if (e.key !== "Escape") return;
+    luker.forEach(function (par) {
+      if (!par.luke.hasAttribute("hidden")) { visLuke(par, false); par.knapp.focus(); }
+    });
   });
 
-  stilling.addEventListener("click", function (e) {
+  document.getElementById("stilling").addEventListener("click", function (e) {
     var k = e.target.closest("button");
     if (!k) return;
     ["skrift", "ui", "ligatur", "storleik", "form", "tema"].forEach(function (felt) {
