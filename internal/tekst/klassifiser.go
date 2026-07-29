@@ -80,12 +80,12 @@ func Klassifiser(inn []Blokk) []Blokk {
 		case reParagraf.MatchString(t):
 			m := reParagraf.FindStringSubmatch(t)
 			b.Slag, b.Nummer = Paragraf, m[1]
-			b.Stumpar = skjerFramme(b.Stumpar, len(t)-len(m[2]))
+			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
 		case erKort(t) && reOppslag.MatchString(t):
 			m := reOppslag.FindStringSubmatch(t)
 			b.Slag, b.Nummer = Oppslag, m[1]
-			b.Stumpar = skjerFramme(b.Stumpar, len(t)-len(m[2]))
+			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
 		case erKort(t):
 			b.Slag, b.Tittel = Mellomtittel, strings.TrimSuffix(t, ".")
@@ -133,7 +133,13 @@ func skjerFramme(st []Stump, n int) []Stump {
 	return ut
 }
 
-func erKort(s string) bool { return len([]rune(s)) < 60 }
+func erKort(s string) bool { return tal(s) < 60 }
+
+// tal er talet paa teikn, ikkje byte. skjerFramme tel teikn, so gjev ein
+// han eit bytetal i staden, skjer han for mykje: tankestreken er eitt
+// teikn men tre byte, og daa forsvann dei to fyrste bokstavane i kvart
+// oppslag i forkortingslista.
+func tal(s string) int { return len([]rune(s)) }
 
 // heldFram seier om ein tekst er avbroten midt i ei setning.
 func heldFram(tekst string) bool {

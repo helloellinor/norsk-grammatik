@@ -420,7 +420,9 @@ strong { font-weight: 600; }
   font-size: 1.0625rem;
   line-height: 1.5;
 }
-.oppslag .stikkord { color: var(--indigo); }
+/* Stikkorda er oppslag, ikkje lenker. Indigo er lenkefargen vaar, so
+   dei fekk folk til aa tru at dei kunne klikkast. */
+.oppslag .stikkord { color: var(--blekk); }
 
 /* Merknadene er Aasens eigne Anm. Dei skal lesast som ein annan røyst
    enn brødteksten, og treng difor luft baade rundt seg og innanfor
@@ -742,25 +744,30 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
    so det ikkje blir staaande ein kvit renning paa kvar side, og ho har
    ingen eigen rullestong - opninga er so stor som innhaldet krev. */
 .i-teksten {
-  margin-inline: calc(-1 * var(--fold-ut));
-  padding-inline: var(--fold-ut);
+  /* Éin piksel forbi kanten, so folden dekkjer ringen arket er teikna
+     med. Utan det ligg ho innanfor ramma og les som ei stripe i arket i
+     staden for eit gap mellom to ark. */
+  margin-inline: calc(-1 * var(--fold-ut) - 1px);
+  padding-inline: calc(var(--fold-ut) + 1px);
   max-height: none;
   overflow: visible;
-  border-top: none;
-  border-block: none;
+  border: none;
   border-radius: 0;
   margin-block: 0;
   background: var(--skrivebord);
+  /* Kantane av det oppdelte arket kastar skugge ned i opninga. */
   box-shadow:
-    inset 0 9px 12px -8px rgb(0 0 0 / 0.42),
-    inset 0 -9px 12px -8px rgb(0 0 0 / 0.42);
+    inset 0 14px 16px -12px rgb(0 0 0 / 0.55),
+    inset 0 -14px 16px -12px rgb(0 0 0 / 0.55);
   animation: fald 0.22s ease-out;
 }
+/* Sjølve snittflatene: den nedre kanten av arket over, og den øvre av
+   arket under. */
 .i-teksten::before, .i-teksten::after {
   content: "";
   display: block;
   height: 1px;
-  margin-inline: calc(-1 * var(--fold-ut));
+  margin-inline: calc(-1 * var(--fold-ut) - 1px);
   background: var(--rivekant);
 }
 .i-teksten::before { margin-bottom: 1.1rem; }
