@@ -1,0 +1,66 @@
+{{define "side.html"}}<!doctype html>
+<html lang="nn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Verk.Tittel}} — Ivar Aasen 1864</title>
+<link rel="stylesheet" href="/statisk/stil.css">
+<script src="/statisk/htmx.min.js" defer></script>
+</head>
+<body>
+
+<a class="hopp apparat" href="#innhald">Hopp til teksten</a>
+
+<div class="rute">
+
+  <nav class="register apparat" aria-label="Innhald">
+    <div class="register-topp">
+      <p class="verk">{{.Verk.Tittel}}</p>
+      <p class="undertitl">{{.Verk.Undertitl}}</p>
+    </div>
+    <ol>
+      {{- range .Verk.Delar}}
+      <li class="niva-{{.Nivå}}{{if eq .Id $.Aktiv.Id}} aktiv{{end}}">
+        <a href="/del/{{.Id}}"
+           hx-get="/del/{{.Id}}"
+           hx-target="#innhald"
+           hx-swap="innerHTML scroll:top"
+           hx-push-url="true"
+           hx-indicator="#lastar">{{.Tittel}}</a>
+      </li>
+      {{- end}}
+    </ol>
+  </nav>
+
+  <div class="lesefelt">
+    <div class="styring apparat">
+      <button id="skrift" type="button" aria-pressed="true">Trykk 1864</button>
+      <button id="tema" type="button" aria-pressed="false">Mørk</button>
+      <span id="lastar" class="lastar" aria-hidden="true">hentar …</span>
+    </div>
+
+    <main id="innhald">
+      {{- template "del.html" .}}
+    </main>
+
+    <footer class="apparat">
+      <p><strong>Om denne utgåva.</strong> Teksten er 1864-utgåva, henta frå Det Norske
+      Samlagets elektroniske transkripsjon (1997). Den lange s-en er sett attende inn etter
+      korleis kvart einskilt ord faktisk står i førstetrykket, lese av ei 400 ppi-skanning
+      frå Nasjonalbiblioteket. Ord som ikkje fanst i trykken fylgjer trykkregelen: rund s i
+      slutten av eit ordledd, lang ſ elles.</p>
+      <p>Aasen tek sjølv opp dette i § 384, og skyv det med vilje ut av grammatikken:
+      skriftteikn høyrer til «det ydre eller det, som er for Øiet», og der skal ein «fylgje
+      Brugen i Danſk og Tydſk». Difor er trykkjaren sin eigen praksis fasit her — mellom
+      anna at dobbel s vert sett <span class="frak">sſ</span>, ikkje
+      <span class="frak">ſſ</span> som på tysk.</p>
+      <p>Skrifta er UnifrakturMaguntia (SIL OFL).</p>
+    </footer>
+  </div>
+
+</div>
+
+<script src="/statisk/lesar.js" defer></script>
+</body>
+</html>
+{{end}}

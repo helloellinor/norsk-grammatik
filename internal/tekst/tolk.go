@@ -1,7 +1,8 @@
-package main
+package tekst
 
 import (
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -25,14 +26,16 @@ const (
 )
 
 type Bolk struct {
-	Slag   Bolkslag
-	Nummer string // §-nummer, romartal eller bokstav
-	Tittel string
-	Tekst  string
+	Slag        Bolkslag
+	Nummer      string // §-nummer, romartal eller bokstav
+	Tittel      string
+	Undertittel string // namnet på ei Afdeling, som står på linja under
+	Tekst       string
 }
 
 var (
-	reAfdeling  = regexp.MustCompile(`^(Førſte|Første|Anden|Tredie|Fjerde|Femte) Afdeling\.?$`)
+	reAfdeling  = regexp.MustCompile(`^(Førſte|Første|Anden|Andet|Tredie|Fjerde|Femte) (Afdeling|Tillæg)\.?$`)
+	reTalseks   = regexp.MustCompile(`^(\d+)\.\s+(.+?)\.?$`)
 	reSeksjon   = regexp.MustCompile(`^([IVX]+)\.\s+(.+?)\.?$`)
 	reUnderseks = regexp.MustCompile(`^([a-z])\)\s+(.+?)\.?$`)
 	reParagraf  = regexp.MustCompile(`^(\d+)\.?\s+(.+)$`)
@@ -51,6 +54,14 @@ func Tolk(tekst string) []Bolk {
 
 	leggTil := func(b Bolk) { bolkar = append(bolkar, b) }
 
+	// Boka nummererer seksjonane med romartal, men på eitt punkt brukar
+	// ho arabartal der «I.» skulle ha stått: «1. Subſtantivernes Bøining»
+	// står i hennar eiga innhaldsliste jamsides «II. Adjektivernes
+	// Bøining». Difor reknar vi ei kort, arabisk nummerert overskrift som
+	// ein seksjon når Afdelinga enno ikkje har fått nokon, og elles som
+	// ei underoverskrift.
+	harSeksjon := false
+
 	for _, rå := range linjer {
 		if reSøppel.MatchString(rå) {
 			continue
@@ -68,11 +79,22 @@ func Tolk(tekst string) []Bolk {
 			leggTil(Bolk{Slag: Merknad, Tekst: trimma})
 
 		case !innrykt && reAfdeling.MatchString(trimma):
+			harSeksjon = false
 			leggTil(Bolk{Slag: Afdeling, Tittel: strings.TrimSuffix(trimma, ".")})
 
 		case !innrykt && erKort(trimma) && reSeksjon.MatchString(trimma):
 			m := reSeksjon.FindStringSubmatch(trimma)
+			harSeksjon = true
 			leggTil(Bolk{Slag: Seksjon, Nummer: m[1], Tittel: m[2]})
+
+		case !innrykt && erKort(trimma) && erTalOverskrift(trimma):
+			m := reTalseks.FindStringSubmatch(trimma)
+			if !harSeksjon {
+				harSeksjon = true
+				leggTil(Bolk{Slag: Seksjon, Nummer: m[1], Tittel: m[2]})
+			} else {
+				leggTil(Bolk{Slag: Underseksjon, Nummer: m[1], Tittel: m[2]})
+			}
 
 		case !innrykt && erKort(trimma) && reUnderseks.MatchString(trimma):
 			m := reUnderseks.FindStringSubmatch(trimma)
@@ -120,3 +142,16 @@ func heldFram(tekst string) bool {
 }
 
 func erKort(s string) bool { return len([]rune(s)) < 60 }
+
+// erTalOverskrift skil ei arabisk nummerert overskrift frå eit kort
+// §-avsnitt. Ei overskrift er ei avslutta nemning og endar med punktum,
+// medan eit §-avsnitt held fram i teksten. Seksjonsnummera er dessutan
+// låge (1-4), medan §-nummera på same staden i boka er godt over hundre.
+func erTalOverskrift(s string) bool {
+	m := reTalseks.FindStringSubmatch(s)
+	if m == nil || !strings.HasSuffix(s, ".") {
+		return false
+	}
+	nr, err := strconv.Atoi(m[1])
+	return err == nil && nr <= 12
+}

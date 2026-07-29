@@ -1,0 +1,30 @@
+{{define "del.html"}}
+{{- with .Aktiv}}
+{{- range .Bolkar}}
+  {{- if eq .Slag "afdeling"}}
+  <header class="afdeling">
+    <h2>{{.Tittel}}</h2>
+    {{- if .Undertittel}}<p class="afdeling-namn">{{.Undertittel}}</p>{{end}}
+  </header>
+  {{- else if eq .Slag "seksjon"}}
+  <h3 class="seksjon"><span class="tal">{{.Nummer}}.</span> {{.Tittel}}</h3>
+  {{- else if eq .Slag "underseksjon"}}
+  <h4 class="underseksjon"><span class="tal">{{.Nummer}})</span> {{.Tittel}}</h4>
+  {{- else if eq .Slag "mellomtittel"}}
+  <h5 class="mellomtittel">{{.Tittel}}</h5>
+  {{- else if eq .Slag "paragraf"}}
+  <p class="paragraf" id="p{{.Nummer}}">
+    <a class="tal" href="#p{{.Nummer}}" aria-label="Paragraf {{.Nummer}}">§&nbsp;{{.Nummer}}</a>{{.Tekst}}
+  </p>
+  {{- else if eq .Slag "oppslag"}}
+  <p class="oppslag"><span class="stikkord">{{.Nummer}}</span><span>{{.Tekst}}</span></p>
+  {{- else if eq .Slag "merknad"}}
+  <p class="merknad">{{.Tekst}}</p>
+  {{- else if eq .Slag "avsnitt"}}
+  <p class="avsnitt">{{.Tekst}}</p>
+  {{- else}}
+  <p>{{.Tekst}}</p>
+  {{- end}}
+{{- end}}
+{{- end}}
+{{end}}
