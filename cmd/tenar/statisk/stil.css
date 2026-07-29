@@ -307,10 +307,8 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
    staar i faste rem og i ei fast skrift, og spaltene er faste. */
 .stilling {
   font-family: var(--grotesk); font-size: 1rem;
-  padding: 1.25rem 1.5rem 1.5rem;
-  display: grid; gap: 1.25rem 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 15rem));
-  justify-content: center;
+  padding: 1.1rem 1.5rem 1.35rem;
+  display: flex; flex-direction: column; gap: 0.55rem;
 }
 .stilling button { font-family: var(--grotesk); font-size: 0.8125rem; }
 /* Kvar skriftknapp syner si eiga skrift, i fast storleik. */
@@ -318,10 +316,20 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .stilling [data-skrift="cook"] { font-family: "Cook", serif; font-size: 0.95rem; }
 .stilling [data-skrift="grenze"] { font-family: "Grenze", serif; font-size: 0.95rem; }
 .stilling [data-skrift="antiqua"], .stilling [data-ui="antiqua"] { font-family: "Garamond", serif; font-size: 0.875rem; }
-.stillingsrad { display: flex; flex-direction: column; gap: 0.5rem; }
-.stillingsnamn { font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--blekk-mjuk); }
+/* Ei rad per val: etiketten til venstre, knappane etter. Rutenett med
+   spalter braut knapperekkjene midt i og gav ujamne kolonnar. */
+.stillingsrad {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  align-items: baseline;
+  gap: 0.2rem 1rem;
+}
+.stillingsrad .stillingsnamn { grid-column: 1; }
+.stillingsrad .val { grid-column: 2; }
+.stillingsrad .stillingshjelp { grid-column: 2; }
+.stillingsnamn { justify-self: end; text-align: right; font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--blekk-mjuk); }
 .val { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-.stillingshjelp { margin: 0; font-size: 0.75rem; line-height: 1.55; color: var(--blekk-mjuk); max-width: 30rem; }
+.stillingshjelp { margin: 0.1rem 0 0; font-size: 0.6875rem; line-height: 1.5; color: color-mix(in srgb, var(--blekk-mjuk) 80%, transparent); }
 .meme { color: var(--indigo); }
 .meme em { font-style: italic; }
 
@@ -333,7 +341,6 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   padding-inline: calc(var(--marg) + 1px);
   margin-block: 0; border: none;
   background: var(--skrivebord);
-  animation: fald 0.22s ease-out;
 }
 /* Snittflatene. Skuggen høyrer til papirkantane og fell utover. */
 .i-teksten::before, .i-teksten::after { content: ""; display: block; height: 1px; margin-inline: calc(-1 * var(--marg) - 1px); background: var(--rivekant); }
@@ -344,7 +351,6 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .paragraf, .seksjon, .underseksjon, .mellomtittel, .afdeling { scroll-margin-top: 5.5rem; }
 .landa { animation: landing 1.8s ease-out; }
 @keyframes landing { from { background: var(--indigo-svak); } to { background: transparent; } }
-@keyframes fald { from { opacity: 0; transform: translateY(-0.4rem); } to { opacity: 1; transform: none; } }
 
 /* Manicula er trykkjaren sitt teikn for «sjaa hit». Ho staar alltid i
    Garamond - den einaste av skriftene vaare som har henne. */
