@@ -1,7 +1,33 @@
 @font-face {
-  font-family: "Fraktur";
+  font-family: "Maguntia";
   src: url("/statisk/fraktur.ttf") format("truetype");
   font-display: block;
+}
+@font-face {
+  font-family: "Cook";
+  src: url("/statisk/cook.ttf") format("truetype");
+  font-display: block;
+}
+@font-face {
+  font-family: "Grenze";
+  src: url("/statisk/grenze.ttf") format("truetype");
+  font-display: block;
+}
+/* Antiqua - den skriftarten frakturen kjempa mot, og som til slutt
+   vann. Difor er det henne ein fell attende paa naar ein sviktar. */
+@font-face {
+  font-family: "Garamond";
+  src: url("/statisk/garamond.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Garamond";
+  src: url("/statisk/garamond-kursiv.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
 }
 
 :root {
@@ -14,9 +40,16 @@
 
   --mål: 34rem;
   --register: 17rem;
-  --fraktur: "Fraktur", serif;
-  --moderne: ui-serif, Georgia, "Times New Roman", serif;
-  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --grunn: 1.1875rem;
+  /* Høgda på den faste linja øvst. Alt ein hoppar til må halde seg
+     klar av henne, elles gøymer ho fyrste linja. */
+  --toppline: 4rem;
+  --fraktur: "Maguntia", serif;
+  --antiqua: "Garamond", ui-serif, Georgia, serif;
+  --grotesk: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Skrifta i apparatet vaart - alt som ikkje er Aasens eigen tekst. */
+  --apparat: var(--grotesk);
+  --apparat-storleik: 1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,6 +79,27 @@
   --uthev: #F1ECE2;
 }
 
+/* Skriftval. Maguntia er tettast paa 1860-talssatsen, Grenze er nyare
+   og lettare aa lesa, Cook er kraftigare. Alle tre har æ, ø, aa og ſ. */
+:root[data-skrift="cook"] { --fraktur: "Cook", serif; }
+:root[data-skrift="grenze"] { --fraktur: "Grenze", serif; }
+
+:root[data-storleik="liten"] { --grunn: 1.0625rem; }
+:root[data-storleik="stor"] { --grunn: 1.3125rem; }
+
+/* Bokside 5∶8. Med den klassiske kanonen tek tekstblokka to tredelar av
+   sidebreidda, so ei side paa 5∶8 med 34rem tekst svarar til ei spalte
+   paa om lag 28rem. Skanningane er skorne i kanten, so dette er kanonen
+   for slike proporsjonar, ikkje ei maaling av originalen. */
+:root[data-form="bokside"] { --mål: 27.5rem; }
+
+/* Grensesnittet kan setjast i tre skrifter. Fraktur gjev ei heilstøypt
+   side, men er tyngre aa lesa i smaatt, so han faar litt meir kropp.
+   Antiqua er den historiske motparten; grotesk skil apparatet skarpast
+   fraa teksten. */
+:root[data-ui="fraktur"] { --apparat: var(--fraktur); --apparat-storleik: 1.16; }
+:root[data-ui="antiqua"] { --apparat: var(--antiqua); --apparat-storleik: 1.06; }
+
 * { box-sizing: border-box; }
 
 body {
@@ -60,7 +114,8 @@ body {
 
 /* Apparatet vårt skil seg med vilje frå Aasens eigen tekst: det som er
    sett i fraktur er 1864, alt anna er utgåva som snakkar. */
-.apparat { font-family: var(--sans); font-feature-settings: normal; }
+.apparat { font-family: var(--apparat); font-size: calc(1em * var(--apparat-storleik)); }
+:root[data-ui="grotesk"] .apparat { font-feature-settings: normal; }
 .frak { font-family: var(--fraktur); }
 
 .hopp {
@@ -135,7 +190,7 @@ body {
 }
 
 button {
-  font-family: var(--sans);
+  font-family: var(--apparat);
   font-size: 0.8125rem;
   color: var(--blekk-mjuk);
   background: transparent;
@@ -165,7 +220,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
-  font-size: 1.1875rem;
+  font-size: var(--grunn);
 }
 
 /* Utslutting som i boka. Fraktursats var alltid utslutta, og det krev
@@ -203,7 +258,7 @@ strong { font-weight: 600; }
    med (jf. § 28), ikkje pynt. Under 1100px fell dei inn i linja att. */
 .paragraf { position: relative; }
 .paragraf .tal {
-  font-family: var(--sans);
+  font-family: var(--apparat);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--indigo);
@@ -279,11 +334,11 @@ footer p { margin: 0 0 0.75rem; }
 footer strong { color: var(--blekk); font-weight: 600; }
 
 /* Lesetekst: same tekst, moderne skrift og rund s. */
-body.lesetekst { font-family: var(--moderne); line-height: 1.7; }
+body.lesetekst { font-family: var(--antiqua); line-height: 1.62; }
 body.lesetekst main { font-size: 1.0625rem; }
 body.lesetekst .afdeling-namn { font-size: 1.9rem; }
 body.lesetekst .seksjon { font-size: 1.3rem; }
-body.lesetekst .register .verk { font-family: var(--moderne); font-size: 1.1rem; }
+body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem; }
 
 @media (max-width: 1100px) {
   .paragraf .tal { position: static; width: auto; display: inline; margin-right: 0.5rem; }
@@ -303,4 +358,103 @@ body.lesetekst .register .verk { font-family: var(--moderne); font-size: 1.1rem;
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
   html { scroll-behavior: auto; }
+}
+
+/* ---- Hoppmål ------------------------------------------------------- */
+/* Den faste linja øvst dekte fyrste linja av det ein hoppa til. */
+.paragraf, .seksjon, .underseksjon, .mellomtittel, .afdeling {
+  scroll-margin-top: calc(var(--toppline) + 1.5rem);
+}
+
+/* Kort blink der ein landar, so auget finn staden att. */
+@keyframes landing {
+  from { background: var(--indigo-svak); }
+  to { background: transparent; }
+}
+:root { --indigo-svak: color-mix(in srgb, var(--indigo) 16%, transparent); }
+.landa { animation: landing 1.8s ease-out; border-radius: 2px; }
+.paragraf.landa, .landa { box-decoration-break: clone; }
+
+/* ---- Register: undertitlar ----------------------------------------- */
+.undertitlar { list-style: none; margin: 0 0 0.4rem; padding: 0; }
+.undertitlar a {
+  padding-block: 0.25rem;
+  font-size: 0.78125rem;
+  color: color-mix(in srgb, var(--blekk-mjuk) 80%, transparent);
+}
+.undertitlar .niva-3 a { padding-left: 3rem; }
+.undertitlar .niva-4 a { padding-left: 3.9rem; }
+.undertitlar a:hover { color: var(--blekk); }
+.undertitlar a[aria-current="true"] { color: var(--indigo); border-left-color: var(--indigo); }
+
+/* ---- Hopp til paragraf --------------------------------------------- */
+.hoppform { display: flex; gap: 0.35rem; align-items: center; }
+.hoppform input {
+  font-family: var(--apparat);
+  font-size: 0.8125rem;
+  width: 7rem;
+  padding: 0.4rem 0.6rem;
+  color: var(--blekk);
+  background: transparent;
+  border: 1px solid var(--linje);
+  border-radius: 2px;
+}
+.hoppform input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
+.skil { flex: 1; }
+.visuelt-skjult {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---- Visingsval ----------------------------------------------------- */
+.stilling {
+  border-bottom: 1px solid var(--linje);
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  background: var(--uthev);
+}
+.stillingsrad { display: flex; flex-direction: column; gap: 0.5rem; }
+.stillingsnamn {
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--blekk-mjuk);
+}
+.val { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.stillingshjelp {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: var(--blekk-mjuk);
+  max-width: 30rem;
+}
+
+/* ---- Oppsett i ein merknad ------------------------------------------ */
+/* Eit oppsett som høyrer til ein Anm. skal lesast som ein del av han,
+   ikkje som eit sjølvstendig oppsett i brødteksten. */
+.oppsett.i-merknad {
+  width: auto;
+  margin-inline: 0;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--linje);
+}
+.oppsett.i-merknad table { font-size: 0.875rem; color: var(--blekk-mjuk); }
+
+/* ---- Rad og kolonne under peikaren ---------------------------------- */
+/* Brei tavle er vond aa fylgja med auget. Rada under peikaren og den
+   kolonna ein held paa blir lyfta fram; eit klikk laasar dei fast. */
+.oppsett tr:hover td,
+.oppsett tr.merkt td { background: color-mix(in srgb, var(--indigo) 7%, transparent); }
+.oppsett td.kolonne,
+.oppsett td.kolonne-merkt { background: color-mix(in srgb, var(--indigo) 7%, transparent); }
+.oppsett tr:hover td.kolonne,
+.oppsett tr.merkt td.kolonne-merkt { background: color-mix(in srgb, var(--indigo) 15%, transparent); }
+.oppsett td { transition: background 0.12s; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .landa { animation: none; background: var(--uthev); }
+  .oppsett td { transition: none; }
 }

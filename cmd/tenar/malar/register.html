@@ -1,0 +1,21 @@
+{{define "register.html"}}
+<ol id="registerliste"{{if .Oob}} hx-swap-oob="true"{{end}}>
+  {{- range .Verk.Delar}}
+  <li class="niva-{{.Nivå}}{{if eq .Id $.Aktiv.Id}} aktiv{{end}}">
+    <a href="/del/{{.Id}}"
+       hx-get="/del/{{.Id}}"
+       hx-target="#innhald"
+       hx-swap="innerHTML scroll:top"
+       hx-push-url="true"
+       hx-indicator="#lastar">{{.Tittel}}</a>
+    {{- if and (eq .Id $.Aktiv.Id) .Titlar}}
+    <ul class="undertitlar">
+      {{- range .Titlar}}
+      <li class="niva-{{.Nivå}}"><a href="#{{.Ankar}}" data-hopp="{{.Ankar}}">{{.Tittel}}</a></li>
+      {{- end}}
+    </ul>
+    {{- end}}
+  </li>
+  {{- end}}
+</ol>
+{{end}}

@@ -29,6 +29,12 @@ type Blokk struct {
 	Undertittel string   `json:"ut,omitempty"`
 	Stumpar     []Stump  `json:"p,omitempty"`
 	Tabell      *Tabell  `json:"tab,omitempty"`
+
+	// Ankar blir sett når blokka er ei overskrift ein kan hoppe til.
+	Ankar string `json:"-"`
+	// IMerknad seier at eit oppsett høyrer til merknaden over det, og
+	// difor skal setjast med same innrykk og dempa farge som han.
+	IMerknad bool `json:"-"`
 }
 
 // Tekst gjev blokka som rein tekst, utan utheiving.

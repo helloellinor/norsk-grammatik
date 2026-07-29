@@ -7,6 +7,7 @@ import (
 	"embed"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -26,11 +27,14 @@ type Verk struct {
 	Tittel    string
 	Undertitl string
 	Delar     []tekst.Del
+	Paragraf  map[string]int // §-nummer -> del
+	SisteP    string
 }
 
 type sidedata struct {
-	Verk
+	Verk  Verk
 	Aktiv tekst.Del
+	Oob   bool // registeret blir bytt ut for seg naar htmx hentar ein del
 }
 
 func main() {
@@ -47,12 +51,16 @@ func main() {
 		log.Fatalf("kunne ikkje tolke %s: %v", *inn, err)
 	}
 
+	delar := tekst.DelOpp(tekst.Klassifiser(blokker))
+	indeks := tekst.ParagrafIndeks(delar)
 	verk := Verk{
 		Tittel:    "Norſk Grammatik",
 		Undertitl: "Ivar Aasen · Chriſtiania 1864",
-		Delar:     tekst.DelOpp(tekst.Klassifiser(blokker)),
+		Delar:     delar,
+		Paragraf:  indeks,
+		SisteP:    høgste(indeks),
 	}
-	log.Printf("%d delar tolka frå %s", len(verk.Delar), *inn)
+	log.Printf("%d delar, %d paragrafar tolka frå %s", len(verk.Delar), len(indeks), *inn)
 
 	mal := template.Must(template.ParseFS(malar, "malar/*.html"))
 
@@ -79,6 +87,17 @@ func main() {
 		vis(w, mal, verk, id, berreDel)
 	})
 
+	// Hopp til ein paragraf utan å vite kva bolk han står i.
+	mux.HandleFunc("GET /paragraf/{nr}", func(w http.ResponseWriter, r *http.Request) {
+		nr := r.PathValue("nr")
+		id, finst := verk.Paragraf[nr]
+		if !finst {
+			http.Error(w, "fann ingen § "+nr, http.StatusNotFound)
+			return
+		}
+		http.Redirect(w, r, fmt.Sprintf("/del/%d#p%s", id, nr), http.StatusSeeOther)
+	})
+
 	log.Printf("les på http://%s", *adr)
 	if err := http.ListenAndServe(*adr, mux); err != nil {
 		log.Fatal(err)
@@ -86,7 +105,7 @@ func main() {
 }
 
 func vis(w http.ResponseWriter, mal *template.Template, verk Verk, id int, berreDel bool) {
-	data := sidedata{Verk: verk, Aktiv: verk.Delar[id]}
+	data := sidedata{Verk: verk, Aktiv: verk.Delar[id], Oob: berreDel}
 	namn := "side.html"
 	if berreDel {
 		namn = "del.html"
@@ -95,4 +114,15 @@ func vis(w http.ResponseWriter, mal *template.Template, verk Verk, id int, berre
 	if err := mal.ExecuteTemplate(w, namn, data); err != nil {
 		log.Printf("mal %s: %v", namn, err)
 	}
+}
+
+// høgste gjev det største §-nummeret, til hjelpeteksten i hoppfeltet.
+func høgste(indeks map[string]int) string {
+	beste := 0
+	for nr := range indeks {
+		if n, err := strconv.Atoi(nr); err == nil && n > beste {
+			beste = n
+		}
+	}
+	return strconv.Itoa(beste)
 }

@@ -20,7 +20,12 @@ func Klassifiser(inn []Blokk) []Blokk {
 
 	for _, b := range inn {
 		if b.Tabell != nil {
+			// Eit oppsett som står rett etter ein merknad høyrer til
+			// han, og skal setjast som ein del av merknaden.
 			b.Slag = Oppsett
+			if n := len(ut); n > 0 && (ut[n-1].Slag == Merknad || (ut[n-1].Slag == Oppsett && ut[n-1].IMerknad)) {
+				b.IMerknad = true
+			}
 			ut = append(ut, b)
 			continue
 		}
@@ -60,7 +65,10 @@ func Klassifiser(inn []Blokk) []Blokk {
 			m := reUnderseks.FindStringSubmatch(t)
 			b.Slag, b.Nummer, b.Tittel = Underseksjon, m[1], m[2]
 
-		case !erKort(t) && reParagraf.MatchString(t):
+		// Alt anna som byrjar med eit tal er eit §-avsnitt, same kor
+		// kort det er: sideskifta i papiret deler somme paragrafar i to,
+		// so fyrste luten kan vera berre ei halv linje (t.d. § 153).
+		case reParagraf.MatchString(t):
 			m := reParagraf.FindStringSubmatch(t)
 			b.Slag, b.Nummer = Paragraf, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, len(t)-len(m[2]))

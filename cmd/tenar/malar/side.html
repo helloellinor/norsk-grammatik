@@ -18,25 +18,75 @@
       <p class="verk">{{.Verk.Tittel}}</p>
       <p class="undertitl">{{.Verk.Undertitl}}</p>
     </div>
-    <ol>
-      {{- range .Verk.Delar}}
-      <li class="niva-{{.Nivå}}{{if eq .Id $.Aktiv.Id}} aktiv{{end}}">
-        <a href="/del/{{.Id}}"
-           hx-get="/del/{{.Id}}"
-           hx-target="#innhald"
-           hx-swap="innerHTML scroll:top"
-           hx-push-url="true"
-           hx-indicator="#lastar">{{.Tittel}}</a>
-      </li>
-      {{- end}}
-    </ol>
+    {{template "register.html" .}}
   </nav>
 
   <div class="lesefelt">
     <div class="styring apparat">
-      <button id="skrift" type="button" aria-pressed="true">Trykk 1864</button>
-      <button id="tema" type="button" aria-pressed="false">Mørk</button>
+      <form class="hoppform" action="/paragraf/0" id="paragrafform" role="search">
+        <label for="paragrafnr" class="visuelt-skjult">Hopp til paragraf</label>
+        <input id="paragrafnr" name="nr" type="number" min="1" max="{{.Verk.SisteP}}"
+               inputmode="numeric" placeholder="§ 1–{{.Verk.SisteP}}" autocomplete="off">
+        <button type="submit">Hopp</button>
+      </form>
+      <span class="skil"></span>
+      <button id="skrift" type="button" aria-pressed="true"
+              title="Aasen ville halde paa frakturen (§ 384)">Et tu, Antiqua?</button>
+      <button id="opnastilling" type="button" aria-expanded="false" aria-controls="stilling">Vising</button>
       <span id="lastar" class="lastar" aria-hidden="true">hentar …</span>
+    </div>
+
+    <div id="stilling" class="stilling apparat" hidden>
+      <div class="stillingsrad">
+        <span class="stillingsnamn">Skrift</span>
+        <div class="val" role="radiogroup" aria-label="Skrift">
+          <button type="button" data-skrift="maguntia" aria-pressed="true">Maguntia</button>
+          <button type="button" data-skrift="cook" aria-pressed="false">Cook</button>
+          <button type="button" data-skrift="grenze" aria-pressed="false">Grenze</button>
+        </div>
+        <p class="stillingshjelp">Maguntia er tettast paa 1860-talssatsen. Grenze er nyare og
+        lettare aa lesa; Cook er kraftigare og meir dekorativ.</p>
+      </div>
+
+      <div class="stillingsrad">
+        <span class="stillingsnamn">Grenſeſnitt</span>
+        <div class="val" role="radiogroup" aria-label="Skrift i grensesnittet">
+          <button type="button" data-ui="grotesk" aria-pressed="true">Grotesk</button>
+          <button type="button" data-ui="antiqua" aria-pressed="false">Antiqua</button>
+          <button type="button" data-ui="fraktur" aria-pressed="false">Fraktur</button>
+        </div>
+        <p class="stillingshjelp">Grotesk skil apparatet skarpast frå Aasens eigen tekst.
+        Antiqua er EB Garamond — den skriftarten frakturen kappast med, og som til slutt
+        vann. Fraktur gjev ei heilstøypt side, men er tyngre å lesa i smått.</p>
+      </div>
+
+      <div class="stillingsrad">
+        <span class="stillingsnamn">Storleik</span>
+        <div class="val" role="radiogroup" aria-label="Skriftstorleik">
+          <button type="button" data-storleik="liten" aria-pressed="false">Liten</button>
+          <button type="button" data-storleik="vanleg" aria-pressed="true">Vanleg</button>
+          <button type="button" data-storleik="stor" aria-pressed="false">Stor</button>
+        </div>
+      </div>
+
+      <div class="stillingsrad">
+        <span class="stillingsnamn">Spalte</span>
+        <div class="val" role="radiogroup" aria-label="Spaltebreidd">
+          <button type="button" data-form="fri" aria-pressed="true">Fri</button>
+          <button type="button" data-form="bokside" aria-pressed="false">Bokside 5∶8</button>
+        </div>
+        <p class="stillingshjelp">Boksida set spalta til same breidd som ei 5∶8-side med
+        klassiske margar gjev. Skanningane er skorne i kanten, so sjølve margane er ikkje
+        kjende — dette er den vanlege kanonen for slike proporsjonar, ikkje ei måling.</p>
+      </div>
+
+      <div class="stillingsrad">
+        <span class="stillingsnamn">Drakt</span>
+        <div class="val" role="radiogroup" aria-label="Drakt">
+          <button type="button" data-tema="light" aria-pressed="true">Ljos</button>
+          <button type="button" data-tema="dark" aria-pressed="false">Mørk</button>
+        </div>
+      </div>
     </div>
 
     <main id="innhald" lang="da">
@@ -51,10 +101,9 @@
       slutten av eit ordledd, lang ſ elles.</p>
       <p>Aasen tek sjølv opp dette i § 384, og skyv det med vilje ut av grammatikken:
       skriftteikn høyrer til «det ydre eller det, som er for Øiet», og der skal ein «fylgje
-      Brugen i Danſk og Tydſk». Difor er trykkjaren sin eigen praksis fasit her — mellom
-      anna at dobbel s vert sett <span class="frak">sſ</span>, ikkje
-      <span class="frak">ſſ</span> som på tysk.</p>
-      <p>Skrifta er UnifrakturMaguntia (SIL OFL).</p>
+      Brugen i Danſk og Tydſk». Same staden slår han fast at det er «tjenligſt at beholde
+      Frakturſkriften» — difor heiter knappen som svik han <em>Et tu, Antiqua?</em></p>
+      <p>Skriftene er UnifrakturMaguntia, UnifrakturCook og Grenze Gotisch (SIL OFL).</p>
     </footer>
   </div>
 
