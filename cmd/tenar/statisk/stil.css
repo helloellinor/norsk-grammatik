@@ -173,6 +173,7 @@ main {
   display: flex; flex-direction: column;
   gap: 1.5rem;
   padding: 6.9em var(--marg) 7.8em;
+  width: 100%;
   margin: 0 auto 5.5rem;
   max-width: calc(100% - 2 * var(--sidemarg));
   background: var(--papir);
@@ -326,6 +327,20 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 /* Lukene ligg fast under linja og over papiret: dei er skrivebordet ein
    ser gjennom rifta. Dei blir ikkje flytte i dokumentet - berre synte og
    gøymde - so dei staar same staden kvar gong. */
+/* Rifta. Ho blir sett inn i papiret der lesaren er og veks til luka si
+   høgd, so arket under glir ned og opninga blir til der ein ser. Luka
+   sjølv ligg fast over rifta og rører seg ikkje. */
+.rift {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--skrivebord);
+  margin-inline: calc(-1 * var(--marg));
+  border-block: 1px solid var(--rivekant);
+  border-block-color: transparent;
+}
+.rift.open { border-block-color: var(--rivekant); }
+
 .stilling, .luke {
   position: fixed;
   top: var(--toppline);
@@ -337,9 +352,8 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
      flytte noko i dokumentet, og det var nettopp det som gjorde at ho
      rørte paa seg - so ho legg seg over papiret i staden, der lesaren
      er, og opnar seg nedover. */
-  transform: translateY(-100%);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
   overflow-y: auto;
   background: var(--skrivebord);
 }
@@ -348,7 +362,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .stilling::after, .luke::after {
   content: ""; display: block; height: 1px; background: var(--rivekant);
 }
-.stilling:not([hidden]), .luke:not([hidden]) { transform: translateY(0); }
+.stilling:not([hidden]), .luke:not([hidden]) { opacity: 1; }
 .stilling::before, .luke::before { box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
 .stilling::after, .luke::after { box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
 .luke { padding: 1.25rem 1.5rem 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
@@ -404,9 +418,6 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .meme { color: var(--indigo); }
 .meme em { font-style: italic; }
 
-.i-teksten::before { margin-bottom: 1.1rem; box-shadow: 0 7px 11px -5px rgb(0 0 0 / 0.34); }
-.i-teksten::after { margin-top: 1.1rem; box-shadow: 0 -7px 11px -5px rgb(0 0 0 / 0.34); }
-
 /* -- 9  HOPPMAAL OG SAMANHENGANDE LESING --------------------------- */
 .paragraf, .seksjon, .underseksjon, .mellomtittel, .afdeling { scroll-margin-top: 5.5rem; }
 .landa { animation: landing 1.8s ease-out; }
@@ -415,9 +426,6 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 /* Manicula er trykkjaren sitt teikn for «sjaa hit». Ho staar alltid i
    Garamond - den einaste av skriftene vaare som har henne. */
 .ornament { font-family: "Garamond", serif; }
-  min-height: 5.5rem; display: flex; justify-content: center; align-items: center; gap: 0.35rem;
-  font-family: var(--apparat); font-size: 0.75rem; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--blekk-mjuk); opacity: 0.75;
 
 /* -- 10  SMAL SKJERM ----------------------------------------------- */
 @media (max-width: 1100px) {

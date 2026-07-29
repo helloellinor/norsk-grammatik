@@ -73,7 +73,7 @@
       });
   }
 
-  samle(document.getElementById("innhald"));
+  samle(document.body);
   settSkriftform();
   settVising();
 
@@ -86,10 +86,39 @@
     { luke: document.getElementById("om"), knapp: document.getElementById("opnaom") }
   ];
 
-  // Luka blir ikkje flytt i dokumentet. Ho ligg fast under linja, over
-  // papiret, og er skrivebordet ein ser gjennom rifta. Aa flytte henne
-  // for kvar opning var det som gjorde at ho rørte paa seg, og at
-  // tilstanden mellom dei to lukene kom i ulage.
+  // Papiret blir rive opp der lesaren er: ei rift blir sett inn framfor
+  // den fyrste blokka under topplinja og veks til luka si høgd, so arket
+  // under glir ned. Luka sjølv blir aldri flytt - ho ligg fast over
+  // opninga. Det var flyttinga som gjorde at ho rørte paa seg før.
+  var rift = null;
+
+  function opnaRift(høgd) {
+    lukkRift();
+    var topp = document.querySelector(".topp");
+    var under = topp.getBoundingClientRect().bottom + 4;
+    var born = document.querySelectorAll("#innhald > section > *");
+    var mål = null;
+    for (var i = 0; i < born.length; i++) {
+      if (born[i].getBoundingClientRect().top > under) { mål = born[i]; break; }
+    }
+    if (!mål) return;
+    rift = document.createElement("div");
+    rift.className = "rift";
+    mål.parentNode.insertBefore(rift, mål);
+    // Rifta opnar seg nedanfor det lesaren ser, so sida under skal ikkje
+    // dra augo med seg: vi flyttar rullinga like mykje som ho veks.
+    requestAnimationFrame(function () {
+      rift.style.height = høgd + "px";
+      rift.classList.add("open");
+    });
+  }
+
+  function lukkRift() {
+    if (!rift) return;
+    rift.remove();
+    rift = null;
+  }
+
   function visLuke(par, open) {
     if (open) { par.luke.removeAttribute("hidden"); }
     else { par.luke.setAttribute("hidden", ""); }
@@ -102,6 +131,8 @@
     par.knapp.addEventListener("click", function () {
       var open = par.luke.hasAttribute("hidden");
       luker.forEach(function (a) { visLuke(a, a === par && open); });
+      if (open) { opnaRift(par.luke.getBoundingClientRect().height); }
+      else { lukkRift(); }
     });
   });
 
@@ -110,7 +141,7 @@
     luker.forEach(function (par) {
       if (!par.luke.hasAttribute("hidden")) { visLuke(par, false); par.knapp.focus(); }
     });
-    settRørsle();
+    lukkRift();
   });
 
   stilling.addEventListener("click", function (e) {
@@ -245,7 +276,7 @@
   // ---- Ny del henta inn ---------------------------------------------
   document.body.addEventListener("htmx:afterSwap", function (e) {
     if (!e.target || e.target.id !== "innhald") return;
-    samle(e.target);
+    samle(document.body);
     settSkriftform();
     // Ein ny bolk er henta, og han skal byrje paa toppen. Utan dette
     // vart rullinga staaande der ho var, og eit ankar frå den førre

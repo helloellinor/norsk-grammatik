@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"aasen/internal/tekst"
 )
@@ -40,13 +41,9 @@ type Verk struct {
 }
 
 type sidedata struct {
-	Verk     Verk
-	Aktiv    tekst.Del
-	Oob      bool       // registeret blir bytt ut for seg naar htmx hentar ein del
-	Neste    *tekst.Del // bolken som kjem etter, til samanhengande lesing
-	Forrige  *tekst.Del // bolken føre, so ein kan lesa seg oppover att
-	Framhald bool       // henta av di lesaren rulla nedover hit
-	Oppover  bool       // henta av di lesaren rulla oppover hit
+	Verk  Verk
+	Aktiv tekst.Del
+	Oob   bool // registeret blir bytt ut for seg naar htmx hentar ein del
 }
 
 func main() {
@@ -87,7 +84,7 @@ func main() {
 			http.NotFound(w, r)
 			return
 		}
-		vis(w, mal, verk, 0, false, false, false)
+		vis(w, mal, verk, 0, false)
 	})
 
 	mux.HandleFunc("GET /del/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -99,8 +96,7 @@ func main() {
 		// htmx ber om berre brotstykket; ein vanleg lenkeklikk eller eit
 		// bokmerke skal framleis gje heile sida.
 		berreDel := r.Header.Get("HX-Request") == "true"
-		q := r.URL.Query()
-		vis(w, mal, verk, id, berreDel, q.Get("fram") == "1", q.Get("opp") == "1")
+		vis(w, mal, verk, id, berreDel)
 	})
 
 	// Hopp til ein paragraf utan å vite kva bolk han står i.
@@ -122,19 +118,11 @@ func main() {
 	}
 }
 
-func vis(w http.ResponseWriter, mal *template.Template, verk Verk, id int, berreDel, framhald, oppover bool) {
+func vis(w http.ResponseWriter, mal *template.Template, verk Verk, id int, berreDel bool) {
 	data := sidedata{
-		Verk:     verk,
-		Aktiv:    verk.Delar[id],
-		Oob:      berreDel && !framhald && !oppover,
-		Framhald: framhald,
-		Oppover:  oppover,
-	}
-	if id+1 < len(verk.Delar) {
-		data.Neste = &verk.Delar[id+1]
-	}
-	if id > 0 {
-		data.Forrige = &verk.Delar[id-1]
+		Verk:  verk,
+		Aktiv: verk.Delar[id],
+		Oob:   berreDel,
 	}
 	namn := "side.html"
 	if berreDel {
@@ -188,22 +176,29 @@ func adresser(adr string) []string {
 // stad - staa som lause overskrifter.
 func (d sidedata) Tittelblad() bool { return d.Aktiv.Id == 0 }
 
-// Saum seier om det skal setjast eit skilje føre denne bolken. Kom vi
-// hit ved aa rulle, men bolken føre hadde berre ei overskrift - som ei
-// Afdeling har - so høyrer dei to saman, og eit skilje imellom ville
-// sett ut som eit tomt avsnitt med eit ornament i.
-func (d sidedata) Saum() bool {
-	if !d.Framhald || d.Aktiv.Id == 0 {
-		return false
-	}
-	return d.Verk.Delar[d.Aktiv.Id-1].HarTekst()
+// tittelord er orda tittelarket alt syner. Vi kan ikkje samanlikne heile
+// blokker: sideskifta i kjelda slaar linjene saman til lange remser, og
+// kva som hamnar i kva remse skiftar med klassifiseringa.
+var tittelord = map[string]bool{
+	"Ivar": true, "Aaſen": true, "Norſk": true, "Grammatik": true,
+	"Chiſtiania": true, "Chriſtiania": true, "1864": true,
+	"Føreord": true, "(1997)": true, "Innhald": true, "Fortale": true,
+	"Elektroniſk": true, "utgåve": true, "Det": true, "Norſke": true,
+	"Samlaget": true, "Oslo": true, "1997": true,
 }
 
-// tittellinjer er dei linjene tittelarket alt tek seg av.
-var tittellinjer = map[string]bool{
-	"Ivar Aaſen": true, "Norſk Grammatik": true, "Chiſtiania 1864": true,
-	"Elektroniſk utgåve": true, "Det Norſke Samlaget": true, "Oslo 1997": true,
-	"Innhald": true, "Fortale": true,
+// berreTittelord seier om blokka ikkje inneheld anna enn det arket syner.
+func berreTittelord(t string) bool {
+	felt := strings.Fields(t)
+	if len(felt) == 0 {
+		return false
+	}
+	for _, o := range felt {
+		if !tittelord[o] {
+			return false
+		}
+	}
+	return true
 }
 
 // Vis er blokkene som skal setjast. Paa tittelbladet hoppar vi over dei
@@ -214,7 +209,7 @@ func (d sidedata) Vis() []tekst.Blokk {
 	}
 	b := d.Aktiv.Blokker
 	hopp := 0
-	for hopp < len(b) && b[hopp].Slag == tekst.Mellomtittel && tittellinjer[b[hopp].Tittel] {
+	for hopp < len(b) && berreTittelord(b[hopp].Tekst()) {
 		hopp++
 	}
 	return b[hopp:]

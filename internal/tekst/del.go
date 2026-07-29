@@ -102,17 +102,18 @@ func titlarMedInnhald(d *Del) []Peikar {
 		default:
 			continue
 		}
-		// Berre nummererte overskrifter høyrer heime i registeret. Dei
-		// unummererte er overskrifter i teksten, men ikkje punkt ein blar
-		// etter - og dei fyller lista med smaating.
-		if b.Nummer == "" {
-			continue
-		}
-		if nivå > 2 && !harTekstUnder(d.Blokker[i+1:]) {
-			continue
-		}
-		ankar := fmt.Sprintf("t%d-%d", d.Id, len(ut))
+		// Kvar overskrift faar eit ankar, uansett om ho hamnar i
+		// registeret - elles kjem ho ut med id="" og kan ikkje naaast
+		// med ei lenke i det heile.
+		ankar := fmt.Sprintf("t%d-%d", d.Id, i)
 		d.Blokker[i].Ankar = ankar
+
+		// I registeret høyrer berre dei nummererte heime - dei
+		// unummererte er overskrifter i teksten, ikkje punkt ein blar
+		// etter - og berre dei som faktisk har tekst under seg.
+		if b.Nummer == "" || (nivå > 2 && !harTekstUnder(d.Blokker[i+1:])) {
+			continue
+		}
 		tittel := b.Tittel
 		if b.Nummer != "" {
 			skil := ") "

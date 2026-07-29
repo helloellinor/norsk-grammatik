@@ -1,5 +1,13 @@
 // skann hentar sider frå ei PDF-skanning i høg oppløysing, binariserer dei,
 // og køyrer OCR med tesseracts frk-modell (LSTM-fraktur).
+//
+// Han treng tre program utanfor Go:
+//
+//	pdftoppm   brew install poppler
+//	magick     brew install imagemagick
+//	tesseract  brew install tesseract tesseract-lang   (frk-modellen)
+//
+// Utdatamappa er den attreis og sanalyse les frå.
 package main
 
 import (
@@ -12,7 +20,7 @@ import (
 
 func main() {
 	pdf := flag.String("pdf", "", "sti til PDF-fila")
-	utmappe := flag.String("ut", "sider", "mappe for utdata")
+	utmappe := flag.String("ut", "bøker/sider", "mappe for utdata (det attreis og sanalyse les)")
 	fraSide := flag.Int("fra", 1, "fyrste side")
 	tilSide := flag.Int("til", 1, "siste side")
 	sprak := flag.String("sprak", "frk", "tesseract-spraakmodell")
@@ -28,13 +36,31 @@ func main() {
 		os.Exit(1)
 	}
 
+	var feila, lukkast int
 	for side := *fraSide; side <= *tilSide; side++ {
 		if err := handsamSide(*pdf, *utmappe, side, *sprak); err != nil {
 			fmt.Fprintf(os.Stderr, "side %d: %v\n", side, err)
+			feila++
+			// Manglar eit av programma, feilar kvar einaste side. Aa halde
+			// fram til siste sida og so avslutte med 0 ville sagt at OCR-en
+			// gjekk bra medan mappa er tom.
+			if feila >= 3 && lukkast == 0 {
+				stopp(fmt.Errorf("dei tre fyrste sidene feila og ingen gjekk gjennom - er pdftoppm, magick og tesseract installerte?"))
+			}
 			continue
 		}
+		lukkast++
 		fmt.Printf("side %d ferdig\n", side)
 	}
+	if lukkast == 0 {
+		stopp(fmt.Errorf("ingen sider vart skanna"))
+	}
+	fmt.Printf("%d sider skanna, %d feila\n", lukkast, feila)
+}
+
+func stopp(err error) {
+	fmt.Fprintln(os.Stderr, err)
+	os.Exit(1)
 }
 
 func handsamSide(pdf, utmappe string, side int, sprak string) error {

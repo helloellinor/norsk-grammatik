@@ -18,6 +18,10 @@ func Klassifiser(inn []Blokk) []Blokk {
 	// kort, arabisk nummerert overskrift ein seksjon nettopp naar talet
 	// held fram rekkja, og elles ei underoverskrift.
 	sisteSeksjon := 0
+	// Oppslagsmønsteret («Ang. — Angelſachſiſk.») passar òg paa korte
+	// linjer med tankestrek i brødteksten - t.d. avlydsrekkjene. Det skal
+	// difor berre gjelde inne i forkortingsbolken.
+	iForkortingar := false
 
 	for _, b := range inn {
 		if b.Tabell != nil {
@@ -54,6 +58,7 @@ func Klassifiser(inn []Blokk) []Blokk {
 		// heilt umarkert.
 		case reFramanfor.MatchString(t) && heiltUtheva(b):
 			sisteSeksjon = 0
+			iForkortingar = strings.HasPrefix(t, "Forklaring af nogle Forkortninger")
 			b.Slag, b.Tittel = Afdeling, strings.TrimSuffix(t, ".")
 			// Same bolknamnet står stundom to gonger etter kvarandre,
 			// av di boka har det både som overskrift og som kolumnetittel.
@@ -88,7 +93,7 @@ func Klassifiser(inn []Blokk) []Blokk {
 			b.Slag, b.Nummer = Paragraf, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
 
-		case erKort(t) && reOppslag.MatchString(t):
+		case iForkortingar && erKort(t) && reOppslag.MatchString(t):
 			m := reOppslag.FindStringSubmatch(t)
 			b.Slag, b.Nummer = Oppslag, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
@@ -215,7 +220,10 @@ func heldFram(tekst string) bool {
 	if t == "" {
 		return false
 	}
-	return !strings.ContainsAny(t[len(t)-1:], ".:;!?»)—")
+	// Siste RUNE, ikkje siste byte: » og — er flerbyte, og med byte-snitt
+	// kunne dei aldri matche - same feilen som tal() ovanfor rettar.
+	r := []rune(t)
+	return !strings.ContainsRune(".:;!?»)—", r[len(r)-1])
 }
 
 // erTalOverskrift skil ei arabisk nummerert overskrift frå eit kort
