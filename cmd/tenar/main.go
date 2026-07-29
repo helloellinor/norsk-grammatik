@@ -174,6 +174,17 @@ func adresser(adr string) []string {
 // stad - staa som lause overskrifter.
 func (d sidedata) Tittelblad() bool { return d.Aktiv.Id == 0 }
 
+// Saum seier om det skal setjast eit skilje føre denne bolken. Kom vi
+// hit ved aa rulle, men bolken føre hadde berre ei overskrift - som ei
+// Afdeling har - so høyrer dei to saman, og eit skilje imellom ville
+// sett ut som eit tomt avsnitt med eit ornament i.
+func (d sidedata) Saum() bool {
+	if !d.Framhald || d.Aktiv.Id == 0 {
+		return false
+	}
+	return d.Verk.Delar[d.Aktiv.Id-1].HarTekst()
+}
+
 // tittellinjer er dei linjene tittelarket alt tek seg av.
 var tittellinjer = map[string]bool{
 	"Ivar Aaſen": true, "Norſk Grammatik": true, "Chiſtiania 1864": true,

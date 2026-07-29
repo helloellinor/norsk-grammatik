@@ -165,6 +165,19 @@ func ankarNr(ankar string) int {
 	return 0
 }
 
+// HarTekst seier om bolken har anna enn overskrifter. Ei Afdeling har
+// ofte berre namnet sitt, av di teksten ligg i seksjonane under henne.
+func (d Del) HarTekst() bool {
+	for _, b := range d.Blokker {
+		switch b.Slag {
+		case Afdeling, Seksjon, Underseksjon, Mellomtittel:
+		default:
+			return true
+		}
+	}
+	return false
+}
+
 // ParagrafIndeks seier kva del kvart §-nummer står i, so ein kan hoppe
 // rett til ein paragraf utan å vite kva bolk han høyrer til.
 func ParagrafIndeks(delar []Del) map[string]int {

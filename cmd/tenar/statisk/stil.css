@@ -409,6 +409,15 @@ strong { font-weight: 600; }
 }
 
 p { margin: 0; }
+
+/* Held eit avsnitt fram inne i same §, skal fyrste linja rykkjast inn,
+   slik boka gjer. Fyrste avsnittet etter ei overskrift staar derimot
+   flust - der treng auget ikkje hjelp til aa sjaa at noko byrjar. */
+main > .paragraf + p:not(.merknad):not(.oppslag),
+main > p:not(.merknad):not(.oppslag) + p:not(.merknad):not(.oppslag),
+main > .merknad + p:not(.merknad):not(.oppslag),
+main > .oppsett + p:not(.merknad):not(.oppslag) { text-indent: 1.4em; }
+.merknad + .merknad { text-indent: 1.4em; }
 /* Nytt avsnitt treng litt meir luft over seg enn den jamne avstanden
    mellom blokkene gjev. */
 main > p + p,
