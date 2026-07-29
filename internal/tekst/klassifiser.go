@@ -48,7 +48,11 @@ func Klassifiser(inn []Blokk) []Blokk {
 			sisteSeksjon = 0
 			b.Slag, b.Tittel = Afdeling, strings.TrimSuffix(t, ".")
 
-		case reFramanfor.MatchString(t):
+		// Òg desse er halvfeite i boka. Uthevinga skil den ekte
+		// overskrifta «Føreord (1997)» frå den same nemninga i
+		// 1997-utgåva si eiga vesle innhaldsliste framme, som staar
+		// heilt umarkert.
+		case reFramanfor.MatchString(t) && heiltUtheva(b):
 			sisteSeksjon = 0
 			b.Slag, b.Tittel = Afdeling, strings.TrimSuffix(t, ".")
 			// Same bolknamnet står stundom to gonger etter kvarandre,
@@ -100,7 +104,11 @@ func Klassifiser(inn []Blokk) []Blokk {
 			ut[n].Stumpar = append(ut[n].Stumpar, b.Stumpar...)
 			continue
 
-		case erKort(t) && !erInnleiing(t):
+		// Boka uthevar overskriftene: Afdeling-namna er halvfeite,
+		// mellomoverskriftene kursive. Det er signalet - ikkje lengda.
+		// Utan denne prøven vart kvar kort line ei overskrift, og lister
+		// som «ei til e: Leir, heil, rein» hamna i registeret.
+		case erKort(t) && !erInnleiing(t) && heiltUtheva(b):
 			b.Slag, b.Tittel = Mellomtittel, strings.TrimSuffix(t, ".")
 
 		default:
@@ -113,6 +121,25 @@ func Klassifiser(inn []Blokk) []Blokk {
 	}
 
 	return ut
+}
+
+// heiltUtheva seier om heile blokka staar utheva - kursiv eller
+// halvfeit. Overskriftene i boka gjer det; brødtekst og lister ikkje.
+func heiltUtheva(b Blokk) bool {
+	kursiv, feit, sett := true, true, false
+	for _, s := range b.Stumpar {
+		if strings.TrimSpace(s.Tekst) == "" {
+			continue
+		}
+		sett = true
+		if !s.Kursiv {
+			kursiv = false
+		}
+		if !s.Feit {
+			feit = false
+		}
+	}
+	return sett && (kursiv || feit)
 }
 
 // heldFramFrå seier om siste blokka er avbroten midt i ei setning, so
