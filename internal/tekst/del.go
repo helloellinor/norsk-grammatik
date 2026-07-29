@@ -133,7 +133,7 @@ func harTekstUnder(etter []Blokk) bool {
 		switch b.Slag {
 		case Underseksjon, Mellomtittel, Seksjon, Afdeling:
 			return false
-		case Brødtekst, Paragraf, Merknad, Avsnitt, Oppsett, Oppslag:
+		case Brødtekst, Paragraf, Merknad, Avsnitt, Oppsett, Oppslag, Døme:
 			return true
 		}
 	}

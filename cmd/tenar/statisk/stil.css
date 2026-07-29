@@ -266,10 +266,10 @@ main {
 /* Nytt avsnitt: litt luft over, og innrykk naar det held fram inne i
    same §. Fyrste avsnittet etter ei overskrift staar flust. */
 .bolk > p + p, .bolk > .paragraf, .bolk > .merknad { margin-top: 0.45rem; }
-.bolk > .paragraf + p:not(.merknad):not(.oppslag),
-.bolk > p:not(.merknad):not(.oppslag) + p:not(.merknad):not(.oppslag),
-.bolk > .merknad + p:not(.merknad):not(.oppslag),
-.bolk > .oppsett + p:not(.merknad):not(.oppslag) { text-indent: 1.4em; }
+.bolk > .paragraf + p:not(.merknad):not(.oppslag):not(.døme),
+.bolk > p:not(.merknad):not(.oppslag) + p:not(.merknad):not(.oppslag):not(.døme),
+.bolk > .merknad + p:not(.merknad):not(.oppslag):not(.døme),
+.bolk > .oppsett + p:not(.merknad):not(.oppslag):not(.døme) { text-indent: 1.4em; }
 .merknad + .merknad { text-indent: 1.4em; }
 
 /* §-nummera heng i margen: dei er handtaka teksten siterer seg sjølv med. */
@@ -389,9 +389,9 @@ main {
 }
 .register ol, .register ul { list-style: none; margin: 0; padding: 0; }
 .register ol { margin-top: 1rem; }
-.register a { display: block; padding: 0.4rem 1.25rem; color: var(--blekk-mjuk); text-decoration: none; line-height: 1.45; border-left: 2px solid transparent; }
-.register a:hover { color: var(--blekk); background: var(--uthev); }
-.register a:focus-visible { outline: 2px solid var(--indigo); outline-offset: -2px; }
+.register li a { display: block; padding: 0.4rem 1.25rem; color: var(--blekk-mjuk); text-decoration: none; line-height: 1.45; border-left: 2px solid transparent; }
+.register li a:hover { color: var(--blekk); background: var(--uthev); }
+.register li a:focus-visible { outline: 2px solid var(--indigo); outline-offset: -2px; }
 /* Storleiken speglar hierarkiet. */
 .register .niva-1 > a { color: var(--blekk); font-size: 0.9375rem; margin-top: 0.9rem; padding-block: 0.5rem; }
 .register .aktiv > a { color: var(--indigo); border-left-color: var(--indigo); background: var(--uthev); }

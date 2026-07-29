@@ -104,7 +104,7 @@ func Klassifiser(inn []Blokk) []Blokk {
 		// Oppstilte døme. Kvart døme staar som si eiga blokk i kjelda og
 		// er ei line for seg i trykket; utan eige slag rann dei saman til
 		// vanlege, utlikna avsnitt med innrykk.
-		case reDøme.MatchString(t):
+		case !framhald && reDøme.MatchString(t):
 			m := reDøme.FindStringSubmatch(t)
 			b.Slag, b.Nummer = Døme, m[1]
 			b.Stumpar = skjerFramme(b.Stumpar, tal(t)-tal(m[2]))
