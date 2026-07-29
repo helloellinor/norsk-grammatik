@@ -628,25 +628,64 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   to   { transform: rotate(450deg); }
 }
 
-/* ---- Tittelbladet -------------------------------------------------- */
-/* Fyrste møtet med verket skal vera sjølve tittelbladet, ikkje ei
-   innstillingsluke. Dei tre fyrste linjene er forfattar, verk og stad. */
-.tittelblad .mellomtittel:nth-of-type(1),
-.tittelblad .mellomtittel:nth-of-type(2),
-.tittelblad .mellomtittel:nth-of-type(3) { color: var(--blekk); }
-.tittelblad > .mellomtittel:first-child {
-  font-size: 1.5rem;
-  letter-spacing: 0.02em;
-  margin-top: 2rem;
+
+/* ---- Tittelarket --------------------------------------------------- */
+/* Fyrste møtet med verket. Sett som eit titelblad, ikkje som ei rekkje
+   lause overskrifter: forfattaren over, verket stort i midten, staden og
+   aaret under, med eit aldusblad imellom. */
+.tittelark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.4rem;
+  padding: 3.5rem 0 3rem;
+  min-height: 62vh;
+  justify-content: center;
 }
-.tittelblad > .mellomtittel:first-child + .mellomtittel {
-  font-size: clamp(2.4rem, 7vw, 3.6rem);
-  line-height: 1.12;
-  margin: 0.4rem 0 0.2rem;
+.tittelark p, .tittelark h1 { margin: 0; }
+.tittelark .forfattar {
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  color: var(--blekk-mjuk);
 }
-.tittelblad > .mellomtittel:first-child + .mellomtittel + .mellomtittel {
-  font-size: 1.16rem;
-  margin-bottom: 3.5rem;
-  padding-bottom: 2.5rem;
+.tittelark .verktittel {
+  font-weight: 400;
+  font-size: clamp(2.8rem, 9vw, 4.6rem);
+  line-height: 1.06;
+  letter-spacing: 0.01em;
+}
+.tittelark .utgjeving {
+  font-size: 1.3rem;
+  color: color-mix(in srgb, var(--blekk-mjuk) 60%, transparent);
+}
+.tittelark .stad { font-size: 1.2rem; line-height: 1.5; color: var(--blekk-mjuk); }
+.tittelark-fot {
+  text-align: center;
+  padding-bottom: 3rem;
   border-bottom: 1px solid var(--linje);
+  margin-bottom: 2rem;
 }
+.tittelark-fot p {
+  margin: 0;
+  font-family: var(--apparat);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blekk-mjuk);
+}
+
+/* ---- Luka som deler teksten ---------------------------------------- */
+/* Luka bryt inn i spalta der lesaren er, og skuvar linjene frå kvarandre
+   som ei brett i papiret. Rullar ein forbi henne, fell ho att. */
+.i-teksten {
+  border-block: 1px solid var(--linje);
+  border-radius: 0;
+  margin-block: 1.2rem;
+  animation: fald 0.22s ease-out;
+}
+@keyframes fald {
+  from { opacity: 0; transform: translateY(-0.4rem); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .i-teksten { animation: none; } }

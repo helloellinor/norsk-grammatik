@@ -168,3 +168,29 @@ func adresser(adr string) []string {
 	}
 	return ut
 }
+
+// Tittelblad seier om denne bolken opnar verket. Daa set vi sjølve
+// tittelbladet i staden for aa la dei tre linjene - forfattar, verk,
+// stad - staa som lause overskrifter.
+func (d sidedata) Tittelblad() bool { return d.Aktiv.Id == 0 }
+
+// tittellinjer er dei linjene tittelarket alt tek seg av.
+var tittellinjer = map[string]bool{
+	"Ivar Aaſen": true, "Norſk Grammatik": true, "Chiſtiania 1864": true,
+	"Elektroniſk utgåve": true, "Det Norſke Samlaget": true, "Oslo 1997": true,
+	"Innhald": true, "Fortale": true,
+}
+
+// Vis er blokkene som skal setjast. Paa tittelbladet hoppar vi over dei
+// linjene tittelarket alt har synt.
+func (d sidedata) Vis() []tekst.Blokk {
+	if !d.Tittelblad() {
+		return d.Aktiv.Blokker
+	}
+	b := d.Aktiv.Blokker
+	hopp := 0
+	for hopp < len(b) && b[hopp].Slag == tekst.Mellomtittel && tittellinjer[b[hopp].Tittel] {
+		hopp++
+	}
+	return b[hopp:]
+}

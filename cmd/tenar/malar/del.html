@@ -6,8 +6,18 @@
 <div class="saum" data-del="{{.Aktiv.Id}}" aria-hidden="true"><span class="ornament">&#10087;</span></div>
 {{- end}}
 <section class="bolk" data-del="{{.Aktiv.Id}}" data-tittel="{{.Aktiv.Tittel}}">
-{{- with .Aktiv}}
-{{- range .Blokker}}
+{{- if .Tittelblad}}
+<div class="tittelark">
+  <p class="forfattar">Ivar Aaſen</p>
+  <h1 class="verktittel">Norſk<br>Grammatik</h1>
+  <p class="utgjeving"><span class="ornament">&#10087;</span></p>
+  <p class="stad">Chriſtiania<br>1864</p>
+</div>
+<div class="tittelark-fot">
+  <p>Elektroniſk utgåve · Det Norſke Samlaget · Oslo 1997</p>
+</div>
+{{- end}}
+{{- range .Vis}}
   {{- if eq .Slag "afdeling"}}
   <header class="afdeling">
     <h2>{{.Tittel}}</h2>
@@ -44,7 +54,6 @@
   {{- else}}
   <p>{{template "stumpar" .Stumpar}}</p>
   {{- end}}
-{{- end}}
 {{- end}}
 </section>
 {{- if .Neste}}

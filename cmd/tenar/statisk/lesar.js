@@ -87,8 +87,46 @@
     { luke: document.getElementById("om"), knapp: document.getElementById("opnaom") }
   ];
 
+  var topp = document.querySelector(".topp");
+  var innhald = document.getElementById("innhald");
+
+  // Luka bryt inn i spalta der lesaren er, og skuvar linjene frå
+  // kvarandre. Rullar ein forbi henne, fell ho att.
+  function delingspunkt() {
+    var under = topp.getBoundingClientRect().bottom + 4;
+    var born = innhald.querySelectorAll(":scope > section > *");
+    for (var i = 0; i < born.length; i++) {
+      if (born[i].getBoundingClientRect().top > under) { return born[i]; }
+    }
+    return null;
+  }
+
+  var fold = null;
+  function fylgFolden(par) {
+    if (!("IntersectionObserver" in window)) return;
+    if (fold) { fold.disconnect(); }
+    var saag = false;
+    fold = new IntersectionObserver(function (rader) {
+      for (var i = 0; i < rader.length; i++) {
+        if (rader[i].isIntersecting) { saag = true; }
+        else if (saag) { visLuke(par, false); }
+      }
+    }, { threshold: 0 });
+    fold.observe(par.luke);
+  }
+
   function visLuke(par, open) {
-    if (open) { par.luke.removeAttribute("hidden"); } else { par.luke.setAttribute("hidden", ""); }
+    if (open) {
+      var mål = delingspunkt();
+      if (mål) { mål.parentNode.insertBefore(par.luke, mål); par.luke.classList.add("i-teksten"); }
+      par.luke.removeAttribute("hidden");
+      fylgFolden(par);
+    } else {
+      par.luke.setAttribute("hidden", "");
+      par.luke.classList.remove("i-teksten");
+      if (fold) { fold.disconnect(); fold = null; }
+      if (par.luke.parentNode !== topp) { topp.appendChild(par.luke); }
+    }
     par.knapp.setAttribute("aria-expanded", String(open));
     par.knapp.setAttribute("aria-pressed", String(open));
   }
@@ -144,10 +182,17 @@
         return;
       }
     }
-    // Ingen att i denne bolken: be om den neste, so lesinga held fram.
+    // Ingen att i denne bolken: hent den neste og hald fram der.
     var sentinel = document.querySelector(".hentar-neste");
-    if (sentinel) { sentinel.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    if (!sentinel) return;
+    ventarPaaNeste = true;
+    sentinel.scrollIntoView({ behavior: "smooth", block: "center" });
   }
+
+  // Sett naar Hopp gjekk tom for paragrafar og bad om ein ny bolk. Naar
+  // han er inne, hoppar vi vidare av oss sjølve, so ein kan halde fram
+  // med aa trykkje utan aa venta paa noko.
+  var ventarPaaNeste = false;
 
   // ---- Landing: blink der ein hoppar --------------------------------
   function blink(el) {
@@ -289,6 +334,7 @@
       samle(mål.parentNode);
       settSkriftform();
       fylg(mål.parentNode);
+      if (ventarPaaNeste) { ventarPaaNeste = false; nesteParagraf(); }
     }
   });
 
