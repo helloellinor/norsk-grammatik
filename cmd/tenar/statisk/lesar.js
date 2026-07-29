@@ -91,17 +91,10 @@
     opna.setAttribute("aria-pressed", String(open));
   }
 
-  opna.addEventListener("click", function (e) {
-    e.stopPropagation();
+  opna.addEventListener("click", function () {
     visMeny(stilling.hasAttribute("hidden"));
   });
 
-  // Ei kontekstmeny lukkar seg naar ein tek i noko anna, eller trykkjer
-  // escape. Klikk inne i menyen skal derimot ikkje lukke henne.
-  stilling.addEventListener("click", function (e) { e.stopPropagation(); });
-  document.addEventListener("click", function () {
-    if (!stilling.hasAttribute("hidden")) { visMeny(false); }
-  });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !stilling.hasAttribute("hidden")) {
       visMeny(false);
