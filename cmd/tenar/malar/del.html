@@ -5,7 +5,7 @@
 {{- if .Saum}}
 <div class="saum" data-del="{{.Aktiv.Id}}" aria-hidden="true"><span class="ornament">&#10087;</span></div>
 {{- end}}
-<section class="bolk" data-del="{{.Aktiv.Id}}" data-tittel="{{.Aktiv.Tittel}}">
+<section class="bolk{{if not .Aktiv.HarTekst}} deltittel{{end}}" data-del="{{.Aktiv.Id}}" data-tittel="{{.Aktiv.Tittel}}">
 {{- if .Tittelblad}}
 <div class="tittelark">
   <p class="forfattar">Ivar Aaſen</p>

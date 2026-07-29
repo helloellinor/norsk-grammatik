@@ -44,6 +44,7 @@
   --register: 17rem;
   --grunn: 1.3125rem;
   --sidemarg: 1.5rem;
+  --fold-ut: 1.5rem;
   /* Høgda på den faste linja øvst. Alt ein hoppar til må halde seg
      klar av henne, elles gøymer ho fyrste linja. */
   --toppline: 3.9rem;
@@ -275,7 +276,7 @@ main {
    staar paa sitt eige ark, so eit skifte er eit fysisk sideskifte og
    ikkje berre luft. */
 .bolk {
-  max-width: var(--mål);
+  max-width: min(var(--mål), 100%);
   width: 100%;
   margin: 0 auto;
   padding: 3rem var(--sidemarg) 5rem;
@@ -546,7 +547,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   padding: 1.25rem 1.5rem 1.5rem;
   display: grid;
   gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
 }
 .luke {
   padding: 1.25rem 1.5rem 1.5rem;
@@ -605,11 +606,17 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 
 /* ---- Bokside: papiret rundt satsen -------------------------------- */
 :root[data-form="bokside"] .bolk {
-  max-width: var(--papirbreidd);
-  /* 14,4 % av papirbreidda - snittet av dei maalte 14,7 og 14,1.
-     Sett i em og ikkje i prosent, av di prosent paa folden ville løyst
-     seg mot innhaldsboksen og ikkje mot heile arket. */
-  --sidemarg: 5.724em;
+  /* Arket maa krympe med spalta. Var det laast til 39,75em, sprengde det
+     spalta paa smale vindauge, og clip skar av det som stakk ut - difor
+     vart teksten kappa og saumen stod ikkje under arket. */
+  max-width: min(var(--papirbreidd), 100%);
+  /* Margen er 14,4 % av arket - snittet av dei maalte 14,7 og 14,1 - og
+     staar i prosent so han fylgjer arket naar det krympar. */
+  --sidemarg: 14.4%;
+  /* Folden skal ut til kanten av arket. Prosent paa henne løyser seg mot
+     satsbreidda, ikkje mot arket, so 14,4 % av arket er 20,22 % av
+     satsen. */
+  --fold-ut: 20.22%;
   padding-block: 6.9em 7.8em;     /* 10,8 % og 12,3 % av sidehøgda */
   background: var(--papir);
   box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.07);
@@ -667,6 +674,14 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
 }
 
 
+/* Ei Afdeling har berre namnet sitt; teksten ligg i seksjonane under.
+   Arket hennar er difor ei deltittelside, slik bøker har, og skal setjast
+   som ei: namnet midt paa flata og ikkje øvst med tom side under. */
+.deltittel {
+  min-height: 38vh;
+  justify-content: center;
+}
+
 /* ---- Tittelarket --------------------------------------------------- */
 /* Fyrste møtet med verket. Sett som eit titelblad, ikkje som ei rekkje
    lause overskrifter: forfattaren over, verket stort i midten, staden og
@@ -722,8 +737,8 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
    so det ikkje blir staaande ein kvit renning paa kvar side, og ho har
    ingen eigen rullestong - opninga er so stor som innhaldet krev. */
 .i-teksten {
-  margin-inline: calc(-1 * var(--sidemarg));
-  padding-inline: var(--sidemarg);
+  margin-inline: calc(-1 * var(--fold-ut));
+  padding-inline: var(--fold-ut);
   max-height: none;
   overflow: visible;
   border-top: none;
@@ -740,7 +755,7 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   content: "";
   display: block;
   height: 1px;
-  margin-inline: calc(-1 * var(--sidemarg));
+  margin-inline: calc(-1 * var(--fold-ut));
   background: var(--rivekant);
 }
 .i-teksten::before { margin-bottom: 1.1rem; }
