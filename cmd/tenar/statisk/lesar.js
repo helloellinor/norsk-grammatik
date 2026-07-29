@@ -8,7 +8,6 @@
   var LAGER = "aasen-lesar";
 
   var val = {
-    trykk: true,
     skrift: "maguntia",
     ui: "antiqua",
     ligatur: "trykk",
@@ -44,14 +43,18 @@
     }
   }
 
+  // Antikva er eit skriftval jamsides frakturane. Er han vald, gaar
+  // teksten over til latinske bokstavar med rund s.
+  function erFraktur() { return val.skrift !== "antiqua"; }
+
   function settSkriftform() {
-    kropp.classList.toggle("lesetekst", !val.trykk);
+    var fraktur = erFraktur();
+    kropp.classList.toggle("lesetekst", !fraktur);
     for (var i = 0; i < nodar.length; i++) {
-      nodar[i].node.nodeValue = val.trykk ? nodar[i].trykk : nodar[i].antikva;
+      nodar[i].node.nodeValue = fraktur ? nodar[i].trykk : nodar[i].antikva;
     }
-    var k = document.getElementById("skrift");
-    k.setAttribute("aria-pressed", String(val.trykk));
-    k.textContent = val.trykk ? "Et tu, Antiqua?" : "Attende til frakturen";
+    var meme = document.getElementById("meme");
+    if (fraktur) { meme.setAttribute("hidden", ""); } else { meme.removeAttribute("hidden"); }
   }
 
   function settVising() {
@@ -75,12 +78,6 @@
   samle(document.getElementById("innhald"));
   settSkriftform();
   settVising();
-
-  document.getElementById("skrift").addEventListener("click", function () {
-    val.trykk = !val.trykk;
-    settSkriftform();
-    lagre();
-  });
 
   // ---- Lukene under topplinja ----------------------------------------
   // Berre éi luke om gongen; den andre lukkar seg.
@@ -120,6 +117,7 @@
       if (v) { val[felt] = v; }
     });
     settVising();
+    settSkriftform();
     lagre();
   });
 

@@ -83,6 +83,8 @@
    og lettare aa lesa, Cook er kraftigare. Alle tre har æ, ø, aa og ſ. */
 :root[data-skrift="cook"] { --fraktur: "Cook", serif; }
 :root[data-skrift="grenze"] { --fraktur: "Grenze", serif; }
+/* Antikva er eit skriftval jamsides frakturane, ikkje ein eigen brytar. */
+:root[data-skrift="antiqua"] { --fraktur: var(--antiqua); }
 
 :root[data-storleik="liten"] { --grunn: 1.1875rem; }
 :root[data-storleik="stor"] { --grunn: 1.5rem; }
@@ -509,6 +511,8 @@ body.lesetekst .register .verk { font-family: var(--antiqua); font-size: 1.15rem
   color: var(--blekk-mjuk);
 }
 .val { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.meme { font-style: normal; color: var(--indigo); }
+.meme em { font-style: italic; }
 .stillingshjelp {
   margin: 0;
   font-size: 0.75rem;
