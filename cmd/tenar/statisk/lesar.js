@@ -278,6 +278,22 @@
       ark.parentNode.insertBefore(ny, ark);
     } else {
       var i = delepunkt(ark, tl);
+      // Rull snittet paa plass FØR vi deler. Luka skal koma same staden
+      // kvar gong - elles veit ikkje lesaren kvar ho dukkar opp, og det er
+      // verre enn ei rørsle han kan sjaa og fylgje. Snittet kan berre gaa
+      // mellom to blokker, og dei ligg i snitt 257 px frå kvarandre, so
+      // utan dette landa opninga kvar sin stad alt etter kvar i teksten
+      // ein stod.
+      //
+      // Vi hugsar skuvet paa rifta og tek det att naar arket blir limt, so
+      // lesaren kjem attende dit han las.
+      var kant = i < ark.children.length
+        ? ark.children[i].getBoundingClientRect().top
+        : ark.getBoundingClientRect().bottom;
+      var skuv = Math.round(kant - tl);
+      if (skuv) { scrollBy(0, skuv); }
+      ny.dataset.skuv = String(skuv);
+      ny.dataset.rull = String(Math.round(scrollY));
       var nedre = document.createElement("section");
       nedre.className = ark.className + " nedre";
       ark.classList.add("øvre");
@@ -352,6 +368,13 @@
     // Ein ankerkompensasjon oppaa det retta noko som alt var rett, og
     // sparka sida 92 px oppover kvar gong det var ein rest att av rifta -
     // det var den rykkinga ein saag ved kvar opning og lukking.
+    // Skuvet frå rivinga blir teke att, so lesaren kjem attende dit han
+    // las. Berre om han ikkje har rulla sjølv i mellomtida - daa er det
+    // hans eiga stode som gjeld, ikkje vaar.
+    var skuv = parseInt(r.dataset.skuv || "0", 10);
+    var rullDa = parseInt(r.dataset.rull || "0", 10);
+    var taAtt = skuv && Math.abs(Math.round(scrollY) - rullDa) < 2;
+
     if (nedre && nedre.classList.contains("nedre") && øvre && øvre.classList.contains("øvre")) {
       // Klassa var berre eit plaster medan arket laag i to; naa held
       // syskenregelen att av seg sjølv.
@@ -364,6 +387,8 @@
       nedre.remove();
     }
     r.remove();
+
+    if (taAtt) { scrollBy(0, -skuv); }
   }
 
   function visLuke(par, open) {

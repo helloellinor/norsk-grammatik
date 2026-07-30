@@ -767,16 +767,22 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   content: ""; position: absolute; left: 0; right: 0; height: 0;
   pointer-events: none; z-index: 2;
 }
-/* Ei ekte box-shadow, ikkje ein gradient. Ein gradient som gaar frå kant
-   til kant stoggar brått i begge endar og les som eit maala band; ei
-   box-shadow uskarpar paa alle sider og fadar ut mot hjørna, slik ein
-   kasta skugge gjer. Same token som arkskuggen. */
+/* Ei ekte box-shadow, ikkje ein gradient: han uskarpar paa alle sider og
+   fadar ut mot hjørna, slik ein kasta skugge gjer.
+   Innrykket i sidene er ikkje pynt. Rifta har overflow: hidden - han maa
+   ha det, baade for at 0fr-samanfallet skal virke og for aa klippe luka -
+   og eit skuggefelt som gaar heilt ut til kanten blir difor kappa tvert av
+   der. Arkskuggen er ikkje klipt og fell mjukt utover, so møtet mellom dei
+   to vart ei knivrett loddline nedover frå arkhjørnet.
+   Med feltet trekt inn 24 px har uskarpleiken (15 px pluss 3 i spreiing)
+   døydd ut før han naar klippekanten, og skuggen tynnest av mot endane -
+   som ein skugge frå ein rive kant faktisk gjer. */
 .rift::before {
-  top: 0;
+  top: 0; left: 24px; right: 24px;
   box-shadow: 0 5px 15px 3px rgb(var(--skugge) / var(--skuggestyrke));
 }
 .rift::after {
-  bottom: 0;
+  bottom: 0; left: 24px; right: 24px;
   box-shadow: 0 -5px 15px 3px rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.85));
 }
 /* Ligg rifta fyrst, er det ikkje noko ark over henne - luka er lagd FØRE
