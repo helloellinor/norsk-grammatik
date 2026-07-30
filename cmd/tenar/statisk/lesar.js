@@ -129,22 +129,17 @@
   // Leseflata, ikkje heile vindauget: stonga dekkjer toppen, so midten av
   // det ein faktisk ser ligg eit stykke nedanfor midten av ruta.
   // Aldri over stonga, uansett kor høg luka er.
-  function riftlinje(lukehøgd) {
+  // riftlinja er midt i leseflata, og ikkje noko meir. Snittet skal liggje
+  // der, og so opnar arket seg symmetrisk om det - overarket opp,
+  // underarket ned - so luka blir midtstilt av seg sjølv.
+  //
+  // Her stod «midt - lukehøgd/2» ei stund. Det var rett den gongen opninga
+  // berre voks nedover, men saman med den symmetriske opninga blir det
+  // midtstilt to gonger: snittet hamna høgt oppe, og for ei høg luke heilt
+  // oppe ved stonga.
+  function riftlinje() {
     var tl = toppline();
-    var midt = tl + (innerHeight - tl) / 2;
-    // Luka skal staa midt i leseflata: midtpunktet hennar og midtpunktet
-    // paa flata paa same line. Naar ho er so høg at ho ikkje faar rom -
-    // forkortingslista er 798 px av ei flate paa 836 - legg vi henne so
-    // høgt som raad, altso rett under stonga. Det er det nærmaste ein
-    // kjem, og luka fyller daa flata.
-    //
-    // Her stod eit unnatak som sende snittet til sjølve midten naar luka
-    // var høg. Det gjorde det verre: luka byrja daa PAA midten og voks
-    // nedover, so midtpunktet hennar hamna 400 px under midten av sida.
-    // Unnataket var laga for ei tid daa vi ikkje rulla snittet paa plass
-    // og maatte ta den kanten som fanst; no treffer vi maalet, og daa er
-    // ei rein midtstilling rett.
-    return Math.max(tl, Math.round(midt - (lukehøgd || 0) / 2));
+    return Math.round(Math.max(tl, tl + (innerHeight - tl) / 2));
   }
 
   // Stilarket kan ikkje vite kor høg den faste linja er: ho kjem av
@@ -218,6 +213,34 @@
     helvtene(r).forEach(function (h) { h.classList.add("mjuk", "open"); });
   }
 
+  // fylg held MIDTEN av opninga paa maalet medan ho veks eller fell saman.
+  // Utan dette staar det øvre arket bom stille og alt under det blir skuve
+  // nedover; med det gaar dei to helvtene kvar sin veg frå snittet, slik
+  // eit ark faktisk opnar seg naar ein dreg det frå kvarandre. Snittet -
+  // det lesaren fylgjer med auga - blir liggjande der det var.
+  //
+  // Vi les stoda kvar biletramme i staden for aa rekne henne ut: rifta har
+  // si eiga tidskurve, og eit reknestykke her maatte kjenne henne og ville
+  // gli frå henne den dagen kurva blir endra.
+  // Maalet kan flytte seg undervegs. Ved opning staar det i ro paa midten;
+  // ved lukking glir det attende dit snittet laag før vi rulla, so sida er
+  // tilbake der lesaren las i det same augeblinken som opninga er borte.
+  // Eit eige rull ETTER lukkinga vart ei andre, laus rørsle - fyrst lukka
+  // arket seg, so hoppa sida.
+  function fylg(r, fraa, til, tid) {
+    if (!mjuk) { return; }
+    var t0 = Date.now();
+    (function steg() {
+      if (!r.isConnected) { return; }
+      var p = Math.min(1, (Date.now() - t0) / tid);
+      var maal = fraa + (til - fraa) * p;
+      var b = r.getBoundingClientRect();
+      var av = Math.round((b.top + b.bottom) / 2 - maal);
+      if (av) { scrollBy(0, av); }
+      if (p < 1) { requestAnimationFrame(steg); }
+    })();
+  }
+
   // att tek rørsla andre vegen: snittmarga fell saman samstundes med
   // opninga, so papiret lukkar seg frå baae kantar.
   function att(r) {
@@ -226,12 +249,6 @@
   }
 
   function riv(luke) {
-    // Maal luka her, medan ho enno staar i lesefeltet. Etter at ho er flytt
-    // inn i rifta er ho lausrive frå dokumentet til vi set rifta inn, og
-    // daa maaler ho null. Breidda er ikkje heilt den same som inne i rifta,
-    // so dette er eit overslag - godt nok til aa velje kva snitt vi deler
-    // ved. Den endelege rettinga nedanfor maaler paa nytt.
-    var lukehøgd = luke.getBoundingClientRect().height;
     var innhald = document.getElementById("innhald");
     var ark = innhald ? innhald.querySelector(".bolk") : null;
     var ny = document.createElement("div");
@@ -259,7 +276,7 @@
     // Med riftlinja i baae rollene vart svaret paa det fyrste alltid nei -
     // midtlinja ligg langt nede - so arket vart delt ògso naar lesaren stod
     // heilt øvst, i staden for at luka la seg føre og skauv arket ned.
-    var tl = riftlinje(lukehøgd);
+    var tl = riftlinje();
     if (!ark) { (innhald || heim).appendChild(ny); }
     else if (ark.getBoundingClientRect().top >= toppline()) {
       // Heile arket ligg under linja - lesaren staar over papiret. Daa er
@@ -335,6 +352,9 @@
     // luka føre arket, og naar ho veks, skyv ho heile arket nedover i
     // staden for at sida rullar under det.
     opne(ny);
+    // Snittet ligg no paa riftlinja. Hald midten av opninga der medan ho
+    // veks, so dei to helvtene gaar opp og ned kvar for seg.
+    fylg(ny, riftlinje(), riftlinje(), RIFTETID + 40);
   }
 
   // lim spør DOM-en i staden for aa lite paa variabelen. Er sida henta
@@ -363,7 +383,12 @@
     // hans eiga stode som gjeld, ikkje vaar.
     var skuv = parseInt(r.dataset.skuv || "0", 10);
     var rullDa = parseInt(r.dataset.rull || "0", 10);
-    var taAtt = skuv && Math.abs(Math.round(scrollY) - rullDa) < 2;
+    // Romsleg vindauge. Vakta skal skilje ei RULLING LESAREN har gjort frå
+    // vaar eiga; fylg() rullar sjølv medan opninga fell saman, og lander
+    // sjeldan paa nøyaktig same pikselen. Ei toleranse paa to piksler slo
+    // difor ut paa vaar eiga rørsle og gjorde at stoda aldri vart teken
+    // att. Eit reelt rullegrep er langt større enn dette.
+    var taAtt = skuv && Math.abs(Math.round(scrollY) - rullDa) < 40;
 
     if (nedre && nedre.classList.contains("nedre") && øvre && øvre.classList.contains("øvre")) {
       // Klassa var berre eit plaster medan arket laag i to; naa held
@@ -378,14 +403,10 @@
     }
     r.remove();
 
-    if (taAtt) {
-      // Gli attende. Skuvet kan vera fleire hundre px - snittet ligg i
-      // snitt 110 px frå maalet - og eit sprang av den storleiken i same
-      // augeblinken som arket blir limt les som eit rykk. Rørsla seier kva
-      // som hender; spranget seier berre at noko hende.
-      if (mjuk) { scrollBy({ top: -skuv, behavior: "smooth" }); }
-      else { scrollBy(0, -skuv); }
-    }
+    // Med rørsle er skuvet alt teke att av fylg() undervegs i lukkinga.
+    // Utan rørsle finst det inga lukking aa leggje det inn i, so daa gjer
+    // vi det her.
+    if (taAtt && !mjuk) { scrollBy(0, -skuv); }
   }
 
   function visLuke(par, open) {
@@ -442,6 +463,14 @@
       par.knapp.setAttribute("aria-pressed", "false");
     });
     att(r);
+    // Same rørsla andre vegen, og skuvet frå rivinga blir teke att i same
+    // slengen: maalet glir frå midten og attende dit snittet laag, so sida
+    // er der ho var i det opninga er borte.
+    var attSkuv = parseInt(r.dataset.skuv || "0", 10);
+    var rullDa2 = parseInt(r.dataset.rull || "0", 10);
+    var taaAtt = attSkuv && Math.abs(Math.round(scrollY) - rullDa2) < 40;
+    var m = riftlinje();
+    fylg(r, m, taaAtt ? m + attSkuv : m, RIFTETID);
     // Vi limer naar rørsla faktisk er over, ikkje naar klokka seier ho
     // burde vera det. Ein timer aaleine kan fyre eit bilete for tidleg, og
     // daa blir helvtene rykte ut medan opninga enno har ein rest og

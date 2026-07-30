@@ -374,7 +374,20 @@ main {
    men baade rifta og den nedre helvta kjem etter henne i treet, og
    bakgrunnane deira mala han over. Med eit eige stablingslag legg
    kantane seg over luka - som dei skal, av di dei ligg paa henne. */
-.bolk.øvre, .bolk.nedre { position: relative; z-index: 1; }
+/* Det øvre arket ligg over det nedre. Ljoset kjem ovanfraa, so det er
+   overkanten som kastar - ned i opninga, og paa det som ligg under naar
+   opninga er smal. Det nedre arket kastar ikkje oppover; ingenting lyser
+   nedanfraa.
+   Dette er heile grunnen til at .nedre ikkje lenger maalar oppaa .øvre:
+   ho har ingen oppoverskugge aa maale med, og ho ligg under.
+   Skuggen er arket sin eigen box-shadow - ikkje eit felt inne i rifta.
+   Eit felt der blir klipt av «overflow: hidden» ved arkkanten, og ein
+   klipt skugge kan aldri møte ein uklipt: anten stoggar han brått, eller
+   han naar ikkje fram. Som arkets eigen skugge er han samanhengande heile
+   vegen rundt kanten av seg sjølv. */
+.bolk.øvre, .bolk.nedre { position: relative; }
+.bolk.nedre { z-index: 1; }
+.bolk.øvre { z-index: 2; }
 .bolk.øvre {
   /* Halve blokkgapet paa kvar side av snittet. Det er nettopp det gapet
      dei to blokkene hadde som sysken før delinga, so sjølve delinga endrar
@@ -382,7 +395,16 @@ main {
      vegen. Utan dette voks avstanden med eit blokkgap i det helvtene
      smelta saman, og alt under snittet rykte 24 px. */
   margin-bottom: 0; padding-bottom: calc(var(--blokkgap) / 2);
-  /* Ingen eigen snittskugge her. Sjaa .rift::before nedanfor. */
+  /* Snittskuggen fylgjer opninga, so han er borte naar gapet er det.
+     Lista maa ha like mange lekkar i baae stodene for aa mellomreknast. */
+  box-shadow: 0 0 0 1px var(--linje),
+              0 2px 18px rgb(var(--skugge) / var(--skuggestyrke)),
+              0 12px 20px -6px transparent;
+}
+.bolk.øvre.open {
+  box-shadow: 0 0 0 1px var(--linje),
+              0 2px 18px rgb(var(--skugge) / var(--skuggestyrke)),
+              0 12px 20px -6px rgb(var(--skugge) / calc(var(--skuggestyrke) * 1.15));
 }
 .bolk.nedre {
   padding-top: calc(var(--blokkgap) / 2);
@@ -396,7 +418,8 @@ main {
    lesar.js slaar henne paa fyrst etter at den stoda er fest. */
 .bolk.mjuk {
   transition: padding-top var(--riftetid) var(--riftekurve),
-              padding-bottom var(--riftetid) var(--riftekurve);
+              padding-bottom var(--riftetid) var(--riftekurve),
+              box-shadow var(--riftetid) var(--riftekurve);
 }
 .bolk.øvre.open { padding-bottom: calc(var(--blokkgap) / 2 + 2.2em); }
 .bolk.nedre.open { padding-top: calc(var(--blokkgap) / 2 + 2.2em); }
@@ -762,35 +785,6 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
    dei, so dei kan ikkje naa papiret i det heile - og naar opninga er att,
    er det ingen ting aa teikne. Ingen alpha aa tone, ingen rest aa ta att:
    skuggen finst berre der gapet finst. */
-.rift { position: relative; }
-.rift::before, .rift::after {
-  content: ""; position: absolute; left: 0; right: 0; height: 0;
-  pointer-events: none; z-index: 2;
-}
-/* Ei ekte box-shadow, ikkje ein gradient: han uskarpar paa alle sider og
-   fadar ut mot hjørna, slik ein kasta skugge gjer.
-   Innrykket i sidene er ikkje pynt. Rifta har overflow: hidden - han maa
-   ha det, baade for at 0fr-samanfallet skal virke og for aa klippe luka -
-   og eit skuggefelt som gaar heilt ut til kanten blir difor kappa tvert av
-   der. Arkskuggen er ikkje klipt og fell mjukt utover, so møtet mellom dei
-   to vart ei knivrett loddline nedover frå arkhjørnet.
-   Med feltet trekt inn 24 px har uskarpleiken (15 px pluss 3 i spreiing)
-   døydd ut før han naar klippekanten, og skuggen tynnest av mot endane -
-   som ein skugge frå ein rive kant faktisk gjer. */
-.rift::before {
-  top: 0; left: 24px; right: 24px;
-  box-shadow: 0 5px 15px 3px rgb(var(--skugge) / var(--skuggestyrke));
-}
-.rift::after {
-  bottom: 0; left: 24px; right: 24px;
-  box-shadow: 0 -5px 15px 3px rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.85));
-}
-/* Ligg rifta fyrst, er det ikkje noko ark over henne - luka er lagd FØRE
-   arket, ikkje inn i eit snitt. Daa finst det ingen papirkant til aa kaste
-   skugge ned i opninga, og han skal ikkje teiknast. */
-main > .rift:first-child::before { content: none; }
-main > .rift:last-child::after { content: none; }
-.riftpakke { position: relative; z-index: 1; }
 /* Innpakninga er det rada faldar saman. Ho ber inga utfylling sjølv - eit
    barn med loddrett utfylling kan ikkje falle heilt saman, og daa byrja
    opninga med eit ugjennomsiktig band i skrivebordsfarge i staden for aa
