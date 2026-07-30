@@ -324,16 +324,11 @@
     var nedre = r.nextElementSibling;
     var øvre = r.previousElementSibling;
 
-    // Snittet skal liggje i ro medan arket blir limt. Riv() dyttar sida so
-    // snittet legg seg paa linja; limet maa gjere det motsette, elles
-    // rykkjer teksten under snittet oppover i det augeblinken helvtene
-    // smeltar saman - snittmarga, rifta og gapet mellom blokkene byter alle
-    // maal paa ein gong. Vi festar oss i den fyrste blokka under snittet og
-    // legg henne attende der ho laag.
-    var ankar = (nedre && nedre.classList.contains("nedre"))
-      ? nedre.firstElementChild : null;
-    var før = ankar ? ankar.getBoundingClientRect().top : 0;
-
+    // Ingen rulling her. Snittet ber eit halvt blokkgap paa kvar side, so
+    // liminga er geometrisk nøytral: 12 + 0 + 12 før, eitt blokkgap etter.
+    // Ein ankerkompensasjon oppaa det retta noko som alt var rett, og
+    // sparka sida 92 px oppover kvar gong det var ein rest att av rifta -
+    // det var den rykkinga ein saag ved kvar opning og lukking.
     if (nedre && nedre.classList.contains("nedre") && øvre && øvre.classList.contains("øvre")) {
       // Klassa var berre eit plaster medan arket laag i to; naa held
       // syskenregelen att av seg sjølv.
@@ -343,10 +338,6 @@
       nedre.remove();
     }
     r.remove();
-
-    if (ankar && ankar.isConnected) {
-      scrollBy(0, Math.round(ankar.getBoundingClientRect().top - før));
-    }
   }
 
   function visLuke(par, open) {
@@ -403,7 +394,19 @@
       par.knapp.setAttribute("aria-pressed", "false");
     });
     att(r);
-    ventar = { luker: opne, timar: setTimeout(fullfør, RIFTETID) };
+    // Vi limer naar rørsla faktisk er over, ikkje naar klokka seier ho
+    // burde vera det. Ein timer aaleine kan fyre eit bilete for tidleg, og
+    // daa blir helvtene rykte ut medan opninga enno har ein rest og
+    // snittskuggen enno er synleg - eit glimt av skugge oppaa papiret.
+    // Timaren staar att som sikring: transitionend kjem ikkje om fana ligg
+    // i bakgrunnen, eller om rørsla blir avbroten.
+    var ferdig = function (e) {
+      if (e && (e.target !== r || e.propertyName !== "grid-template-rows")) { return; }
+      r.removeEventListener("transitionend", ferdig);
+      fullfør();
+    };
+    r.addEventListener("transitionend", ferdig);
+    ventar = { luker: opne, timar: setTimeout(fullfør, RIFTETID + 60) };
     return true;
   }
 
