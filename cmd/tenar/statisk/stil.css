@@ -375,10 +375,22 @@ main {
      vegen. Utan dette voks avstanden med eit blokkgap i det helvtene
      smelta saman, og alt under snittet rykte 24 px. */
   margin-bottom: 0; padding-bottom: calc(var(--blokkgap) / 2);
+  /* Snittskuggen fylgjer opninga. Han hentar meining frå gapet han fell
+     ned i; er gapet borte, ligg han berre oppaa papiret under. I det siste
+     augeblinken av lukkinga var opninga null medan skuggen enno stod, og
+     daa laag han som ei stripe over botnen av det øvre arket.
+     Lista maa ha like mange skuggar i baae stodene for aa kunna
+     mellomreknast - difor «transparent» og ikkje ein kortare liste. */
+  box-shadow: 0 0 0 1px var(--linje), 0 9px 16px -4px transparent;
+}
+.bolk.øvre.open {
   box-shadow: 0 0 0 1px var(--linje), 0 9px 16px -4px rgb(0 0 0 / 0.34);
 }
 .bolk.nedre {
   padding-top: calc(var(--blokkgap) / 2);
+  box-shadow: 0 0 0 1px var(--linje), 0 -9px 16px -4px transparent, 0 2px 18px rgb(0 0 0 / 0.28);
+}
+.bolk.nedre.open {
   box-shadow: 0 0 0 1px var(--linje), 0 -9px 16px -4px rgb(0 0 0 / 0.34), 0 2px 18px rgb(0 0 0 / 0.28);
 }
 /* Snittmarga veks fram med opninga, ho slaar ikkje til. Kvar helvt tek si
@@ -390,7 +402,8 @@ main {
    lesar.js slaar henne paa fyrst etter at den stoda er fest. */
 .bolk.mjuk {
   transition: padding-top var(--riftetid) var(--riftekurve),
-              padding-bottom var(--riftetid) var(--riftekurve);
+              padding-bottom var(--riftetid) var(--riftekurve),
+              box-shadow var(--riftetid) var(--riftekurve);
 }
 .bolk.øvre.open { padding-bottom: calc(var(--blokkgap) / 2 + 2.2em); }
 .bolk.nedre.open { padding-top: calc(var(--blokkgap) / 2 + 2.2em); }
@@ -712,6 +725,13 @@ button[aria-pressed="true"] { color: var(--papir); background-color: var(--indig
 button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .hoppform { display: flex; gap: 0.4rem; align-items: center; }
 .hoppform input { width: 7rem; padding: 0.4rem 0.6rem; font-family: var(--apparat); font-size: 0.8125rem; color: var(--blekk); background: transparent; border: 1px solid var(--linje); border-radius: 2px; }
+/* Nettlesaren sine eigne opp/ned-pilar i eit talfelt er teikna av systemet
+   og lyder ikkje stilarket: dei kom i ein blaagraa systemfarge midt i ei
+   flate av papir og blekk. Feltet tek imot tal like fullt, og «Hopp» er
+   knappen som sender det. */
+.hoppform input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+.hoppform input::-webkit-outer-spin-button,
+.hoppform input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .hoppform input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
 .lastar { flex: 0 1 auto; min-width: 0; font-size: 0.75rem; color: var(--blekk-mjuk); opacity: 0; transition: opacity var(--rørsle); }
 .lastar.htmx-request { opacity: 1; }
