@@ -54,6 +54,16 @@
   /* Skrivebordet rundt arket. Same maal som topplinja er høg, so
      margen ovanfor arket svarar til henne og rammene kjennest like. */
   --sidemarg: var(--toppline);
+  /* Skrivebordet langs sidekantane er det som skal gje etter fyrst.
+     Han er ikkje eit fast maal, men det som er til overs naar arket har
+     faatt det det treng: satsbreidda pluss margen inne paa arket. Er det
+     rikeleg, stoggar han paa same maal som topplinja; er det knapt, gaar
+     han mot null - og arket naar kant til kant heller enn at skrifta
+     krympar. Maalt før: mellom 820 og 1000 px heldt kanten seg paa 63 px
+     medan satsen fall frå 594 til 454. */
+  --kantmarg: clamp(0px,
+    (100vw - var(--register) - var(--mål) - 2 * var(--marg)) / 2,
+    var(--toppline));
 
   /* Satsbreidda: 90 mm = 255 pt ~ 28,3 em, maalt paa faksimilen. Rekna
      ut frå grunnstorleiken so ho fylgjer med naar ein endrar han, og i
@@ -194,7 +204,7 @@ main {
   padding: 6.9em var(--marg) 7.8em;
   width: 100%;
   margin: 0 auto 5.5rem;
-  max-width: calc(100% - 2 * var(--sidemarg));
+  max-width: calc(100% - 2 * var(--kantmarg));
   background: var(--papir);
   line-height: 1.52;
   box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.28);
@@ -315,8 +325,12 @@ main {
   color: var(--indigo);
 }
 .punkt > span:last-child { text-align: justify; hyphens: auto; }
-/* Underpunkta ligg eit hakk inn, so nestinga syner seg. */
-.punkt.underpunkt { margin-left: 2.45rem; }
+/* Underpunkta ligg eit hakk inn. Innrykket maa vera padding og ikkje
+   margin: blokkene staar midt paa arket med margin-inline: auto, og ein
+   venstremarg med tal i slaar den autoen av, so punkta datt ut av
+   midtstillinga og la seg inntil venstrekanten. Med padding held boksen
+   plassen sin og berre innhaldet flyttar seg. */
+.punkt.underpunkt { padding-left: 2.45rem; }
 .bolk > .punkt + .punkt { margin-top: 0.15rem; }
 
 /* Oppstilte døme. I trykket er kvart døme ei line for seg, ikkje eit
@@ -453,21 +467,29 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
    teksten og kan ikkje hamne ein annan stad enn der ho vart laga. */
 .rift {
   display: grid; grid-template-rows: 0fr;
-  transition: grid-template-rows 0.34s cubic-bezier(0.32, 0, 0.24, 1);
-  width: 100%; max-width: calc(100% - 2 * var(--sidemarg));
+  /* Lufta rundt luka er den same som mellom stonga og arkkanten, og lik
+     paa baae sider. Ho maa vekse med opninga - stod ho fast, ville ho
+     halde eit gap ope ògso naar luka er att. */
+  padding-block: 0;
+  /* Lufta rundt luka høyrer heime her, ikkje inne i henne. To grunnar:
+     0fr-trikset kan ikkje falle saman rundt eit barn som har loddrett
+     utfylling - maalt 24 px rad rundt eit barn med 12 px - so opninga
+     byrja med eit ugjennomsiktig band i skrivebordsfarge i staden for aa
+     vekse fram frå ingenting. Og luka har skrivebordsfarge sjølv, so
+     utfyllinga hennar og lufta rundt henne var same flata to gonger. */
+  overflow: hidden;
+  transition: grid-template-rows 0.34s cubic-bezier(0.32, 0, 0.24, 1),
+              padding-block 0.34s cubic-bezier(0.32, 0, 0.24, 1);
+  width: 100%; max-width: calc(100% - 2 * var(--kantmarg));
   margin: 0 auto;
+  /* Forkortingslista har 45 rader. Utan tak skauv ho den nedre
+     arkhelvta fleire skjermhøgder ned, og daa rullar sjølve opninga bort
+     medan ein les. Rullinga skjer inne i luka i staden. */
+  max-height: 62vh;
 }
-.rift.open { grid-template-rows: 1fr; }
-/* Ligg rifta føre arket, blir ho staaande der arket byrjar - altso under
-   lufta mellom stonga og arkkanten, ikkje inntil stonga. Luka skal koma
-   fram frå ein stad, ikkje ut av ingenting. */
-/* Luka fekk ei eiga rullehøgd att. Ho hadde max-height medan ho laag
-   fast; i flyten voks ho fritt, og forkortingslista med sine 45 rader
-   skauv den nedre arkhelvta fleire skjermhøgder ned - so maatte ein
-   rulle for aa lesa henne, og daa rullar sjølve opninga bort. Rulling
-   skjer inne i luka i staden. overflow-y: auto klipper like godt som
-   hidden gjorde under samanfaldinga. */
-.rift { max-height: 62vh; }
+.rift.open { grid-template-rows: 1fr; padding-block: var(--sidemarg); }
+/* Øvst kjem lufta ovanfor alt frå main sin eigen toppmarg. */
+.rift.over.open { padding-top: 0; }
 .rift > * { min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
 @media (prefers-reduced-motion: reduce) { .rift { transition: none; } }
 
@@ -475,7 +497,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
    frå den tida luka laag over papiret; no er kantane ekte arkkantar med
    sin eigen skugge, og dei to sette skugge paa skugge. */
 .stilling, .luke { background: var(--skrivebord); }
-.luke { padding: 1.25rem 1.5rem 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
+.luke { padding: 0 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
 .luke p { margin: 0 0 0.8rem; max-width: 46rem; }
 .luke p:last-child { margin-bottom: 0; }
 .luke strong { color: var(--blekk); font-weight: 600; }
@@ -484,7 +506,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
    staar i faste rem og i ei fast skrift, og spaltene er faste. */
 .stilling {
   font-family: var(--grotesk); font-size: 1rem;
-  padding: 1.1rem 1.5rem 1.35rem;
+  padding: 0 1.5rem;
   display: flex; flex-direction: column; gap: 0.55rem;
 }
 .stilling button { font-family: var(--grotesk); font-size: 0.8125rem; }
@@ -543,6 +565,9 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   .paragraf .tal { position: static; width: auto; display: inline; margin-right: 0.5rem; }
 }
 @media (max-width: 820px) {
+  /* Ryggen ligg ikkje lenger ved sida av arket, so han skal ikkje
+     reknast med naar kanten blir rekna ut. */
+  :root { --register: 0px; }
   .rute { grid-template-columns: minmax(0, 1fr); }
   .register { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--linje); }
   .register ol { max-height: 14rem; overflow-y: auto; }
@@ -564,7 +589,6 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .stuttliste tr:hover th, .stuttliste tr:hover td {
   background: color-mix(in srgb, var(--indigo) 8%, transparent);
 }
-#stutt { padding-block: 1.1rem 1.35rem; }
 @media (min-width: 1100px) {
   /* Lista er lang; to kolonnar gjer henne lesbar utan aa rulle. */
   .stuttliste { column-count: 2; column-gap: 3rem; display: block; }

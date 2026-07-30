@@ -127,6 +127,15 @@
     return document.getElementById("innhald");
   }
 
+  // opne set i gang animasjonen. Vi tvingar fram ei omrekning i staden
+  // for aa vente paa ei biletramme: requestAnimationFrame fyrer ikkje
+  // naar fana ligg i bakgrunnen, og daa vart luka staaande samanfalden
+  // med berre si eiga utfylling synleg.
+  function opne(r) {
+    void r.getBoundingClientRect().height;
+    r.classList.add("open");
+  }
+
   function riv(luke) {
     var innhald = document.getElementById("innhald");
     var ark = innhald ? innhald.querySelector(".bolk") : null;
@@ -149,7 +158,7 @@
       ny.className += " over";
       ark.parentNode.insertBefore(ny, ark);
       rift = ny;
-      requestAnimationFrame(function () { ny.classList.add("open"); });
+      opne(ny);
       return;
     } else {
       var i = delepunkt(ark, tl);
@@ -176,8 +185,7 @@
     if (ny.isConnected) {
       scrollBy(0, Math.round(ny.getBoundingClientRect().top - tl));
     }
-    // Ei bilete-ramme fram, so nettlesaren har ei høgd aa gaa ut ifrå.
-    requestAnimationFrame(function () { ny.classList.add("open"); });
+    opne(ny);
   }
 
   // lim spør DOM-en i staden for aa lite paa variabelen. Er sida henta
