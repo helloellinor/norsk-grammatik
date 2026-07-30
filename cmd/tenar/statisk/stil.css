@@ -16,23 +16,33 @@
    Skrivebordet syner seg der arket er flytt til side: rundt arka, i
    gapet mellom dei, og i folden.
 
-   Satsbreidda styrer teksten, ikkje papirkanten: arket fyller flata,
-   og blokkene inne i det er kapa til --mål og staar midt paa.
+   Satsbreidda styrer arket, ikkje omvendt: satsen er kapa til --mål, og
+   arket er kapa til --arkbreidd, som er --mål delt paa 71,2 % - tilhøvet
+   faksimilen har. Difor er margen inne paa arket den same delen av arket
+   uansett skjerm, og det er skrivebordet rundt som gjev etter.
    ===================================================================== */
 
 /* -- 1  SKRIFTER --------------------------------------------------- */
-@font-face { font-family: "Maguntia"; src: url("/statisk/fraktur.ttf") format("truetype"); font-display: block; }
-@font-face { font-family: "Cook"; src: url("/statisk/cook.ttf") format("truetype"); font-display: block; }
-@font-face { font-family: "Grenze"; src: url("/statisk/grenze.ttf") format("truetype"); font-display: block; }
-/* Antiqua - skriftarten frakturen kjempa mot, og som til slutt vann. */
-@font-face { font-family: "Garamond"; src: url("/statisk/garamond.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: swap; }
-@font-face { font-family: "Garamond"; src: url("/statisk/garamond-kursiv.ttf") format("truetype"); font-weight: 100 900; font-style: italic; font-display: swap; }
+/* Vekt og stil maa staa paa kvar face. Utan tilvisinga les nettlesaren
+   metadata i fila, og cook.ttf melder seg som Bold - vekt 700 - so han
+   vart emboldert oppaa eit snitt som alt var feitt. Grenze ber ein ekte
+   vektakse frå 100 til 900, og med tilvisinga fell den falske feiten
+   bort til fordel for den verkelege.
+   font-display er no lik for alle fem. Med «block» stod brødteksten
+   usynleg i opptil tre sekund medan fila lasta - og valde lesaren
+   fraktur i grensesnittet, gjekk heile navigasjonen med. */
+@font-face { font-family: "Maguntia"; src: url("/statisk/fraktur.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Cook"; src: url("/statisk/cook.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Grenze"; src: url("/statisk/grenze.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: swap; }
+/* Antiqua - skriftarten frakturen kjempa mot, og som til slutt vann.
+   Vektaksen gaar frå 400 til 800 i fila; 100 900 lova meir enn ho har. */
+@font-face { font-family: "Garamond"; src: url("/statisk/garamond.ttf") format("truetype"); font-weight: 400 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Garamond"; src: url("/statisk/garamond-kursiv.ttf") format("truetype"); font-weight: 400 800; font-style: italic; font-display: swap; }
 
 /* -- 2  FARGAR OG MAAL --------------------------------------------- */
 :root {
   --papir: #FCFBF9;
   --skrivebord: #E7E1D4;
-  --rivekant: #CFC7B6;
   --blekk: #1A1714;
   --blekk-mjuk: #57514A;
   --indigo: #2B3A67;
@@ -46,56 +56,123 @@
   --ryggstrek: #C7BFAE;
   --skilt: #2B3A67;
   --skilt-blekk: #F4F1EA;
+  /* Falsen inn mot arka er tvefarga, slik ein bøygd rygg er: skuggen i
+     sjølve folden, og ljoset paa kanten rett utanfor. Med berre éin strek
+     i --linje laag han 1,02:1 mot skrivebordet og var ikkje aa sjaa i ljos
+     drakt. I mørk drakt er --fals ljosare enn flata og gjev fasen sjølv,
+     so der skal ingen ljoskant attaat. */
+  --fals: #B3A992;
+  --falsljos: #F7F3EA;
+  /* Kanten rundt knappane. --linje er laga for strekar paa papir og ligg
+     1,21:1 mot stonga - ein ser han ikkje, og daa ser ein ikkje kvar
+     knappen sluttar. Dette maalet gjev 3:1, som er grensa for noko ein
+     skal kunna kjenne att som ein kontroll. */
+  --knappekant: #8F8574;
 
   --grunn: 1.3125rem;
   --register: 17rem;
-  --marg: 1.5rem;
-  --toppline: 3.95rem;   /* høgda paa den faste linja */
-  /* Skrivebordet rundt arket. Same maal som topplinja er høg, so
-     margen ovanfor arket svarar til henne og rammene kjennest like. */
+  /* Satsen sin del av arket. Dette er BOKMARGEN, og han skal aldri ut av
+     tilhøve: faksimilen har satsen paa 71,2 % av breidda, so 14,4 % marg
+     paa kvar side, og slik skal det vera paa kvar einaste skjerm. Blir
+     arket mindre, blir satsen mindre - slik ei side blir mindre naar ein
+     skalerer henne - men tilhøvet staar.
+     Han maa liggje paa blokkene og ikkje som utfylling paa arket: ei
+     prosentutfylling reknar mot foreldreboksen, altso leseflata, ikkje mot
+     arket sjølv - maalt gav det 59,7 % sats ved 1440 px i staden for 71,2. */
+  --satsdel: 71.2%;
+  /* Skrivebordet langs arkkantane. Dette er noko heilt anna enn bokmargen
+     over: han har inga øvre grense - paa ein brei skjerm er det berre bord
+     omkring - men naar det blir knapt, gjev han etter heilt ned hit, ein
+     nominell strek. Det er skrivebordet som skal vike paa telefon, ikkje
+     tilhøvet inne paa arket. */
+  --minidesk: 6px;
+  /* Lufta mellom blokkene i satsen. Maa vera eit token: flex-gap fell
+     ikkje saman med margane til syskena, so kvar blokk som skal staa
+     tettare enn dette maa trekkje talet frå att sjølv. Stod det som eit
+     tal to stader, og døme-regelen skreiv 1.5rem om att med minus foran -
+     endra ein det eine, la nedstreken seg over lina under. */
+  --blokkgap: 1.5rem;
+  /* Innrykket paa ryggen. Skiltkanten, bolkskilet og teksten i lista
+     ligg alle her, so spalta har éi loddline. */
+  --rygginnrykk: 1.25rem;
+  /* Og éi luftmaal loddrett: over skiltet, under skiltet, og rundt
+     bolkskila. Stod som 1,75rem over og 1,15 under, so skiltet laag
+     10 px for langt ned og heile ryggen kjendest skeiv. */
+  --rygglufta: 1.15rem;
+  /* Høgda paa den faste linja. Talet her er berre eit utgangspunkt:
+     lesar.js maaler linja og skriv maalet attende hit, av di ho ikkje har
+     nokon fast høgd - ho fylgjer skrifta lesaren vel i grensesnittet
+     (maalt 61 px i Maguntia, 67 i Grenze) og knapperekkja bryt seg i to
+     under 487 px breidd, og daa er ho 104 px. Alt som skal liggje klar av
+     linja reknar frå dette talet, so det maa vera sant. */
+  --toppline: 3.95rem;
+  /* Skrivebordet rundt arket, baade ovanfor og langs kantane. Same maal
+     som topplinja er høg, so rammene kjennest like. */
   --sidemarg: var(--toppline);
-  /* Skrivebordet langs sidekantane er det som skal gje etter fyrst.
-     Han er ikkje eit fast maal, men det som er til overs naar arket har
-     faatt det det treng: satsbreidda pluss margen inne paa arket. Er det
-     rikeleg, stoggar han paa same maal som topplinja; er det knapt, gaar
-     han mot null - og arket naar kant til kant heller enn at skrifta
-     krympar. Maalt før: mellom 820 og 1000 px heldt kanten seg paa 63 px
-     medan satsen fall frå 594 til 454. */
-  --kantmarg: clamp(0px,
-    (100vw - var(--register) - var(--mål) - 2 * var(--marg)) / 2,
-    var(--toppline));
+  /* Avstanden eit hopp skal landa paa: klar av linja, med litt luft
+     attaat. Stod som 5.5rem og var eit fjerde tal som ikkje visste om dei
+     andre - ved wrappa knapperekkje landa paragrafen bak stonga. */
+  --landing: calc(var(--toppline) + 1.5rem);
+  /* Rørsla naar arket riv seg opp og att. lesar.js maa vite kor lenge ho
+     tek, so ho staar som eit tal her og ein gong der - hald dei like. */
+  --riftetid: 0.34s;
+  --riftekurve: cubic-bezier(0.32, 0, 0.24, 1);
 
   /* Satsbreidda: 90 mm = 255 pt ~ 28,3 em, maalt paa faksimilen. Rekna
      ut frå grunnstorleiken so ho fylgjer med naar ein endrar han, og i
      rem so ho er den same for alle blokkene same kva grad dei har. */
   --mål: calc(28.3 * var(--grunn));
+  /* Arkbreidda. Paa papir er margen ein fast del av arket: faksimilen har
+     satsen paa 71,2 % av breidda, altso 14,4 % marg paa kvar side. Difor
+     maa arket kapast der, og ikkje fylle leseflata: gjorde det det, vart
+     margen «det som var til overs» etter at satsen var midtstilt, og daa
+     skifte han med vindaugsbreidda - 224 px paa ein brei skjerm, 24 paa ein
+     smal. Med arkbreidda bunden til satsen er tilhøvet det same overalt, og
+     det er skrivebordet som veks og krympar i staden. */
+  --arkbreidd: calc(var(--mål) / 0.712);
 
   --fraktur: "Maguntia", serif;
   --antiqua: "Garamond", ui-serif, Georgia, serif;
   --grotesk: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --apparat: var(--antiqua);
   --indigo-svak: color-mix(in srgb, var(--indigo) 16%, transparent);
+  /* Vask til aa lyfte fram ei rad eller ei kolonne. Stod som 7 % i
+     tavlene og 8 % i forkortingslista - same handrørsla, to materiale. */
+  --indigo-vask: color-mix(in srgb, var(--indigo) 7%, transparent);
+  --indigo-vask-sterk: color-mix(in srgb, var(--indigo) 15%, transparent);
+  /* Éi rørsle for alt ein tek paa. Stod som 0.15s ease, 0.15s ease-out,
+     0.12s ease og ingen overgang i det heile, alt etter kva ein peika paa. */
+  --rørsle: 0.15s ease-out;
 }
 
+/* Draktene. Lesaren sitt val staar i data-theme og skal alltid vinne over
+   det maskina meiner, so mørk kjem i to utgaaver: ei for maskinvalet og ei
+   for lesarvalet. Ljos maa staa ein gong til av same grunn - ho skal slaa
+   maskinvalet naar lesaren har bede om ljost paa ei mørk maskin.
+   Hald dei tre listene i same rekkjefylgje; det er einaste vernet mot at
+   dei glid frå kvarandre. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --papir: #2A261D; --skrivebord: #0A0907; --rivekant: #4A4438;
+    --papir: #2A261D; --skrivebord: #0A0907;
     --blekk: #EDE8DE; --blekk-mjuk: #A29A8D; --indigo: #93A6DC;
     --linje: #3D382F; --uthev: #322E24; --stong: #17150F;
     --ryggstrek: #2C271E; --skilt: #1B2440; --skilt-blekk: #C9D3F0;
+    --fals: #2C271E; --falsljos: transparent; --knappekant: #6E6757;
   }
 }
 :root[data-theme="dark"] {
-  --papir: #2A261D; --skrivebord: #0A0907; --rivekant: #4A4438;
+  --papir: #2A261D; --skrivebord: #0A0907;
   --blekk: #EDE8DE; --blekk-mjuk: #A29A8D; --indigo: #93A6DC;
   --linje: #3D382F; --uthev: #322E24; --stong: #17150F;
-    --ryggstrek: #2C271E; --skilt: #1B2440; --skilt-blekk: #C9D3F0;
+  --ryggstrek: #2C271E; --skilt: #1B2440; --skilt-blekk: #C9D3F0;
+  --fals: #2C271E; --falsljos: transparent; --knappekant: #6E6757;
 }
 :root[data-theme="light"] {
-  --papir: #FCFBF9; --skrivebord: #E7E1D4; --rivekant: #CFC7B6;
+  --papir: #FCFBF9; --skrivebord: #E7E1D4;
   --blekk: #1A1714; --blekk-mjuk: #57514A; --indigo: #2B3A67;
-  --ryggstrek: #C7BFAE; --skilt: #2B3A67; --skilt-blekk: #F4F1EA;
   --linje: #E4DFD6; --uthev: #F1ECE2; --stong: #FAF7F1;
+  --ryggstrek: #C7BFAE; --skilt: #2B3A67; --skilt-blekk: #F4F1EA;
+  --fals: #B3A992; --falsljos: #F7F3EA; --knappekant: #8F8574;
 }
 
 /* Val lesaren gjer. Berre desse rører tokena over. */
@@ -118,7 +195,12 @@ body {
   color: var(--blekk);
   font-family: var(--fraktur);
   line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  /* Ingen -webkit-font-smoothing her. «antialiased» slaar av
+     underpikselutjamninga og stammemørkinga, og hårstrekane i frakturen
+     er tynnare enn éin piksel ved lesestorleik - dei vart brotne
+     punktlinjer i staden for strek, verst i mørk drakt. Han stod dessutan
+     utan si -moz-osx-motpart, so sida var merkbart lettare i Chrome enn i
+     Firefox paa same maskin. */
   /* liga og rlig gjev fraktursatsen sine eigne ligaturar: ch, ck, ſt,
      ff, fi, tz. hlig maa staa av - han byter mm og nn mot m og n med
      strek over, ei forkorting frå handskrifter som 1864-trykket ikkje
@@ -132,6 +214,19 @@ body {
 .frak { font-family: var(--fraktur); }
 [hidden] { display: none !important; }
 em { font-style: italic; }
+/* Fraktur har ingen kursiv. Ingen av dei tre frakturfilene ber eit
+   kursivsnitt, so «italic» fekk nettlesaren til aa skjere glyfane paa
+   skeive - 5469 stader i teksten - og skjeringa kjem etter hintinga, so
+   haarstrekane brotna. Trykket sperrar i staden; det er slik fraktursats
+   alltid har utheva. Vel lesaren antiqua, er skrifta Garamond, som har
+   eit ekte kursivsnitt, og daa gjeld det vanlege. Vil ein ha den skeive
+   forma att, er det denne eine regelen som skal ut. */
+:root:not([data-skrift="antiqua"]) .bolk em,
+:root:not([data-skrift="antiqua"]) .frak em {
+  font-style: normal;
+  font-synthesis: style none;
+  letter-spacing: 0.09em;
+}
 strong { font-weight: 600; }
 p { margin: 0; }
 
@@ -151,13 +246,19 @@ p { margin: 0; }
     var(--skrivebord) 0.5rem,
     var(--skrivebord) calc(100% - 0.9rem),
     color-mix(in srgb, var(--skrivebord) 92%, black) 100%);
-  box-shadow: inset -7px 0 9px -8px rgb(0 0 0 / 0.5);
+  /* Skuggen i folden, og ljoskanten rett utanfor han. Sjaa --fals. */
+  box-shadow: inset -7px 0 9px -8px rgb(0 0 0 / 0.5),
+              1px 0 0 0 var(--falsljos);
   /* Ryggen fyller heile høgda. Med align-self: start vart han berre so
      høg som innhaldet, so han stogga midt paa sida. */
   min-width: 0; position: sticky; top: 0; align-self: start;
   height: 100vh; overflow-y: auto;
-  padding: 1.75rem 0 3rem;
-  border-right: 1px solid var(--linje);
+  /* Ingen botnutfylling: lista sluttar der ho sluttar. */
+  padding: var(--rygglufta) 0 0;
+  /* Falsen maa ha ryggfargen. --linje er laga for papir og ligg tre
+     verdiar frå skrivebordsfargen - 1,02:1 - so kanten var reint usynleg,
+     og ryggen flaut ut i arket. Same feilen som bolkskilet hadde. */
+  border-right: 1px solid var(--fals);
   font-size: 0.8125rem;
 }
 
@@ -168,20 +269,42 @@ p { margin: 0; }
    begge. Visingsluka høyrer derimot til skrivebordet, og kjem fram naar
    arket blir rive opp. */
 .topp {
-  position: sticky; top: 0; z-index: 10;
-  background: color-mix(in srgb, var(--stong) 92%, transparent);
-  backdrop-filter: saturate(180%) blur(14px);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
-  border-bottom: 1px solid var(--linje);
+  /* Éin piksel over kanten, og pikselen teken att i utfyllinga. Ved brotne
+     rullehøgder - styreflate, 2x-skjerm - hamna stonga paa eit halvt
+     pikseltal, og daa opna det seg ei haarfin sprekk mellom henne og
+     vindaugskanten der arket synte seg gjennom. No ligg ho eit hakk for
+     høgt og dekkjer sprekken; den synlege høgda er den same. */
+  position: sticky; top: -1px; padding-top: 1px; z-index: 10;
+  /* Gjennomskinleg, so ein ser arket gaa under henne. Stod paa 92 % og
+     sidan 82 %, og las framleis som ei tett flate. Uskarpleiken nedanfor
+     gjer at skrifta paa knappane held seg roleg sjølv naar flata slepp
+     mykje gjennom. */
+  background: color-mix(in srgb, var(--stong) 62%, transparent);
+  /* Papir, ikkje frosta glas. Ei glasrute held strukturen i det som ligg
+     under henne - ein ser dei mørke formene av skrifta gli forbi - medan
+     tynt papir spreier ljoset til strukturen er borte og arket sin eigen
+     tone tek over. Det er ikkje ein annan filterfunksjon, men ei anna
+     blanding: mykje breiare spreiing, og kontrasten dregen ned mot
+     papirtonen. Metninga ned, ikkje opp: glas gjer fargane skarpare,
+     spreiing i papir gjer dei blassare. */
+  backdrop-filter: blur(30px) contrast(0.62) brightness(1.06) saturate(0.85);
+  -webkit-backdrop-filter: blur(30px) contrast(0.62) brightness(1.06) saturate(0.85);
+  /* Linja grensar ned mot skrivebordet, ikkje mot papir - difor
+     ryggfargen her òg. */
+  border-bottom: 1px solid var(--ryggstrek);
   box-shadow: 0 7px 13px -7px rgb(0 0 0 / 0.26);
 }
 
 /* Papiret ligg under luka. */
 main {
   min-width: 0; display: flex; flex-direction: column;
-  /* Arket maa vite om linja over seg: utan luft her ligg fyrste arket
-     rett inntil henne, og margen ovanfor syner seg ikkje. */
-  padding-block: var(--sidemarg) 4rem;
+  /* Skrivebordet over og under arka. Same maal paa baae sider, so ramma
+     er jamn: utan luft øvst ligg fyrste arket rett inntil linja.
+     Nedst stod her 4rem attaat den botnmargen arket alt ber med seg, og
+     dei to la seg oppaa kvarandre - 9,5rem under det siste arket mot
+     3,95 over det fyrste. Gapet mellom arka er arket sin eigen marg og
+     høyrer til der; skrivebordsramma er denne. */
+  padding-block: var(--sidemarg);
   font-size: var(--grunn);
   /* main er skrivebordet arka ligg paa. Rifta har ingen eigen bakgrunn,
      so det er denne flata ein ser gjennom opninga. */
@@ -200,11 +323,19 @@ main {
      stretch fyller dei arket, max-width kapar dei, og margin auto held
      dei midt paa. */
   display: flex; flex-direction: column;
-  gap: 1.5rem;
-  padding: 6.9em var(--marg) 7.8em;
+  gap: var(--blokkgap);
+  /* Loddrett utfylling i em, so ho fylgjer skriftgraden. Vassrett skal
+     det ikkje vera noka: margen er blokkene sin eigen del av arket. */
+  padding: 6.9em 0 7.8em;
   width: 100%;
   margin: 0 auto 5.5rem;
-  max-width: calc(100% - 2 * var(--kantmarg));
+  /* Arket tek det leseflata gjev, men aldri meir enn arkbreidda - der
+     stoggar det, og resten blir skrivebord. Skrivebordet gjev etter fyrst,
+     og aldri meir enn 12 % av flata, so arket ikkje blir smalt paa telefon.
+     Maalt mot leseflata sjølv, ikkje mot vindauget. Rekna vi frå 100vw og
+     trekte frå ryggen, kom rullestonga med i talet - 15 px paa Windows og
+     Linux - og satsen vart 579 px i staden for 594. */
+  max-width: min(var(--arkbreidd), calc(100% - 2 * var(--minidesk)));
   background: var(--papir);
   line-height: 1.52;
   box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.28);
@@ -216,8 +347,16 @@ main {
    flex-boks, so blokkene krympa til innhaldet sitt - og daa fekk strekane
    kvar side av overskriftene (flex: 1) null breidd og forsvann. Same
    feilen som gjorde sjølve arket for smalt, eitt hakk ned. */
-.bolk > * { width: 100%; max-width: var(--mål); margin-inline: auto; }
-.bolk > .oppsett { max-width: calc(1.34 * var(--mål)); }
+/* Botnmargen er gapet MELLOM to ark. Det siste arket har ingen nabo under
+   seg, so der skal han vekk - elles la han seg oppaa skrivebordsramma og
+   botnen vart dobbelt so djup som toppen. */
+.bolk:last-child { margin-bottom: 0; }
+/* Satsen tek alltid sin del av arket - aldri meir, aldri mindre. Det er
+   dette som held bokmargen i tilhøve paa kvar skjerm. */
+.bolk > * { width: var(--satsdel); margin-inline: auto; }
+/* Oppsetta faar strekkje seg ut i margen, slik dei gjer i trykket: 1,34
+   gonger satsbreidda, altso 95,4 % av arket. */
+.bolk > .oppsett { width: var(--satsdel); max-width: none; }
 
 /* Dei to helvtene av eit rive ark. Snittet er eit snitt, ikkje ein
    arkkant: der skal det korkje vera margbotn eller den store luft-marga
@@ -230,14 +369,31 @@ main {
    kantane seg over luka - som dei skal, av di dei ligg paa henne. */
 .bolk.øvre, .bolk.nedre { position: relative; z-index: 1; }
 .bolk.øvre {
-  margin-bottom: 0; padding-bottom: 2.2em;
+  /* Halve blokkgapet paa kvar side av snittet. Det er nettopp det gapet
+     dei to blokkene hadde som sysken før delinga, so sjølve delinga endrar
+     ingen ting: 24 px før, 12 + 0 + 12 etter. Limet er like nøytralt andre
+     vegen. Utan dette voks avstanden med eit blokkgap i det helvtene
+     smelta saman, og alt under snittet rykte 24 px. */
+  margin-bottom: 0; padding-bottom: calc(var(--blokkgap) / 2);
   box-shadow: 0 0 0 1px var(--linje), 0 9px 16px -4px rgb(0 0 0 / 0.34);
 }
 .bolk.nedre {
-  padding-top: 2.2em;
+  padding-top: calc(var(--blokkgap) / 2);
   box-shadow: 0 0 0 1px var(--linje), 0 -9px 16px -4px rgb(0 0 0 / 0.34), 0 2px 18px rgb(0 0 0 / 0.28);
 }
-.deltittel, .tittelark { align-items: center; }
+/* Snittmarga veks fram med opninga, ho slaar ikkje til. Kvar helvt tek si
+   eiga side av snittet, so papiret opnar seg frå baae kantar samstundes.
+   Overgangen ligg i ei eiga klasse av di han ikkje maa vera paa medan
+   delinga skjer: i det augeblinken arket blir delt, fell botnmarga paa den
+   øvre helvta frå 7,8em til null, og var overgangen live daa, ville dei
+   5,6em krympe seg gjennom teksten i staden for berre aa vera borte.
+   lesar.js slaar henne paa fyrst etter at den stoda er fest. */
+.bolk.mjuk {
+  transition: padding-top var(--riftetid) var(--riftekurve),
+              padding-bottom var(--riftetid) var(--riftekurve);
+}
+.bolk.øvre.open { padding-bottom: calc(var(--blokkgap) / 2 + 2.2em); }
+.bolk.nedre.open { padding-top: calc(var(--blokkgap) / 2 + 2.2em); }
 
 /* Ei Afdeling har berre namnet sitt; teksten ligg i seksjonane under.
    Arket hennar er difor ei deltittelside, slik bøker har. */
@@ -256,17 +412,24 @@ main {
 }
 
 /* Overskrifter. margin-block, ikkje margin: kortforma nullstiller
-   sidemargane, og dei held blokka midt paa arket. */
+   sidemargane, og dei held blokka midt paa arket.
+   Gradene staar i em, ikkje rem: dei skal maalast mot brødteksten dei
+   staar over, ikkje mot rota. I rem fylgde dei ikkje storleiksvalet, so
+   paa «Stor» - der brødteksten er 24 px - vart tre av fire overskrifter
+   MINDRE enn teksten dei høyrer til: seksjonen laag paa 24, storbokstaven
+   22, underseksjonen 19,5 og mellomtittelen 18,6. Ein Anm. paa 0,94em
+   voks samstundes til 22,6 px og vart større enn overskrifta over seg.
+   Tala under er dei gamle delte paa 21 px, so «Vanleg» ser ut som før. */
 .afdeling { display: flex; flex-direction: column; gap: 0.4rem; text-align: center; margin-block: 0 1rem; }
-.afdeling h2 { margin: 0; font-size: 1.5rem; color: var(--blekk-mjuk); }
-.afdeling-namn { margin: 0; font-size: 2.4rem; line-height: 1.2; }
+.afdeling h2 { margin: 0; font-size: 1.143em; color: var(--blekk-mjuk); }
+.afdeling-namn { margin: 0; font-size: 1.829em; line-height: 1.2; }
 .seksjon, .storbokstav, .underseksjon, .mellomtittel { margin-block: 1.6rem 0.7rem; }
-.seksjon { font-size: 1.5rem; }
+.seksjon { font-size: 1.143em; }
 /* A. B. C. staar mellom romartalet og dei smaa bokstavane, og
    skal difor lesast som eit hakk over dei - ikkje under. */
-.storbokstav { font-size: 1.38rem; margin-top: 2rem; }
-.underseksjon { font-size: 1.22rem; }
-.mellomtittel { font-size: 1.16rem; color: var(--blekk-mjuk); }
+.storbokstav { font-size: 1.051em; margin-top: 2rem; }
+.underseksjon { font-size: 0.93em; }
+.mellomtittel { font-size: 0.884em; color: var(--blekk-mjuk); }
 .seksjon .tal, .storbokstav .tal, .underseksjon .tal { color: var(--indigo); }
 
 /* Bolkoverskriftene staar mellom to linjer, som eit skilje i satsen. */
@@ -284,6 +447,10 @@ main {
 .bolk > .merknad + p:not(.merknad):not(.oppslag):not(.døme):not(.punkt),
 .bolk > .oppsett + p:not(.merknad):not(.oppslag):not(.døme):not(.punkt) { text-indent: 1.4em; }
 .merknad + .merknad { text-indent: 1.4em; }
+/* Fyrste blokka i den nedre arkhelvta har ingen sysken lenger, so
+   innrykksregelen over naar henne ikkje. lesar.js set denne klassa naar
+   blokka var innrykt før arket vart rive. */
+.bolk.nedre > .rykk { text-indent: 1.4em; }
 
 /* §-nummera heng i margen: dei er handtaka teksten siterer seg sjølv med. */
 .paragraf { position: relative; }
@@ -296,16 +463,48 @@ main {
   color: var(--indigo); text-decoration: none;
 }
 .paragraf .tal:hover { text-decoration: underline; }
-.paragraf:target { background: var(--uthev); }
+/* Ingen flate paa hoppmaalet. Ein :target-bakgrunn blir staaande so lenge
+   adressa peikar dit, og laag som eit tanfarga felt under landingsgløden -
+   det var det andre glimtet naar arket reiv seg opp. Gløden aaleine seier
+   kvar ein landa. */
 
 /* Merknadene er Aasens eigne Anm. - ei anna røyst enn brødteksten. */
 .merknad, .avsnitt {
   font-size: 0.94em; color: var(--blekk-mjuk);
-  margin-block: 0.7rem; padding: 0.15rem 0.5rem 0.15rem 1.75rem;
+  margin-block: 0.7rem; padding: 0.122em 0.405em 0.122em 1.418em;
   border-left: 2px solid var(--linje);
 }
 .merknad + .merknad, .avsnitt + .avsnitt,
 .merknad + .avsnitt, .avsnitt + .merknad { margin-top: -0.5rem; }
+
+/* Alt som høyrer til ein Anm. skal sjaa ut som ein del av han: same
+   innrykk, same strek, same dempa røyst. Fram til no galdt det berre
+   tavlene; punkta, døma og oppslaga under ein merknad stod uforma midt i
+   satsen, som om dei var brødtekst.
+   Innrykket ligg utanpaa det blokka har frå før, so ei liste under ein
+   merknad rykkjer inn frå merknadskanten og ikkje frå arkkanten. */
+.bolk > .i-merknad {
+  padding-left: 1.418em;
+  border-left: 2px solid var(--linje);
+  color: var(--blekk-mjuk);
+}
+/* Streken skal gaa ubroten frå fyrste ordet i merknaden til siste rada i
+   tavla under han. Blokkgapet maa difor trekkjast heilt bort - «margin-top:
+   0» er ikkje nok, av di flex-gapet ikkje fell saman med margar, so det
+   stod att 24 px der streken var borte og merknaden saag ut til aa slutte
+   kvar gong ei tavle kom. */
+.bolk > .merknad + .i-merknad,
+.bolk > .i-merknad + .i-merknad { margin-top: calc(-1 * var(--blokkgap)); }
+/* Og merknaden sin EIGEN botnmarg. Den negative margen over tek berre
+   flex-gapet; att stod 0,7rem - maalt 11,2 px - og streken var framleis
+   broten akkurat der tavla byrja. */
+.bolk > .merknad:has(+ .i-merknad) { margin-bottom: 0; }
+/* Ei tavle i ein merknad ber si eiga luft inne i seg i staden, so radene
+   ikkje klistrar seg til teksten over. */
+.bolk > .oppsett.i-merknad { padding-block: 0.5rem; }
+.bolk > .punkt.i-merknad, .bolk > .døme.i-merknad, .bolk > .oppslag.i-merknad {
+  font-size: 0.94em;
+}
 
 /* Punktlister. Boka nummererer dei med parentes og nestar dei i to
    nivaa: «a)» og «b)» ligg under «3)» i § 363. Talet heng ute i margen
@@ -314,32 +513,42 @@ main {
    liste. Teksten er framleis utsluttet, av di punkta er heile avsnitt og
    ikkje korte liner slik døma er. */
 .punkt {
-  display: grid; grid-template-columns: 1.9rem 1fr;
-  gap: 0 0.55rem;
+  /* Innrykk og talkolonne i em, ikkje rem: dei høyrer til skrifta dei
+     rykkjer inn, ikkje til rota. I rem stod dei stille naar lesaren valde
+     ein annan grad - teksten voks 14 % paa «Stor» medan innrykket laag
+     fast, so satsen glei ut av tilhøve med seg sjølv. */
+  display: grid; grid-template-columns: 1.448em 1fr;
+  gap: 0 0.419em;
   text-indent: 0;
-  margin-block: 0.35rem;
+  /* Ingen eigen loddrett marg: blokkgapet gjev all lufta punktet treng
+     mot naboane, og eit punkt som fylgjer eit anna skal staa tett. Stod
+     her som 0.35rem, og daa la han seg oppaa gapet. */
+  margin-block: 0;
 }
 .punkt .tal {
   text-align: right; white-space: nowrap;
   font-variant-numeric: tabular-nums;
   color: var(--indigo);
 }
-.punkt > span:last-child { text-align: justify; hyphens: auto; }
 /* Underpunkta ligg eit hakk inn. Innrykket maa vera padding og ikkje
    margin: blokkene staar midt paa arket med margin-inline: auto, og ein
    venstremarg med tal i slaar den autoen av, so punkta datt ut av
    midtstillinga og la seg inntil venstrekanten. Med padding held boksen
    plassen sin og berre innhaldet flyttar seg. */
-.punkt.underpunkt { padding-left: 2.45rem; }
-.bolk > .punkt + .punkt { margin-top: 0.15rem; }
+.punkt.underpunkt { padding-left: 1.867em; }
+/* Punkt som fylgjer kvarandre staar tett. Blokkgapet maa trekkjast frå -
+   utan det vart avstanden 0,35 + 1,5 + 0,15 = 2 rem, altso VIDARE enn to
+   vanlege avsnitt (1,95 rem), og dei aatte punkta i § 363 la seg som aatte
+   lause avsnitt i staden for ei liste. */
+.bolk > .punkt + .punkt { margin-top: calc(0.15rem - var(--blokkgap)); }
 
 /* Oppstilte døme. I trykket er kvart døme ei line for seg, ikkje eit
    avsnitt: talet heng ute i margen og teksten byrjar paa same staden i
    alle linene. Difor korkje innrykk eller utslutting her - ei kort line
    som blir utsluttet blir til gissen sats. */
 .døme {
-  display: grid; grid-template-columns: 2.4rem 1fr;
-  gap: 0 0.5rem;
+  display: grid; grid-template-columns: 1.885em 1fr;
+  gap: 0 0.393em;
   text-align: left; text-indent: 0; hyphens: manual;
   font-size: 0.97em; line-height: 1.45;
 }
@@ -352,7 +561,7 @@ main {
   color: var(--blekk-mjuk);
 }
 /* Ei rekkje døme høyrer saman og skal staa tett, ikkje med avsnittsluft. */
-.bolk > .døme + .døme { margin-top: calc(-1 * 1.5rem + 0.12rem); }
+.bolk > .døme + .døme { margin-top: calc(0.12rem - var(--blokkgap)); }
 
 /* Boka si eiga kryssvising. Ho skal kjennast som ein peikepinn i
    margen, ikkje som ei lenkje paa ei nettside - difor ingen strek før
@@ -365,7 +574,8 @@ main {
 .tilvis:hover, .tilvis:focus-visible { color: var(--indigo); border-bottom-color: var(--indigo); }
 
 /* Forkortingslista: stikkord og forklaring. */
-.oppslag { display: grid; grid-template-columns: minmax(4.5rem, max-content) 1fr; gap: 0 1rem; font-size: 1.0625rem; line-height: 1.5; }
+/* Graden i em som elles i satsen, so ho fylgjer storleiksvalet. */
+.oppslag { display: grid; grid-template-columns: minmax(4.233em, max-content) 1fr; gap: 0 0.94em; font-size: 0.81em; line-height: 1.5; }
 .oppslag > * { text-align: left; hyphens: manual; }
 /* Stikkorda er oppslag, ikkje lenker. Indigo er lenkefargen vaar. */
 .oppslag .stikkord { color: var(--blekk); }
@@ -383,63 +593,109 @@ main {
 /* -- 6  OPPSETT (lydtavler, bøyingsmønster) ------------------------ */
 .oppsett { width: 100%; }
 .oppsett table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; line-height: 1.5; }
-.oppsett td { padding: 0.3rem 0.35rem; vertical-align: baseline; text-align: center; overflow-wrap: break-word; transition: background 0.12s; }
+.oppsett td { padding: 0.3rem 0.35rem; vertical-align: baseline; text-align: center; overflow-wrap: break-word; transition: background-color var(--rørsle); }
 /* Fyrste kolonne er radnamnet. Originalen skil kolonnane med loddrett
    strek og set ein strek under talrekkja øvst. */
 .oppsett td:first-child { text-align: left; color: var(--blekk-mjuk); }
 .oppsett td + td { border-left: 1px solid var(--linje); }
 .oppsett tr:first-child td { color: var(--blekk-mjuk); border-bottom: 1px solid var(--linje); }
 /* Eit oppsett som staar rett etter ein Anm. høyrer til han. */
-.oppsett.i-merknad { padding-left: 1.75rem; margin-block: 0.7rem; border-left: 2px solid var(--linje); }
+/* Ei tavle elles faar strekkje seg ut i margen, men ikkje ei som høyrer til
+   ein merknad: ho skal halde seg innanfor merknadsspalta, elles stikk ho ut
+   forbi teksten ho forklarar og bryt bokmargen. */
+.bolk > .oppsett.i-merknad { width: var(--satsdel); }
 .oppsett.i-merknad table { font-size: 0.875rem; color: var(--blekk-mjuk); }
 /* Rada og kolonna under peikaren blir lyfte fram; klikk laasar dei. */
-.oppsett tr:hover td, .oppsett tr.merkt td { background: color-mix(in srgb, var(--indigo) 7%, transparent); }
-.oppsett td.kolonne, .oppsett td.kolonne-merkt { background: color-mix(in srgb, var(--indigo) 7%, transparent); }
-.oppsett tr:hover td.kolonne, .oppsett tr.merkt td.kolonne-merkt { background: color-mix(in srgb, var(--indigo) 15%, transparent); }
+.oppsett tr:hover td, .oppsett tr.merkt td,
+.oppsett td.kolonne, .oppsett td.kolonne-merkt { background-color: var(--indigo-vask); }
+.oppsett tr:hover td.kolonne, .oppsett tr.merkt td.kolonne-merkt { background-color: var(--indigo-vask-sterk); }
 
 /* -- 7  REGISTERET ------------------------------------------------- */
 /* Ryggskiltet. Paa ein innbunden rygg staar tittelen paa eit paalimt
    skilt i ein annan farge enn skinnet - det er det einaste feltet med
    full kontrast i heile grensesnittet. Det er ògso vegen til
    tittelbladet, so heile skiltet er ei lenkje. */
+/* Skiltet er eit objekt paa ryggen, og kantane hans skal flukte med det
+   andre som ligg der: bolkskilet og teksten i lista. Dei stod paa tre
+   ulike innrykk - skiltkanten 0,9rem, streken 1,25 og skiltteksten 1,9 -
+   so ingenting laag i lodd med noko anna. No gjeld eitt innrykk for alt.
+   Utfyllinga var dessutan ujamn oppe og nede, 0,85 mot 0,9. */
 .register-topp {
   display: block; text-decoration: none;
-  margin: 0 0.9rem 0.4rem; padding: 0.85rem 1rem 0.9rem;
-  background: var(--skilt);
+  margin: 0 var(--rygginnrykk) var(--rygglufta); padding: 0.9rem 1rem 0.8rem;
+  /* Skiltet er eit paalimt skilt, og eit skilt brekk ikkje teksten sin i
+     to. Blir det for smalt, er det graden som gjev etter - difor maaler vi
+     mot skiltet sjølv (cqw) og ikkje mot rota. */
+  container-type: inline-size;
+  background-color: var(--skilt);
   color: var(--skilt-blekk);
   border-radius: 2px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.3), inset 0 0 0 1px rgb(255 255 255 / 0.12);
   /* Berre fargen skifter naar ein tek paa skiltet. Flytta det seg,
      flytte det alt under seg med. */
-  transition: background 0.15s ease-out;
+  transition: background-color var(--rørsle);
 }
-.register-topp:hover, .register-topp.aktiv { background: color-mix(in srgb, var(--skilt) 82%, black); }
+.register-topp:hover, .register-topp.aktiv { background-color: color-mix(in srgb, var(--skilt) 82%, black); }
 .register-topp:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
-.register .verk { display: block; margin: 0 0 0.3rem; font-family: var(--fraktur); font-size: 1.35rem; line-height: 1.3; color: var(--skilt-blekk); }
-.register .undertitl { display: block; margin: 0; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--skilt-blekk) 74%, transparent); }
+.register .verk {
+  display: block; margin: 0 0 0.35rem; font-family: var(--fraktur);
+  line-height: 1.24; color: var(--skilt-blekk);
+  white-space: nowrap; font-size: min(1.6rem, 13cqw);
+}
+.register .undertitl { display: block; margin: 0; white-space: nowrap; font-size: min(0.72rem, 5.4cqw); letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--skilt-blekk) 74%, transparent); }
 
 /* Skiljet mellom dei tre bolkane.
    Streken maa ha sin eigen farge. --linje er laga for papir, og paa
    skrivebordet ligg han tre verdiar fraa bakgrunnen - maalt 228 mot
    231 - so han var reint usynleg, og ryggen saag flat ut. */
 .register .bolkskil {
-  height: 1px; margin: 1.15rem 1.25rem;
+  height: 1px; margin: var(--rygglufta) var(--rygginnrykk);
   background: var(--ryggstrek);
 }
 .register ol, .register ul { list-style: none; margin: 0; padding: 0; }
-.register ol { margin-top: 1rem; }
-.register li a { display: block; padding: 0.4rem 1.25rem; color: var(--blekk-mjuk); text-decoration: none; line-height: 1.45; border-left: 2px solid transparent; }
-.register li a:hover { color: var(--blekk); background: var(--uthev); }
+/* Ingen marg her. Lufta under skiltet er skiltet sin eigen botnmarg;
+   stod ho tre stader - 1,15 + 1 + 0,9rem - vart det eit tomrom paa 57 px
+   under skiltet før fyrste oppføringa.
+   I staden ei uttoning i overkanten: ryggen rullar, og utan henne vart
+   oppføringane kappa tvers av med ein hard kant naar dei gjekk opp under
+   skiltet. Rampa er like høg som utfyllinga i fyrste rada, so ho ligg paa
+   luft og ikkje paa skrift naar lista staar i ro. */
+.register ol {
+  margin-top: 0;
+  padding-top: 0.5rem;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.5rem);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 0.5rem);
+}
+.register li a {
+  display: block; padding: 0.4rem var(--rygginnrykk);
+  color: var(--blekk-mjuk); text-decoration: none; line-height: 1.45;
+  border-left: 2px solid transparent;
+  /* Same overgang som resten av det ein kan ta paa. Ryggen var det einaste
+     som skifte farge i eit hopp. */
+  transition: color var(--rørsle), background-color var(--rørsle);
+}
+.register li a:hover { color: var(--blekk); background-color: var(--uthev); }
 .register li a:focus-visible { outline: 2px solid var(--indigo); outline-offset: -2px; }
 /* Storleiken speglar hierarkiet. */
-.register .niva-1 > a { color: var(--blekk); font-size: 0.9375rem; margin-top: 0.9rem; padding-block: 0.5rem; }
-.register .aktiv > a { color: var(--indigo); border-left-color: var(--indigo); background: var(--uthev); }
+.register .niva-1 > a { color: var(--blekk); font-size: 0.9375rem; padding-block: 0.5rem; }
+/* Lufta mellom toppoppføringane. Fyrste oppføringa har inga - der gjeld
+   skiltet sin marg - og den fyrste etter eit bolkskil heller ikkje, av di
+   skilet ber si eiga luft. */
+.register .niva-1 + .niva-1 > a { margin-top: 0.9rem; }
+.register .aktiv > a { color: var(--indigo); border-left-color: var(--indigo); background-color: var(--uthev); }
 .undertitlar { margin-bottom: 0.4rem; }
-.undertitlar a { font-size: 0.75rem; padding-block: 0.22rem; }
+/* Ei klasse meir enn «.register li a» over. Utan den vann utfyllinga der -
+   0,4rem - over denne, av di «.register li a» er tyngre enn «.undertitlar
+   a», og daa voks kvar underrad frå 24 til 30 px og tettleiksskiljet mot
+   niva-1 fall bort. */
+.register .undertitlar a { font-size: 0.75rem; padding-block: 0.22rem; }
 .undertitlar .niva-2 a { padding-left: 2.5rem; }
 .undertitlar .niva-3 a { padding-left: 3.4rem; }
-.undertitlar .niva-4 a { padding-left: 4.2rem; }
-.undertitlar .niva-5 a { padding-left: 5rem; color: color-mix(in srgb, var(--blekk-mjuk) 75%, transparent); }
+/* Niva 4 er det djupaste som finst i verket - mellomtitlane ber ikkje
+   nummer og kjem aldri i registeret, so niva 5 er ei tom klasse. Dempinga
+   stod der og verka difor ingen stad, medan niva 4, det mest folkerike
+   nivaaet med sine 27 rader, stod i full styrke. */
+.undertitlar .niva-4 a { padding-left: 4.2rem; color: color-mix(in srgb, var(--blekk-mjuk) 75%, transparent); }
 .undertitlar a[aria-current="true"] { color: var(--indigo); border-left-color: var(--indigo); }
 
 /* -- 8  APPARATET: linja, lukene, folden --------------------------- */
@@ -447,17 +703,17 @@ main {
 .skil { flex: 1; }
 button {
   font-family: var(--apparat); font-size: 0.8125rem; color: var(--blekk-mjuk);
-  background: transparent; border: 1px solid var(--linje); border-radius: 2px;
+  background-color: transparent; border: 1px solid var(--knappekant); border-radius: 2px;
   padding: 0.4rem 0.85rem; cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  transition: color var(--rørsle), border-color var(--rørsle), background-color var(--rørsle);
 }
 button:hover { color: var(--indigo); border-color: var(--indigo); }
-button[aria-pressed="true"] { color: var(--papir); background: var(--indigo); border-color: var(--indigo); }
+button[aria-pressed="true"] { color: var(--papir); background-color: var(--indigo); border-color: var(--indigo); }
 button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .hoppform { display: flex; gap: 0.4rem; align-items: center; }
 .hoppform input { width: 7rem; padding: 0.4rem 0.6rem; font-family: var(--apparat); font-size: 0.8125rem; color: var(--blekk); background: transparent; border: 1px solid var(--linje); border-radius: 2px; }
 .hoppform input:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
-.lastar { flex: 0 1 auto; min-width: 0; font-size: 0.75rem; color: var(--blekk-mjuk); opacity: 0; transition: opacity 0.15s; }
+.lastar { flex: 0 1 auto; min-width: 0; font-size: 0.75rem; color: var(--blekk-mjuk); opacity: 0; transition: opacity var(--rørsle); }
 .lastar.htmx-request { opacity: 1; }
 
 /* Lukene ligg paa skrivebordet, under papiret. Naar ei av dei opnar seg,
@@ -467,49 +723,66 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
    teksten og kan ikkje hamne ein annan stad enn der ho vart laga. */
 .rift {
   display: grid; grid-template-rows: 0fr;
-  /* Lufta rundt luka er den same som mellom stonga og arkkanten, og lik
-     paa baae sider. Ho maa vekse med opninga - stod ho fast, ville ho
-     halde eit gap ope ògso naar luka er att. */
-  padding-block: 0;
-  /* Lufta rundt luka høyrer heime her, ikkje inne i henne. To grunnar:
-     0fr-trikset kan ikkje falle saman rundt eit barn som har loddrett
-     utfylling - maalt 24 px rad rundt eit barn med 12 px - so opninga
-     byrja med eit ugjennomsiktig band i skrivebordsfarge i staden for aa
-     vekse fram frå ingenting. Og luka har skrivebordsfarge sjølv, so
-     utfyllinga hennar og lufta rundt henne var same flata to gonger. */
+  /* Berre rada blir animert. Ingenting inne i luka skal røre paa seg medan
+     opninga veks - eit einaste hakk gjer at det ser ut som teksten renn i
+     staden for at arket opnar seg. Difor ligg lufta inne i luka og ikkje
+     her: animerte vi utfylling paa rifta, skauv ho luka 63 px nedover
+     gjennom heile rørsla. No staar luka bom stille og blir avdekt fraa
+     toppen, slik ei rullegardin gaar opp. */
   overflow: hidden;
-  transition: grid-template-rows 0.34s cubic-bezier(0.32, 0, 0.24, 1),
-              padding-block 0.34s cubic-bezier(0.32, 0, 0.24, 1);
-  width: 100%; max-width: calc(100% - 2 * var(--kantmarg));
+  transition: grid-template-rows var(--riftetid) var(--riftekurve);
+  width: 100%;
+  max-width: min(var(--arkbreidd), calc(100% - 2 * var(--minidesk)));
   margin: 0 auto;
-  /* Forkortingslista har 45 rader. Utan tak skauv ho den nedre
-     arkhelvta fleire skjermhøgder ned, og daa rullar sjølve opninga bort
-     medan ein les. Rullinga skjer inne i luka i staden. */
-  max-height: 62vh;
+  /* Ingen takhøgd, og ingen rulling inne i opninga. Eit rive ark syner alt
+     som ligg i rifta paa ein gong; ei rullestong der ville røpe at luka er
+     eit felt med eige innhald og ikkje ein stad papiret er delt. Er lista
+     lang, blir opninga lang, og ein rullar sida slik ein rullar teksten
+     elles - rifta ligg i flyten og fylgjer med. */
 }
-.rift.open { grid-template-rows: 1fr; padding-block: var(--sidemarg); }
-/* Øvst kjem lufta ovanfor alt frå main sin eigen toppmarg. */
-.rift.over.open { padding-top: 0; }
-.rift > * { min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
-@media (prefers-reduced-motion: reduce) { .rift { transition: none; } }
+.rift.open { grid-template-rows: 1fr; }
+/* Innpakninga er det rada faldar saman. Ho ber inga utfylling sjølv - eit
+   barn med loddrett utfylling kan ikkje falle heilt saman, og daa byrja
+   opninga med eit ugjennomsiktig band i skrivebordsfarge i staden for aa
+   vekse fram frå ingenting. min-height: 0 er det som let henne krympe til
+   ingenting; utan han held innhaldet rada open. */
+.riftpakke { min-height: 0; }
+/* Ingen eiga reduced-motion-regel her: den globale nedst i fila slaar av
+   alle overgangar med !important, og ei snevrare regel kunne likevel ikkje
+   naa henne - ho stod berre og lova noko ho ikkje heldt. */
 
 /* Ingen ::before/::after med rivekant her lenger. Dei var teikna kantar
    frå den tida luka laag over papiret; no er kantane ekte arkkantar med
    sin eigen skugge, og dei to sette skugge paa skugge. */
-.stilling, .luke { background: var(--skrivebord); }
-.luke { padding: 0 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
+/* Lufta rundt lukene ligg paa rifta, ikkje her. Att staar berre eit hakk
+   loddrett: luka er sjølv rulleboksen, so ho klipper i eigen kant, og utan
+   dette hakket vart fokusringen rundt den fyrste knappen - 2 px strek med
+   2 px avstand - skoren av paa oversida, og fyrste rada i
+   forkortingstabellen laag klistra til klippekanten. */
+/* Lufta rundt luka bur her, inne i innpakninga. Ho blir difor avdekt
+   saman med teksten i staden for aa skuve han, og ho er den same som
+   mellom stonga og arkkanten. */
+.stilling, .luke { background: var(--skrivebord); padding-block: var(--sidemarg); }
+.luke { padding-inline: 1.5rem; font-size: 0.8125rem; line-height: 1.7; color: var(--blekk-mjuk); }
 .luke p { margin: 0 0 0.8rem; max-width: 46rem; }
 .luke p:last-child { margin-bottom: 0; }
 .luke strong { color: var(--blekk); font-weight: 600; }
 
-/* Menyen maa ikkje flytte seg naar ein endrar det han styrer: alt her
-   staar i faste rem og i ei fast skrift, og spaltene er faste. */
+/* Menyen maa ikkje flytte seg naar ein endrar det han styrer: storleikane
+   her staar i faste rem og spaltene er faste, so han held maalet sitt.
+   Men skrifta skal fylgje valet. «font-family: var(--grotesk)» stod her og
+   laag etter .apparat i fila med same tyngd, so han vann - og daa var heile
+   menyen grotesk kva lesaren enn valde. Etikettane og hjelpetekstane fekk
+   aldri fylgje --apparat, og fraktur-reglane for dei nedanfor - punktum i
+   staden for versalar - var difor reint dekorative. */
 .stilling {
-  font-family: var(--grotesk); font-size: 1rem;
-  padding: 0 1.5rem;
+  font-size: 1rem;
+  padding-inline: 1.5rem;
   display: flex; flex-direction: column; gap: 0.55rem;
 }
-.stilling button { font-family: var(--grotesk); font-size: 0.8125rem; }
+/* Berre graden er fast her. Familien kjem frå --apparat som elles, so
+   knappane i menyen ser ut som knappane i linja over. */
+.stilling button { font-size: 0.8125rem; }
 /* Kvar skriftknapp syner si eiga skrift, i fast storleik. */
 .stilling [data-skrift="maguntia"], .stilling [data-ui="fraktur"] { font-family: "Maguntia", serif; font-size: 0.95rem; }
 .stilling [data-skrift="cook"] { font-family: "Cook", serif; font-size: 0.95rem; }
@@ -550,10 +823,68 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .meme { color: var(--indigo); }
 .meme em { font-style: italic; }
 
+/* Vegen vidare, i foten under arket. Han ligg paa skrivebordet og ikkje
+   paa papiret: det er ikkje noko boka har, men noko lesaren treng.
+   Viktigast paa telefon - der ligg ryggen øvst paa sida, so utan denne
+   maatte ein rulle heile kapitlet attende berre for aa koma til neste
+   avdeling. Han gjer same nytta paa brei skjerm. */
+.delnav {
+  display: flex; gap: 1rem; justify-content: space-between;
+  width: 100%;
+  max-width: min(var(--arkbreidd), calc(100% - 2 * var(--minidesk)));
+  margin: 0 auto var(--sidemarg);
+  font-size: 0.8125rem;
+}
+.delnav-lenkje {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; gap: 0.15rem;
+  padding: 0.85rem 1rem;
+  text-decoration: none; color: var(--blekk-mjuk);
+  border: 1px solid var(--fals); border-radius: 2px;
+  background-color: color-mix(in srgb, var(--papir) 55%, transparent);
+  transition: color var(--rørsle), border-color var(--rørsle),
+              background-color var(--rørsle);
+}
+.delnav-lenkje.neste { text-align: right; }
+.delnav-lenkje:hover { color: var(--indigo); border-color: var(--indigo); }
+.delnav-lenkje:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+.delnav-merke {
+  font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--blekk-mjuk) 75%, transparent);
+}
+/* Fraktur har ingen versaltradisjon - same regelen som for etikettane. */
+:root[data-ui="fraktur"] .delnav-merke {
+  text-transform: none; letter-spacing: 0.01em; font-size: 0.8125rem;
+}
+:root[data-ui="fraktur"] .delnav-merke::after { content: "."; }
+.delnav-tittel { color: var(--blekk); line-height: 1.35; }
+/* Paa telefon staar dei under kvarandre; to smale spalter med lange
+   deltitlar i blir til ordsalat. */
+@media (max-width: 560px) {
+  .delnav { flex-direction: column; }
+  .delnav-lenkje.neste { text-align: left; }
+}
+
 /* -- 9  HOPPMAAL OG SAMANHENGANDE LESING --------------------------- */
-.paragraf, .seksjon, .underseksjon, .mellomtittel, .afdeling { scroll-margin-top: 5.5rem; }
+/* Alt ein kan hoppe til ber ein id, og skal landa klar av den faste
+   linja. Regelen stod som ei liste over slaga, og lista vart gløymd kvar
+   gong eit nytt kom til: .storbokstav - dei fem «A. B. C.»-overskriftene -
+   landa rett bak stonga. Stillinga i treet er det som gjeld, so ho kan
+   ikkje gløymast. (.afdeling ber ingen id og var alt inert i lista.) */
+.bolk > [id] { scroll-margin-top: var(--landing); }
+/* Landinga er ein glød i skrifta, ikkje eit blink i bakgrunnen. Ein
+   bakgrunn som skifter farge dreg auga til heile flata og les som ein feil;
+   ein skugge i blekket seier «her» utan aa flytte noko. */
 .landa { animation: landing 1.8s ease-out; }
-@keyframes landing { from { background: var(--indigo-svak); } to { background: transparent; } }
+/* background-color, ikkje background: ei kortform med var() i seg blir ein
+   uavklara verdi som ikkje kan mellomreknast, so blinken hoppa rett til
+   slutten i staden for aa tona ut over dei 1,8 sekunda. */
+/* Skuggelista maa ha like mange lekkar i baae endane for aa kunna
+   mellomreknast - difor «transparent» og ikkje «none» til slutt. */
+@keyframes landing {
+  from { text-shadow: 0 0 0.14em var(--indigo), 0 0 0.5em var(--indigo-svak); }
+  to   { text-shadow: 0 0 0.14em transparent, 0 0 0.5em transparent; }
+}
 
 /* Manicula er trykkjaren sitt teikn for «sjaa hit». Ho staar alltid i
    Garamond - den einaste av skriftene vaare som har henne. */
@@ -565,17 +896,24 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
   .paragraf .tal { position: static; width: auto; display: inline; margin-right: 0.5rem; }
 }
 @media (max-width: 820px) {
-  /* Ryggen ligg ikkje lenger ved sida av arket, so han skal ikkje
-     reknast med naar kanten blir rekna ut. */
-  :root { --register: 0px; }
   .rute { grid-template-columns: minmax(0, 1fr); }
-  .register { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--linje); }
+  /* height, ikkje max-height, maa nullstillast. Ryggen fekk «height:
+     100vh» den dagen han skulle gaa heilt ned ved sida av arket, men
+     denne regelen heldt fram med aa nullstille den max-height han hadde
+     før - so paa telefonen stod ryggen framleis laast til ei full
+     skjermhøgd, med kring 460 px tomt skrivebord under lista, og lesaren
+     maatte rulle ein heil skjerm før fyrste ordet. */
+  .register {
+    position: static; height: auto;
+    border-right: none; border-bottom: 1px solid var(--ryggstrek);
+  }
   .register ol { max-height: 14rem; overflow-y: auto; }
   .bolk { padding-block: 3rem 3.5rem; margin-bottom: 3rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
-  .landa { background: var(--uthev); }
+  /* Utan rørsle: ein still glød i staden for animasjonen. */
+  .landa { text-shadow: 0 0 0.14em var(--indigo), 0 0 0.5em var(--indigo-svak); }
 }
 
 /* Forkortingslista som oppslagsverk: to spalter, stikkordet fyrst. */
@@ -587,7 +925,7 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 }
 .stuttliste td { padding: 0.2rem 0; vertical-align: baseline; }
 .stuttliste tr:hover th, .stuttliste tr:hover td {
-  background: color-mix(in srgb, var(--indigo) 8%, transparent);
+  background-color: var(--indigo-vask);
 }
 @media (min-width: 1100px) {
   /* Lista er lang; to kolonnar gjer henne lesbar utan aa rulle. */

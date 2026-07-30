@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // Peikar er ei overskrift ein kan hoppe til inne i ein del.
 type Peikar struct {
 	Ankar  string
 	Tittel string
-	Nivå   int // 2 = seksjon, 3 = underseksjon, 4 = mellomtittel
+	// Same stigen som overskriftsnivå gjev: 2 = seksjon,
+	// 3 = storbokstav, 4 = underseksjon, 5 = mellomtittel.
+	Nivå int
 }
 
 // Del er ein overbolk av verket - ei Afdeling, eit Tillæg eller ein av
@@ -91,17 +94,11 @@ func DelOpp(blokker []Blokk) []Del {
 func titlarMedInnhald(d *Del) []Peikar {
 	var ut []Peikar
 	for i, b := range d.Blokker {
-		nivå := 0
-		switch b.Slag {
-		case Seksjon:
-			nivå = 2
-		case Storbokstav:
-			nivå = 3
-		case Underseksjon:
-			nivå = 4
-		case Mellomtittel:
-			nivå = 5
-		default:
+		// Nivaaet kjem frå overskriftsnivå, ikkje frå ein eigen switch
+		// her: stigen stod skriven to gonger i same fila, og eit nytt
+		// nivaa maatte inn paa baae stader for aa verke.
+		nivå := overskriftsnivå(b.Slag)
+		if nivå < 2 {
 			continue
 		}
 		// Kvar overskrift faar eit ankar, uansett om ho hamnar i
@@ -118,11 +115,7 @@ func titlarMedInnhald(d *Del) []Peikar {
 		}
 		tittel := b.Tittel
 		if b.Nummer != "" {
-			skil := ") "
-			if nivå == 2 || b.Slag == Storbokstav {
-				skil = ". "
-			}
-			tittel = b.Nummer + skil + b.Tittel
+			tittel = b.Nummer + Skiljeteikn(b.Nummer) + " " + b.Tittel
 		}
 		ut = append(ut, Peikar{Ankar: ankar, Tittel: tittel, Nivå: nivå})
 	}
@@ -149,6 +142,22 @@ func harInnhald(etter []Blokk, nivå int) bool {
 		}
 	}
 	return false
+}
+
+// Skiljeteikn gjev teiknet boka set etter eit nummer. Forma paa nummeret
+// avgjer, ikkje slaget det høyrer til: romartal, arabiske tal og store
+// bokstavar faar punktum - «I.», «1.», «A.» - og smaa bokstavar parentes,
+// «a)». Regelen stod som ei liste over slag, og daa fall dei arabisk
+// nummererte underseksjonane utanfor: «1. Præſens kort» kom i registeret
+// som «1) Præſens kort», og likeins «2)» og «3)» under B. Den ſvage
+// Bøining. Teiknet blir sett paa to stader - her og i malen - so dei maa
+// hente det frå same staden.
+func Skiljeteikn(nummer string) string {
+	r := []rune(nummer)
+	if len(r) == 1 && unicode.IsLower(r[0]) {
+		return ")"
+	}
+	return "."
 }
 
 // overskriftsnivå gjev nivaaet til ei overskrift, og 0 for alt anna.
@@ -219,9 +228,11 @@ func ankarNr(ankar string) int {
 // ofte berre namnet sitt, av di teksten ligg i seksjonane under henne.
 func (d Del) HarTekst() bool {
 	for _, b := range d.Blokker {
-		switch b.Slag {
-		case Afdeling, Seksjon, Underseksjon, Mellomtittel:
-		default:
+		// Overskriftsnivået avgjer, ikkje ei eiga liste over slag: den
+		// lista gløymde Storbokstav, so ein del som berre hadde ei
+		// «A.»-overskrift i seg vart rekna for aa ha tekst og mista
+		// deltittelsida si.
+		if overskriftsnivå(b.Slag) == 0 {
 			return true
 		}
 	}

@@ -49,6 +49,10 @@ var (
 	// samanhengande rekkjer paa fem, kvar innleidd av ei line som endar
 	// paa kolon. Ingen einslege treff, altso ingen falske.
 	reDøme = regexp.MustCompile(`^(\d+),\s+(.+)$`)
+	// Halen av ei tilvising som eit sideskift har delt: «(Homil.» slutta
+	// den eine lina, «114).» opna den neste. Utan denne stod sidetalet att
+	// som eit eige avsnitt midt i teksten.
+	reLukkarParentes = regexp.MustCompile(`^\d+\s*\)`)
 	// Punktlister. Boka merkjer dei med parentes - «1)» og «a)» - medan
 	// punktum høyrer til §-nummera og dei nummererte overskriftene. Dei
 	// nestar: «a)» og «b)» ligg under «3)» i § 363. Ei utheva line med

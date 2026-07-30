@@ -17,24 +17,27 @@
 {{- range .Vis}}
   {{- if eq .Slag "afdeling"}}
   <header class="afdeling">
-    <h2>{{.Tittel}}</h2>
-    {{- if .Undertittel}}<p class="afdeling-namn">{{.Undertittel}}</p>{{end}}
+    <h2>{{punktum .Tittel}}</h2>
+    {{- if .Undertittel}}<p class="afdeling-namn">{{punktum .Undertittel}}</p>{{end}}
   </header>
   {{- else if eq .Slag "seksjon"}}
-  <h3 class="seksjon" id="{{.Ankar}}"><span class="tittel"><span class="tal">{{.Nummer}}.</span> {{.Tittel}}</span></h3>
+  <h3 class="seksjon" id="{{.Ankar}}"><span class="tittel"><span class="tal">{{.Nummer}}.</span> {{punktum .Tittel}}</span></h3>
   {{- else if eq .Slag "storbokstav"}}
-  <h4 class="storbokstav" id="{{.Ankar}}"><span class="tal">{{.Nummer}}.</span> {{.Tittel}}</h4>
+  <h4 class="storbokstav" id="{{.Ankar}}"><span class="tal">{{.Nummer}}.</span> {{punktum .Tittel}}</h4>
   {{- else if eq .Slag "underseksjon"}}
-  <h5 class="underseksjon" id="{{.Ankar}}"><span class="tal">{{.Nummer}})</span> {{.Tittel}}</h5>
+  <h5 class="underseksjon" id="{{.Ankar}}"><span class="tal">{{.Nummer}}{{skil .Nummer}}</span> {{punktum .Tittel}}</h5>
   {{- else if eq .Slag "mellomtittel"}}
-  <h6 class="mellomtittel" id="{{.Ankar}}">{{.Tittel}}</h6>
+  <h6 class="mellomtittel" id="{{.Ankar}}">{{punktum .Tittel}}</h6>
   {{- else if eq .Slag "oppsett"}}
   <div class="oppsett{{if .IMerknad}} i-merknad{{end}}">
+    {{- $tab := .Tabell}}
     <table>
-      {{- range .Tabell.Rader}}
+      {{- range $tab.Rader}}
+      {{- $rad := .}}
       <tr>
-        {{- range .Celler}}
-        <td>{{template "stumpar" .}}</td>
+        {{- range $i, $c := .Celler}}
+        {{- $sp := $tab.Spenn (len $rad.Celler) $i}}
+        <td{{if gt $sp 1}} colspan="{{$sp}}"{{end}}>{{template "stumpar" $c}}</td>
         {{- end}}
       </tr>
       {{- end}}
@@ -45,13 +48,13 @@
     <a class="tal" href="#p{{.Nummer}}" aria-label="Paragraf {{.Nummer}}">§&nbsp;{{.Nummer}}</a>{{template "stumpar" .Stumpar}}
   </p>
   {{- else if eq .Slag "listepunkt"}}
-  <p class="punkt"><span class="tal">{{.Nummer}})</span><span>{{template "stumpar" .Stumpar}}</span></p>
+  <p class="punkt{{if .IMerknad}} i-merknad{{end}}"><span class="tal">{{.Nummer}})</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "underpunkt"}}
-  <p class="punkt underpunkt"><span class="tal">{{.Nummer}})</span><span>{{template "stumpar" .Stumpar}}</span></p>
+  <p class="punkt underpunkt{{if .IMerknad}} i-merknad{{end}}"><span class="tal">{{.Nummer}})</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "døme"}}
-  <p class="døme"><span class="tal">{{.Nummer}},</span><span>{{template "stumpar" .Stumpar}}</span></p>
+  <p class="døme{{if .IMerknad}} i-merknad{{end}}"><span class="tal">{{.Nummer}},</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "oppslag"}}
-  <p class="oppslag"><span class="stikkord">{{.Nummer}}</span><span>{{template "stumpar" .Stumpar}}</span></p>
+  <p class="oppslag{{if .IMerknad}} i-merknad{{end}}"><span class="stikkord">{{.Nummer}}</span><span>{{template "stumpar" .Stumpar}}</span></p>
   {{- else if eq .Slag "merknad"}}
   <p class="merknad">{{template "stumpar" .Stumpar}}</p>
   {{- else if eq .Slag "avsnitt"}}
@@ -61,4 +64,26 @@
   {{- end}}
 {{- end}}
 </section>
+{{/* Vegen vidare. Ligg utanfor arket - det er ikkje noko boka har, men
+     noko lesaren treng, og daa høyrer det til skrivebordet. */}}
+{{- if or .Førre .Neste}}
+<nav class="delnav apparat" aria-label="Bla i verket">
+  {{- with .Førre}}
+  <a class="delnav-lenkje forrige" href="/del/{{.Id}}"
+     hx-get="/del/{{.Id}}" hx-target="#innhald" hx-swap="innerHTML scroll:top"
+     hx-push-url="true" hx-indicator="#lastar">
+    <span class="delnav-merke">Førre</span>
+    <span class="delnav-tittel">{{.Tittel}}</span>
+  </a>
+  {{- else}}<span></span>{{end}}
+  {{- with .Neste}}
+  <a class="delnav-lenkje neste" href="/del/{{.Id}}"
+     hx-get="/del/{{.Id}}" hx-target="#innhald" hx-swap="innerHTML scroll:top"
+     hx-push-url="true" hx-indicator="#lastar">
+    <span class="delnav-merke">Neste</span>
+    <span class="delnav-tittel">{{.Tittel}}</span>
+  </a>
+  {{- end}}
+</nav>
+{{- end}}
 {{end}}

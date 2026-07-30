@@ -78,6 +78,22 @@ type sidedata struct {
 	Oob   bool // registeret blir bytt ut for seg naar htmx hentar ein del
 }
 
+// Førre og Neste gjev delen før og etter den aktive, og nil i endane.
+// Registeret er den eine vegen gjennom verket, men han krev at ein finn
+// fram i lista - og paa telefon ligg han øvst paa sida, so ein maa rulle
+// heile kapitlet attende berre for aa koma til neste. Ei lenkje i foten
+// gjer det ein faktisk vil: lesa vidare.
+func (d sidedata) Førre() *tekst.Del { return d.granne(-1) }
+func (d sidedata) Neste() *tekst.Del { return d.granne(1) }
+
+func (d sidedata) granne(steg int) *tekst.Del {
+	i := d.Aktiv.Id + steg
+	if i < 0 || i >= len(d.Verk.Delar) {
+		return nil
+	}
+	return &d.Verk.Delar[i]
+}
+
 func main() {
 	inn := flag.String("inn", "bøker/grammatik-sats.json", "blokker med ſ sett inn")
 	adr := flag.String("adr", ":8064", "adresse å lytte på (:8064 tek imot frå heile nettet ditt)")
@@ -107,6 +123,26 @@ func main() {
 
 	mal := template.Must(template.New("").Funcs(template.FuncMap{
 		"rom": sats(indeks),
+		// Teiknet etter eit overskriftsnummer. Malen og registeret maa
+		// hente det frå same staden, elles stod «1. Præſens kort» i
+		// teksten og «1) Præſens kort» i ryggen.
+		"skil": tekst.Skiljeteikn,
+		// Punktum etter overskrifter. Boka set punktum etter kvar
+		// overskrift - «Tredie Afdeling.», «Bøiningsformer.» - og tolkinga
+		// strauk det bort saman med nummeret, av di det same punktumet
+		// skilde nummeret frå tittelen. Vi set det attende ved satsen i
+		// staden for aa lagre det, so teksten i boka er den boka har.
+		"punktum": func(s string) string {
+			s = strings.TrimSpace(s)
+			if s == "" {
+				return s
+			}
+			r := []rune(s)
+			if strings.ContainsRune(".!?:;»", r[len(r)-1]) {
+				return s
+			}
+			return s + "."
+		},
 	}).ParseFS(malar, "malar/*.html"))
 
 	mux := http.NewServeMux()
@@ -160,7 +196,13 @@ func main() {
 // nok til aa lenkje paa, so der blir berre det fyrste ei lenkje.
 // Tilvisingar til §§ som ikkje finst i teksten (169 og 196) staar att
 // som vanleg tekst i staden for aa bli daude lenkjer.
-var reTilvis = regexp.MustCompile(`§[\s\p{Zs}]*\d+`)
+var reTilvis = regexp.MustCompile(`§[\s\p{Zs}]*\d+(?:[\s\p{Zs}]*,[\s\p{Zs}]*\d+)*`)
+
+// Tala inne i ei tilvising. «§ 112, 180» viser til to paragrafar, og begge
+// skal vera til aa klikke paa - før stod berre det fyrste som lenkje, og
+// dei 21 tilfella med komma i verket gøymde halvparten av tilvisingane
+// sine bak ein tekst som saag klikkbar ut, men ikkje var det.
+var reTal = regexp.MustCompile(`\d+`)
 
 // sats set setningsromma og lenkjer tilvisingane. Han skriv HTML og
 // lyt difor sjølv sleppe teksten gjennom escape.
@@ -175,13 +217,21 @@ func sats(indeks map[string]int) func(string) template.HTML {
 		slutt := 0
 		for _, t := range treff {
 			ord := s[t[0]:t[1]]
-			nr := strings.TrimLeftFunc(ord, func(r rune) bool { return r < '0' || r > '9' })
 			b.WriteString(template.HTMLEscapeString(s[slutt:t[0]]))
-			if _, finst := indeks[nr]; finst {
-				fmt.Fprintf(&b, `<a class="tilvis" href="/paragraf/%s">%s</a>`, nr, template.HTMLEscapeString(ord))
-			} else {
-				b.WriteString(template.HTMLEscapeString(ord))
+			// Kvart tal for seg. Teiknet «§» og komma imellom staar att som
+			// vanleg tekst, so tilvisinga les seg som ei eining.
+			indre := 0
+			for _, tt := range reTal.FindAllStringIndex(ord, -1) {
+				b.WriteString(template.HTMLEscapeString(ord[indre:tt[0]]))
+				nr := ord[tt[0]:tt[1]]
+				if _, finst := indeks[nr]; finst {
+					fmt.Fprintf(&b, `<a class="tilvis" href="/paragraf/%s">%s</a>`, nr, template.HTMLEscapeString(nr))
+				} else {
+					b.WriteString(template.HTMLEscapeString(nr))
+				}
+				indre = tt[1]
 			}
+			b.WriteString(template.HTMLEscapeString(ord[indre:]))
 			slutt = t[1]
 		}
 		b.WriteString(template.HTMLEscapeString(s[slutt:]))

@@ -3,6 +3,7 @@ package tekst
 import (
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // Klassifiser gjev kvar blokk sitt slag ut frå boka sitt eige oppsett.
@@ -28,9 +29,18 @@ func Klassifiser(inn []Blokk) []Blokk {
 			// Eit oppsett som står rett etter ein merknad høyrer til
 			// han, og skal setjast som ein del av merknaden.
 			b.Slag = Oppsett
-			if n := len(ut); n > 0 && (ut[n-1].Slag == Merknad || (ut[n-1].Slag == Oppsett && ut[n-1].IMerknad)) {
-				b.IMerknad = true
+			// Eit sideskift deler ògso tavler. Fylgjer ei tavle rett etter
+			// ei anna med like mange kolonnar, er det same tavla: dei seks
+			// klasserekkjene i § 207 kom ut som «1) 2)» i den eine og
+			// «3) 4) 5) 6)» i den andre, med overskriftsrada berre paa den
+			// fyrste. Fem slike par finst i verket, alle ekte.
+			if n := len(ut); n > 0 && ut[n-1].Slag == Oppsett &&
+				ut[n-1].Tabell != nil && b.Tabell != nil &&
+				breiddPå(ut[n-1].Tabell) == breiddPå(b.Tabell) {
+				ut[n-1].Tabell.Rader = append(ut[n-1].Tabell.Rader, b.Tabell.Rader...)
+				continue
 			}
+			b.IMerknad = høyrerTilMerknad(ut)
 			ut = append(ut, b)
 			continue
 		}
@@ -50,7 +60,7 @@ func Klassifiser(inn []Blokk) []Blokk {
 		// «o. ſ. v.» - halen av setninga føre - vart teken for ei
 		// underoverskrift, og teksten kom ut som «o) ſ. v», med
 		// punktumet bytt mot ein parentes og siste punktum borte.
-		framhald := heldFramFrå(ut)
+		framhald := heldFramFrå(ut, t) && !opnarNyttPunkt(ut, t)
 
 		switch {
 		case reMerknad.MatchString(t):
@@ -161,10 +171,32 @@ func Klassifiser(inn []Blokk) []Blokk {
 			b.Slag = Brødtekst
 		}
 
+		// Boka set baade tavler og lister inn under merknadene sine. Held
+		// ei slik blokk fram ein Anm., skal ho ha same forminga som han -
+		// innrykk, strek og dempa farge - elles ser ho ut som om ho høyrer
+		// til brødteksten, og lesaren mistar kva ho er ei utgreiing om.
+		// Fram til no galdt dette berre oppsett; punkta og døma under ein
+		// merknad stod uforma midt i satsen.
+		switch b.Slag {
+		case Listepunkt, Underpunkt, Døme, Oppslag:
+			b.IMerknad = høyrerTilMerknad(ut)
+		}
+
 		ut = append(ut, b)
 	}
 
 	return ut
+}
+
+// høyrerTilMerknad seier om blokka held fram merknaden over seg - anten
+// rett etter han, eller etter ei anna blokk som alt høyrer til han, so ei
+// rekkje punkt under same Anm. heng saman heile vegen.
+func høyrerTilMerknad(ut []Blokk) bool {
+	n := len(ut) - 1
+	if n < 0 {
+		return false
+	}
+	return ut[n].Slag == Merknad || ut[n].IMerknad
 }
 
 // limInn skøyter eit framhald paa blokka føre. Endar ho paa bindestrek,
@@ -215,9 +247,82 @@ func heiltUtheva(b Blokk) bool {
 // heldFramFrå seier om siste blokka er avbroten midt i ei setning, so
 // det som kjem no er framhaldet hennar. Sideskifta i papiret deler baade
 // avsnitt og merknader i to.
-func heldFramFrå(ut []Blokk) bool {
+func heldFramFrå(ut []Blokk, t string) bool {
 	n := len(ut) - 1
-	return n >= 0 && kanHaldeFram(ut[n].Slag) && heldFram(ut[n].Tekst())
+	if n < 0 || !kanHaldeFram(ut[n].Slag) {
+		return false
+	}
+	return heldFram(ut[n].Tekst()) || opnarSomFramhald(t)
+}
+
+// opnarSomFramhald ser paa linja som kjem, ikkje paa den som gjekk føre.
+// Ei ny setning i denne boka byrjar alltid med stor bokstav; byrjar linja
+// med liten, er ho halen av setninga over - same kva den slutta paa.
+//
+// Det er naudsynt av di punktumet i ei forkorting ser ut som eit
+// setningsslutt: «... f. Ex.» braut linja midt i, og «(Homil.» + «114).»
+// vart to blokker, so sidetalet stod att som eit avsnitt for seg. 55
+// blokker i verket sluttar paa ei slik forkorting, og aa telje dei opp i
+// ei liste ville alltid vera ufullstendig.
+//
+// Eit merke opnar aldri eit framhald, sjølv om det byrjar med liten
+// bokstav - «a) Infinitiv ofteſt ...» er eit nytt underpunkt.
+func opnarSomFramhald(t string) bool {
+	s := strings.TrimSpace(t)
+	if s == "" {
+		return false
+	}
+	if reListepunkt.MatchString(s) || reUnderpunkt.MatchString(s) ||
+		reDøme.MatchString(s) || reParagraf.MatchString(s) {
+		return false
+	}
+	r := []rune(s)
+	// «114).» - talet og parentesen som lukkar ei tilvising frå lina over.
+	if reLukkarParentes.MatchString(s) {
+		return true
+	}
+	return unicode.IsLower(r[0])
+}
+
+// opnarNyttPunkt seier om teksten opnar det NESTE punktet i den lista
+// blokka føre høyrer til. Berre daa skal eit merke slaa framhaldet av.
+//
+// Utan dette svelgde eit listepunkt som slutta utan punktum det neste.
+// Blokk 1853: «1) Nordenfjelds: ... Varg, Vækja» tok «2) Veſtenfjelds:
+// Ange (Aangje), ...» inn i seg som framhald, so lista kom ut nummerert
+// 1) og 3), med 2)-merket staaande midt i teksten til det fyrste punktet.
+//
+// Det er ikkje nok at merket finst. Eit framhald kan sjølv byrje med noko
+// som ser ut som eit merke: «a) og fleire.» er halen av setninga føre, og
+// gjorde vi kvart merke til eit nytt punkt, reiv vi den setninga i to. So
+// merket maa vera det neste i rekkja, etter eit punkt av same slaget.
+func opnarNyttPunkt(ut []Blokk, t string) bool {
+	n := len(ut) - 1
+	if n < 0 {
+		return false
+	}
+	føre := ut[n]
+	if m := reListepunkt.FindStringSubmatch(t); m != nil && føre.Slag == Listepunkt {
+		nr, feil := strconv.Atoi(m[1])
+		før, feil2 := strconv.Atoi(føre.Nummer)
+		return feil == nil && feil2 == nil && nr == før+1
+	}
+	if m := reUnderpunkt.FindStringSubmatch(t); m != nil && føre.Slag == Underpunkt {
+		nr, før := []rune(m[1]), []rune(føre.Nummer)
+		return len(nr) == 1 && len(før) == 1 && nr[0] == før[0]+1
+	}
+	return false
+}
+
+// breiddPå gjev talet paa kolonnar i den breiaste rada.
+func breiddPå(t *Tabell) int {
+	b := 0
+	for _, r := range t.Rader {
+		if n := len(r.Celler); n > b {
+			b = n
+		}
+	}
+	return b
 }
 
 // Eit sideskift kan dele kva som helst av lause tekstblokker - ògso eit

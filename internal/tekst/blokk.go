@@ -20,6 +20,37 @@ type Tabell struct {
 	Rader []Rad `json:"r"`
 }
 
+// Breidd gjev talet paa kolonnar i den breiaste rada.
+func (t Tabell) Breidd() int {
+	b := 0
+	for _, r := range t.Rader {
+		if n := len(r.Celler); n > b {
+			b = n
+		}
+	}
+	return b
+}
+
+// Spenn gjev kor mange kolonnar celle nr i skal dekkje i ei rad med n
+// celler. Ei overskriftsrad har ofte færre celler enn kroppen - «Aktiv.»
+// og «Pasſiv.» staar over kvar sine to kolonnar, med ei tom celle føre
+// radnamna - og utan spennet la dei seg over kvar si EINE kolonne, so
+// heile hovudet stod forskuve mot venstre.
+// Fyrste cella er radnamnet og dekkjer alltid éi kolonne; dei andre deler
+// resten likt, og den siste tek det som ikkje gaar opp.
+func (t Tabell) Spenn(n, i int) int {
+	b := t.Breidd()
+	if n >= b || n < 2 || i == 0 {
+		return 1
+	}
+	att := b - 1
+	del := att / (n - 1)
+	if i == n-1 {
+		return att - del*(n-2)
+	}
+	return del
+}
+
 // Blokk er ei eining i verket. Anten er ho løpande tekst (Stumpar) eller
 // eit oppsett (Tabell).
 type Blokk struct {
