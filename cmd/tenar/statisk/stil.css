@@ -143,6 +143,13 @@
   /* Éi rørsle for alt ein tek paa. Stod som 0.15s ease, 0.15s ease-out,
      0.12s ease og ingen overgang i det heile, alt etter kva ein peika paa. */
   --rørsle: 0.15s ease-out;
+  /* Éin skuggefarge for heile grensesnittet. Arkskuggen har alltid vore
+     rein svart; kantskuggen i opninga var det ògso, men som ein LINEÆR
+     gradient - og eit lineært fall les kaldare og hardare enn den mjuke
+     klokkeforma ein box-shadow gjev. Difor stod dei ikkje til kvarandre
+     sjølv med same farge. Stoppa nedanfor legg seg nær ei uskarpleik. */
+  --skugge: 0 0 0;
+  --skuggestyrke: 0.28;
 }
 
 /* Draktene. Lesaren sitt val staar i data-theme og skal alltid vinne over
@@ -279,7 +286,7 @@ p { margin: 0; }
      sidan 82 %, og las framleis som ei tett flate. Uskarpleiken nedanfor
      gjer at skrifta paa knappane held seg roleg sjølv naar flata slepp
      mykje gjennom. */
-  background: color-mix(in srgb, var(--stong) 62%, transparent);
+  background: color-mix(in srgb, var(--stong) 55%, transparent);
   /* Papir, ikkje frosta glas. Ei glasrute held strukturen i det som ligg
      under henne - ein ser dei mørke formene av skrifta gli forbi - medan
      tynt papir spreier ljoset til strukturen er borte og arket sin eigen
@@ -338,7 +345,7 @@ main {
   max-width: min(var(--arkbreidd), calc(100% - 2 * var(--minidesk)));
   background: var(--papir);
   line-height: 1.52;
-  box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(0 0 0 / 0.28);
+  box-shadow: 0 0 0 1px var(--linje), 0 2px 18px rgb(var(--skugge) / var(--skuggestyrke));
 }
 /* Blokkene i satsen. Ingen width her: dei fyller arket av seg sjølve og
    max-width kapar dei. Set ein width: 100 % attaat, blir breidda
@@ -762,11 +769,19 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 }
 .rift::before {
   top: 0;
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0.34), rgb(0 0 0 / 0));
+  background: linear-gradient(to bottom,
+    rgb(var(--skugge) / var(--skuggestyrke)),
+    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.42)) 38%,
+    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.12)) 68%,
+    rgb(var(--skugge) / 0));
 }
 .rift::after {
   bottom: 0;
-  background: linear-gradient(to top, rgb(0 0 0 / 0.30), rgb(0 0 0 / 0));
+  background: linear-gradient(to top,
+    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.88)),
+    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.37)) 38%,
+    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.10)) 68%,
+    rgb(var(--skugge) / 0));
 }
 .riftpakke { position: relative; z-index: 1; }
 /* Innpakninga er det rada faldar saman. Ho ber inga utfylling sjølv - eit
@@ -827,7 +842,11 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .stillingsrad .stillingsnamn { grid-column: 1; }
 .stillingsrad .val { grid-column: 2; }
 .stillingsrad .stillingshjelp { grid-column: 2; }
-.stillingsnamn { justify-self: end; text-align: right; font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--blekk-mjuk); }
+/* Venstrestilte. Dei stod høgrestilte mot spaltekanten, so venstresida
+   var rehakka - kvar etikett byrja sin eigen stad, etter kor lang han var,
+   og det fanst ingen loddline i menyen i det heile. No byrjar dei alle
+   likt, og knappane byrjar likt eit stykke ute. */
+.stillingsnamn { justify-self: start; text-align: left; font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--blekk-mjuk); }
 /* Fraktur har ingen versaltradisjon for etikettar - store bokstavar blir
    tunge og vanskelege aa lesa. Boka sjølv set punktum etter slike
    nemningar, so det gjer vi òg. */

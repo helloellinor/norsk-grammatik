@@ -131,7 +131,22 @@
   // Aldri over stonga, uansett kor høg luka er.
   function riftlinje(lukehøgd) {
     var tl = toppline();
-    return Math.max(tl, Math.round((tl + innerHeight) / 2 - (lukehøgd || 0) / 2));
+    var flate = innerHeight - tl;
+    var midt = tl + flate / 2;
+    // Midtstill luka naar ho har plass til det. Er ho for høg - lista over
+    // forkortingar er 798 px - drar midtstillinga snittet heilt opp mot
+    // stonga, og daa riv arket seg i toppen av sida i staden for der auga
+    // er. Daa siktar vi paa midten sjølv i staden, og lèt luka vekse
+    // nedover derifraa.
+    //
+    // Merk at snittet berre kan gaa MELLOM to blokker. Er dei høge - her
+    // var kantane 75 og 572 med midten paa 438 - landar rifta paa den
+    // næraste av dei, ikkje nøyaktig paa maalet. Det er prisen for at sida
+    // aldri rullar under lesaren; ville vi treffe midten nøyaktig, maatte
+    // vi flytte papiret han les paa.
+    var y = midt - (lukehøgd || 0) / 2;
+    if (y < tl + flate * 0.15) { y = midt; }
+    return Math.max(tl, Math.round(y));
   }
 
   // landing er der eit hopp legg maalet sitt. Vi les det ut av stilarket i
