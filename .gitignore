@@ -1,17 +1,24 @@
 .DS_Store
 
-# Kjeldemateriale og avleidde OCR-data (store binærfiler/genererte filer, held vi utanfor git)
+# Kjeldemateriale som er for stort for git: skanninga er 331 MB og
+# sidebileta 2,3 GB, godt over GitHub si grense paa 100 MB per fil.
 /bøker/*.pdf
 /bøker/*.png
 /bøker/*.doc
 /bøker/*.docx
-/bøker/ut*.txt
 /bøker/sider/
+
+# Mellomstega og rapportane; dei blir rekna ut om att naar ein treng dei.
+/bøker/ut*.txt
 /bøker/norsk_grammatik.txt
 /bøker/norsk_grammatik_sats.txt
-/bøker/grammatik.json
-/bøker/grammatik-sats.json
 /bøker/sats-rapport.txt
+
+# grammatik.json og grammatik-sats.json er derimot MED, sjølv om dei er
+# avleidde. Sats-fila er det tenaren les ved oppstart, so utan henne kan
+# ingen klon køyre boka - og ho er ikkje til aa rekne ut att heller: steget
+# som set inn den lange s-en les 400 ppi-skanningane, og dei er 2,3 GB.
+# Ho er altso ikkje eit byggjeartefakt, men sjølve verket.
 # overskrifter.md er meint til handredigering - IKKJE ignorert
 
 # Tredjeparts-klon, ikkje ein del av dette prosjektet
