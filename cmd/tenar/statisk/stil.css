@@ -764,25 +764,26 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
    skuggen finst berre der gapet finst. */
 .rift { position: relative; }
 .rift::before, .rift::after {
-  content: ""; position: absolute; left: 0; right: 0; height: 1.1rem;
+  content: ""; position: absolute; left: 0; right: 0; height: 0;
   pointer-events: none; z-index: 2;
 }
+/* Ei ekte box-shadow, ikkje ein gradient. Ein gradient som gaar frå kant
+   til kant stoggar brått i begge endar og les som eit maala band; ei
+   box-shadow uskarpar paa alle sider og fadar ut mot hjørna, slik ein
+   kasta skugge gjer. Same token som arkskuggen. */
 .rift::before {
   top: 0;
-  background: linear-gradient(to bottom,
-    rgb(var(--skugge) / var(--skuggestyrke)),
-    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.42)) 38%,
-    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.12)) 68%,
-    rgb(var(--skugge) / 0));
+  box-shadow: 0 5px 15px 3px rgb(var(--skugge) / var(--skuggestyrke));
 }
 .rift::after {
   bottom: 0;
-  background: linear-gradient(to top,
-    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.88)),
-    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.37)) 38%,
-    rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.10)) 68%,
-    rgb(var(--skugge) / 0));
+  box-shadow: 0 -5px 15px 3px rgb(var(--skugge) / calc(var(--skuggestyrke) * 0.85));
 }
+/* Ligg rifta fyrst, er det ikkje noko ark over henne - luka er lagd FØRE
+   arket, ikkje inn i eit snitt. Daa finst det ingen papirkant til aa kaste
+   skugge ned i opninga, og han skal ikkje teiknast. */
+main > .rift:first-child::before { content: none; }
+main > .rift:last-child::after { content: none; }
 .riftpakke { position: relative; z-index: 1; }
 /* Innpakninga er det rada faldar saman. Ho ber inga utfylling sjølv - eit
    barn med loddrett utfylling kan ikkje falle heilt saman, og daa byrja
