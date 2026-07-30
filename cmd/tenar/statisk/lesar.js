@@ -131,30 +131,20 @@
   // Aldri over stonga, uansett kor høg luka er.
   function riftlinje(lukehøgd) {
     var tl = toppline();
-    var flate = innerHeight - tl;
-    var midt = tl + flate / 2;
-    // Midtstill luka naar ho har plass til det. Er ho for høg - lista over
-    // forkortingar er 798 px - drar midtstillinga snittet heilt opp mot
-    // stonga, og daa riv arket seg i toppen av sida i staden for der auga
-    // er. Daa siktar vi paa midten sjølv i staden, og lèt luka vekse
-    // nedover derifraa.
+    var midt = tl + (innerHeight - tl) / 2;
+    // Luka skal staa midt i leseflata: midtpunktet hennar og midtpunktet
+    // paa flata paa same line. Naar ho er so høg at ho ikkje faar rom -
+    // forkortingslista er 798 px av ei flate paa 836 - legg vi henne so
+    // høgt som raad, altso rett under stonga. Det er det nærmaste ein
+    // kjem, og luka fyller daa flata.
     //
-    // Merk at snittet berre kan gaa MELLOM to blokker. Er dei høge - her
-    // var kantane 75 og 572 med midten paa 438 - landar rifta paa den
-    // næraste av dei, ikkje nøyaktig paa maalet. Det er prisen for at sida
-    // aldri rullar under lesaren; ville vi treffe midten nøyaktig, maatte
-    // vi flytte papiret han les paa.
-    var y = midt - (lukehøgd || 0) / 2;
-    if (y < tl + flate * 0.15) { y = midt; }
-    return Math.max(tl, Math.round(y));
-  }
-
-  // landing er der eit hopp legg maalet sitt. Vi les det ut av stilarket i
-  // staden for aa rekne det om att her: scroll-margin-top er nettopp det
-  // talet scrollIntoView kjem til aa bruke, so dei to kan ikkje bli usamde.
-  function landing() {
-    var p = document.querySelector(".bolk > [id]");
-    return (p && parseFloat(getComputedStyle(p).scrollMarginTop)) || toppline();
+    // Her stod eit unnatak som sende snittet til sjølve midten naar luka
+    // var høg. Det gjorde det verre: luka byrja daa PAA midten og voks
+    // nedover, so midtpunktet hennar hamna 400 px under midten av sida.
+    // Unnataket var laga for ei tid daa vi ikkje rulla snittet paa plass
+    // og maatte ta den kanten som fanst; no treffer vi maalet, og daa er
+    // ei rein midtstilling rett.
+    return Math.max(tl, Math.round(midt - (lukehøgd || 0) / 2));
   }
 
   // Stilarket kan ikkje vite kor høg den faste linja er: ho kjem av
@@ -388,7 +378,14 @@
     }
     r.remove();
 
-    if (taAtt) { scrollBy(0, -skuv); }
+    if (taAtt) {
+      // Gli attende. Skuvet kan vera fleire hundre px - snittet ligg i
+      // snitt 110 px frå maalet - og eit sprang av den storleiken i same
+      // augeblinken som arket blir limt les som eit rykk. Rørsla seier kva
+      // som hender; spranget seier berre at noko hende.
+      if (mjuk) { scrollBy({ top: -skuv, behavior: "smooth" }); }
+      else { scrollBy(0, -skuv); }
+    }
   }
 
   function visLuke(par, open) {

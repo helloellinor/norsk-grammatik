@@ -717,7 +717,7 @@ button:hover { color: var(--indigo); border-color: var(--indigo); }
 button[aria-pressed="true"] { color: var(--papir); background-color: var(--indigo); border-color: var(--indigo); }
 button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .hoppform { display: flex; gap: 0.4rem; align-items: center; }
-.hoppform input { width: 7rem; padding: 0.4rem 0.6rem; font-family: var(--apparat); font-size: 0.8125rem; color: var(--blekk); background: transparent; border: 1px solid var(--linje); border-radius: 2px; }
+.hoppform input { width: 7rem; padding: 0.4rem 0.6rem; font-family: var(--apparat); font-size: 0.8125rem; color: var(--blekk); background-color: transparent; border: 1px solid var(--knappekant); border-radius: 2px; }
 /* Nettlesaren sine eigne opp/ned-pilar i eit talfelt er teikna av systemet
    og lyder ikkje stilarket: dei kom i ein blaagraa systemfarge midt i ei
    flate av papir og blekk. Feltet tek imot tal like fullt, og «Hopp» er
