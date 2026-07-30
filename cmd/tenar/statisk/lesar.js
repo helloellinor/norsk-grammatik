@@ -274,9 +274,17 @@
       // som ei eiga klasse i staden.
       var fyrste = ark.children[i];
       var rykk = fyrste && parseFloat(getComputedStyle(fyrste).textIndent) > 0;
+      // Toppmargen kjem av syskenregelen òg - «.bolk > p + p» gjev 0,45rem.
+      // Blokka mistar han naar ho blir fyrst i si eiga helvt, og faar han
+      // att i det arket blir limt: maalt 0 -> 7,2 px, so alt under snittet
+      // hoppa nedover akkurat der. Vi maaler han medan syskenet enno finst
+      // og festar han, so riving og liming er like høge.
+      var marg = fyrste ? getComputedStyle(fyrste).marginTop : "";
       while (ark.children.length > i) { nedre.appendChild(ark.children[i]); }
-      if (rykk && nedre.firstElementChild) {
-        nedre.firstElementChild.classList.add("rykk");
+      var f = nedre.firstElementChild;
+      if (f) {
+        if (rykk) { f.classList.add("rykk"); }
+        f.style.marginTop = marg;
       }
       ark.parentNode.insertBefore(ny, ark.nextSibling);
       ny.parentNode.insertBefore(nedre, ny.nextSibling);
@@ -332,7 +340,10 @@
     if (nedre && nedre.classList.contains("nedre") && øvre && øvre.classList.contains("øvre")) {
       // Klassa var berre eit plaster medan arket laag i to; naa held
       // syskenregelen att av seg sjølv.
-      if (nedre.firstElementChild) { nedre.firstElementChild.classList.remove("rykk"); }
+      if (nedre.firstElementChild) {
+        nedre.firstElementChild.classList.remove("rykk");
+        nedre.firstElementChild.style.marginTop = "";
+      }
       while (nedre.children.length) { øvre.appendChild(nedre.children[0]); }
       øvre.classList.remove("øvre", "mjuk", "open");
       nedre.remove();
