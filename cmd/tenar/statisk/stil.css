@@ -375,23 +375,10 @@ main {
      vegen. Utan dette voks avstanden med eit blokkgap i det helvtene
      smelta saman, og alt under snittet rykte 24 px. */
   margin-bottom: 0; padding-bottom: calc(var(--blokkgap) / 2);
-  /* Snittskuggen fylgjer opninga. Han hentar meining frå gapet han fell
-     ned i; er gapet borte, ligg han berre oppaa papiret under. I det siste
-     augeblinken av lukkinga var opninga null medan skuggen enno stod, og
-     daa laag han som ei stripe over botnen av det øvre arket.
-     Lista maa ha like mange skuggar i baae stodene for aa kunna
-     mellomreknast - difor «transparent» og ikkje ein kortare liste. */
-  box-shadow: 0 0 0 1px var(--linje), 0 9px 16px -4px transparent;
-}
-.bolk.øvre.open {
-  box-shadow: 0 0 0 1px var(--linje), 0 9px 16px -4px rgb(0 0 0 / 0.34);
+  /* Ingen eigen snittskugge her. Sjaa .rift::before nedanfor. */
 }
 .bolk.nedre {
   padding-top: calc(var(--blokkgap) / 2);
-  box-shadow: 0 0 0 1px var(--linje), 0 -9px 16px -4px transparent, 0 2px 18px rgb(0 0 0 / 0.28);
-}
-.bolk.nedre.open {
-  box-shadow: 0 0 0 1px var(--linje), 0 -9px 16px -4px rgb(0 0 0 / 0.34), 0 2px 18px rgb(0 0 0 / 0.28);
 }
 /* Snittmarga veks fram med opninga, ho slaar ikkje til. Kvar helvt tek si
    eiga side av snittet, so papiret opnar seg frå baae kantar samstundes.
@@ -402,8 +389,7 @@ main {
    lesar.js slaar henne paa fyrst etter at den stoda er fest. */
 .bolk.mjuk {
   transition: padding-top var(--riftetid) var(--riftekurve),
-              padding-bottom var(--riftetid) var(--riftekurve),
-              box-shadow var(--riftetid) var(--riftekurve);
+              padding-bottom var(--riftetid) var(--riftekurve);
 }
 .bolk.øvre.open { padding-bottom: calc(var(--blokkgap) / 2 + 2.2em); }
 .bolk.nedre.open { padding-top: calc(var(--blokkgap) / 2 + 2.2em); }
@@ -761,6 +747,28 @@ button:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
      elles - rifta ligg i flyten og fylgjer med. */
 }
 .rift.open { grid-template-rows: 1fr; }
+/* Arkkantane kastar skugge NED I OPNINGA, ikkje paa kvarandre. To ark som
+   ligg flatt paa same bord ligg i same laget; at den nedre maala oppaa den
+   øvre var berre ei fylgje av at ho kjem etter henne i treet, og skuggen
+   hennar rakk 17 px opp forbi sin eigen kant.
+   Difor ligg kantskuggane her, inne i rifta. «overflow: hidden» klipper
+   dei, so dei kan ikkje naa papiret i det heile - og naar opninga er att,
+   er det ingen ting aa teikne. Ingen alpha aa tone, ingen rest aa ta att:
+   skuggen finst berre der gapet finst. */
+.rift { position: relative; }
+.rift::before, .rift::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 1.1rem;
+  pointer-events: none; z-index: 2;
+}
+.rift::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0.34), rgb(0 0 0 / 0));
+}
+.rift::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.30), rgb(0 0 0 / 0));
+}
+.riftpakke { position: relative; z-index: 1; }
 /* Innpakninga er det rada faldar saman. Ho ber inga utfylling sjølv - eit
    barn med loddrett utfylling kan ikkje falle heilt saman, og daa byrja
    opninga med eit ugjennomsiktig band i skrivebordsfarge i staden for aa
